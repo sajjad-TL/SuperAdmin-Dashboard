@@ -125,10 +125,10 @@ const sections = [
 
 const SidebarDropdownItem = ({ section }) => {
   const [isOpen, setIsOpen] = useState(false);
-  
+
   return (
     <div className="mb-1">
-      <div 
+      <div
         className={`flex items-center justify-between p-3 rounded-lg cursor-pointer hover:bg-gray-700 transition-all duration-200 group`}
         onClick={() => setIsOpen(!isOpen)}
       >
@@ -140,7 +140,7 @@ const SidebarDropdownItem = ({ section }) => {
         </div>
         {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
       </div>
-      
+
       {isOpen && (
         <div className="ml-12 pl-2 border-l-2 border-gray-600 mt-1 mb-2 space-y-2">
           {section.items.map((item, idx) => (
@@ -159,7 +159,7 @@ const SidebarDropdownItem = ({ section }) => {
 
 export default function EnhancedSidebar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  
+
   return (
     <div className={`bg-gradient-to-b from-gray-900 to-gray-800 text-white w-80 flex flex-col overflow-y-auto h-screen border-r border-gray-700 shadow-xl transition-all duration-300 ${menuOpen ? "fixed inset-y-0 left-0 z-50" : "hidden md:block"}`}>
       {/* Header with logo */}
@@ -177,8 +177,8 @@ export default function EnhancedSidebar() {
 
       {/* Mobile menu toggle button - shown outside sidebar when closed */}
       {!menuOpen && (
-        <button 
-          onClick={() => setMenuOpen(true)} 
+        <button
+          onClick={() => setMenuOpen(true)}
           className="fixed bottom-6 left-6 md:hidden z-40 bg-blue-600 text-white p-3 rounded-full shadow-lg"
         >
           <Menu size={24} />
@@ -193,7 +193,7 @@ export default function EnhancedSidebar() {
           ))}
         </nav>
       </div>
-      
+
       {/* User profile at bottom */}
       <div className="p-4 border-t border-gray-700 bg-gray-800">
         <div className="flex items-center gap-3">
@@ -208,7 +208,7 @@ export default function EnhancedSidebar() {
       </div>
     </div>
 
-    
+
   );
 }
 
