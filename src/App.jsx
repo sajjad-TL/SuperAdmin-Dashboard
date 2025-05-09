@@ -8,6 +8,7 @@ import Layout from './layout/Layout';
 import AdminPanel from './pages/AdminPanel';
 import Agent from './pages/Agent';
 import AgentProfile from './pages/AgentProfile';
+import StudentTable from './pages/Student';
 
 function App() {
   return (
@@ -18,7 +19,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-
+        
         {/* Protected Layout with Sidebar */}
         <Route path="/" element={<Layout />}>
           <Route path="admin" element={<AdminPanel />} />
@@ -36,6 +37,7 @@ function App() {
           <Route path="gic" element={<Agent />} />
           <Route path="help" element={<Agent />} />
           <Route path="agentprofile" element={<AgentProfile />} />
+          <Route path="student" element={<StudentTable />} />
           {/* Add other protected routes here */}
         </Route>
 
