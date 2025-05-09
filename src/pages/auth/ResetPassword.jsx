@@ -42,7 +42,7 @@ const ResetPassword = () => {
                 {/* Left Column: Image */}
                 <div className="hidden md:block md:col-span-6 bg-blue-100 flex items-center justify-center">
                     <img
-                        src="/your-image-path.jpg" // Replace with your actual image path
+                        src="../src/assets/Left@1x.png" // Replace with your actual image path
                         alt="Reset Password Illustration"
                         className="w-full h-full object-cover"
                     />

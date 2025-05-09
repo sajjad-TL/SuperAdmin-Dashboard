@@ -55,7 +55,7 @@ export default function Sidebar() {
     const [menuOpen, setMenuOpen] = useState(false);
     const navigate = useNavigate();
     // const [activeItem, setActiveItem] = useState(""); ❌ Remove this
-const location = useLocation();
+    const location = useLocation();
 
 
     // Close sidebar when clicking outside of it (for mobile)
@@ -144,10 +144,10 @@ const location = useLocation();
                                     onClick={() => {
                                         navigate(navRoutes[item]);
                                         if (window.innerWidth < 768) {
-                                          setMenuOpen(false);
+                                            setMenuOpen(false);
                                         }
-                                      }}
-                                      
+                                    }}
+
                                 >
                                     <div className="flex items-center gap-2">
                                         <Icon className="w-5 h-5" />
