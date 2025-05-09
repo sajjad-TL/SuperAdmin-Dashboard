@@ -3,33 +3,46 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
+
+import Layout from './layout/Layout';
 import AdminPanel from './pages/AdminPanel';
-import ProtectedRoute from './components/ProtectedRoute';
+import Agent from './pages/Agent';
+import AgentProfile from './pages/AgentProfile';
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Public routes */}
+        {/* Public Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 
-        {/* Protected routes */}
-        <Route
-          path="/admin"
-          element={
-            // <ProtectedRoute>
-              <AdminPanel />
-            // {/* </ProtectedRoute> */}
-          }
-        />
+        {/* Protected Layout with Sidebar */}
+        <Route path="/" element={<Layout />}>
+          <Route path="admin" element={<AdminPanel />} />
+          <Route path="agent" element={<Agent />} />
+          <Route path="students" element={<Agent />} />
+          <Route path="universities" element={<Agent />} />
+          <Route path="application" element={<Agent />} />
+          <Route path="commission" element={<Agent />} />
+          <Route path="tasks" element={<Agent />} />
+          <Route path="trainhub" element={<Agent />} />
+          <Route path="growth" element={<Agent />} />
+          <Route path="tests" element={<Agent />} />
+          <Route path="reports" element={<Agent />} />
+          <Route path="loan" element={<Agent />} />
+          <Route path="gic" element={<Agent />} />
+          <Route path="help" element={<Agent />} />
+          <Route path="agentprofile" element={<AgentProfile />} />
+          {/* Add other protected routes here */}
+        </Route>
 
         {/* Redirect root to login */}
         <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* Catch all route */}
+        {/* Catch-all */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>
