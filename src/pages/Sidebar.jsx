@@ -1,86 +1,187 @@
-import { ChevronRight, ChevronDown } from 'lucide-react';
-import { useState } from 'react';
-import { PiBuildings } from "react-icons/pi";
-import avatar from '../assets/avatar.png';
+import { useState, useEffect } from 'react';
+import migracon from '../assets/Migracon Study.png';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { AiFillHome } from "react-icons/ai";
+import { FaSchool } from "react-icons/fa6";
+import { FaUserGraduate } from "react-icons/fa6";
+import { IoDocumentTextSharp } from "react-icons/io5";
+import { FaMoneyBill } from "react-icons/fa6";
+import { FaTasks } from "react-icons/fa";
+import { FaGraduationCap } from "react-icons/fa";
+import { FaChartLine } from "react-icons/fa6";
+import { PiTestTubeFill } from "react-icons/pi";
+import { TiStarburst } from "react-icons/ti";
+import { FaHandHoldingDollar } from "react-icons/fa6";
+import { BsBank2 } from "react-icons/bs";
+import { FaUserPlus } from "react-icons/fa";
+import { IoSettingsOutline } from "react-icons/io5";
+import { FiMenu } from "react-icons/fi";
+
+const navRoutes = {
+    "Dashboard Overview": "/admin",
+    "Agent Management": "/agent",
+    "Universities Management": "/students",
+    "Students Management": "/universities",
+    "Application Management": "/application",
+    "Commission & Payment": "/commission",
+    "Tasks / Workflows": "/tasks",
+    "TrainHub": "/trainhub",
+    "Growth Hub": "/growth",
+    "Test Solutions": "/tests",
+    "Reports & Analytics": "/reports",
+    "Loan Application": "/loan",
+    "GIC Application": "/gic",
+    "Help / Support": "/help",
+};
+const navIcons = {
+    "Dashboard Overview": AiFillHome,
+    "Agent Management": FaSchool,
+    "Universities Management": FaSchool,
+    "Students Management": FaUserGraduate,
+    "Application Management": IoDocumentTextSharp,
+    "Commission & Payment": FaMoneyBill,
+    "Tasks / Workflows": FaTasks,
+    "TrainHub": FaGraduationCap,
+    "Growth Hub": FaChartLine,
+    "Test Solutions": PiTestTubeFill,
+    "Reports & Analytics": TiStarburst,
+    "Loan Application": FaHandHoldingDollar,
+    "GIC Application": BsBank2,
+    "Help / Support": FaUserPlus
+};
+
 
 export default function Sidebar() {
     const [menuOpen, setMenuOpen] = useState(false);
-    const [activeItem, setActiveItem] = useState("Dashboard Overview");
+    const navigate = useNavigate();
+    // const [activeItem, setActiveItem] = useState(""); ❌ Remove this
+const location = useLocation();
 
-    const navItems = [
-        "Dashboard Overview",
-        "Agent Management",
-        "Student Management",
-        "Application Management",
-        "School & Program Management",
-        "Commission & Payment",
-        "Tasks / Workflows",
-        "Reports & Analytics",
-        "Help / Support",
-        "Admin Settings",
-    ];
+
+    // Close sidebar when clicking outside of it (for mobile)
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            const sidebar = document.getElementById('mobile-sidebar');
+            const hamburger = document.getElementById('hamburger-button');
+
+            if (sidebar &&
+                !sidebar.contains(event.target) &&
+                hamburger &&
+                !hamburger.contains(event.target) &&
+                menuOpen) {
+                setMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [menuOpen]);
 
     const toggleMenu = () => {
         setMenuOpen(!menuOpen);
     };
-
     return (
         <>
-            {/* Mobile Top Bar */}
-            <div className="md:hidden flex justify-between items-center p-4 bg-white border-b">
-                <div className="flex items-center">
-                    <div className="h-8 w-8 bg-blue-100 rounded flex items-center justify-center mr-2">
-                        <span className="text-blue-500">📊</span>
-                    </div>
-                    <span className="font-bold">Migracon Study</span>
-                </div>
-                <button onClick={toggleMenu} className="p-2">
-                    {menuOpen ? <ChevronDown /> : <ChevronRight />}
+            {/* Hamburger Menu Button (visible only on mobile) */}
+            <div className="fixed top-4 left-4 md:hidden z-20">
+                <button
+                    id="hamburger-button"
+                    className="p-2 bg-gray-100 rounded-full shadow-md focus:outline-none"
+                    onClick={toggleMenu}
+                >
+                    <FiMenu className="w-6 h-6" />
                 </button>
             </div>
 
+            {/* Overlay for mobile when menu is open */}
+            {menuOpen && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 z-10 md:hidden"
+                    onClick={toggleMenu}
+                ></div>
+            )}
+
+
             {/* Sidebar */}
-            <div className={`md:block bg-white w-full md:w-64 rounded-lg border-gray-300 my-4 ml-4 shadow-sm border-2 ${menuOpen ? 'block' : 'hidden'}`}>
-                <div className="p-4 flex items-center">
-                    <div className="h-10 w-10 bg-[#E6F3F5] rounded-[1rem] flex items-center justify-center mr-3">
-                        <span className="text-[#2A7B88] text-2xl"><PiBuildings />
-                        </span>
-                    </div>
-                    <span className="font-bold text-lg">Migracon Study</span>
+            <div
+                id="mobile-sidebar"
+                className={`
+                    bg-white shadow fixed top-0 z-20 h-full overflow-y-auto scrollbar-hide transition-all duration-300 ease-in-out
+                    md:left-0 md:w-64 md:block
+                    ${menuOpen ? 'left-0 w-4/5' : '-left-full w-0'}
+                    md:translate-x-0
+                `}
+            >
+                <div className="p-2">
+                    <img src={migracon} alt="migracon" className="img-fluid" style={{ height: "70px" }} />
                 </div>
-
-                <div className="p-4 ">
-                    <div className="h-20 w-56 bg-[#E6F3F5] rounded-[1rem] flex items-center justify-center mr-3">
-                        <div className="flex items-center gap-3">
-                            <div className="h-12 w-12 bg-gray-200 rounded-full mr-3 overflow-hidden">
-                                <img src={avatar} alt="Avatar" className="w-16 h-16 rounded-full" />
-
-                            </div>
-                            <div className='flex flex-col'>
-
-                                <div className="font">Admin User</div>
-                                <div className="text-xs text-[#2A7B88] font-semibold">Super Admin</div>
-                            </div>
-                        </div>
+                {/* Close Button (only for mobile) */}
+                {menuOpen && (
+                    <div className="md:hidden flex justify-end px-4 pt-2">
+                        <button
+                            onClick={() => setMenuOpen(false)}
+                            className="text-gray-500 hover:text-gray-700 focus:outline-none text-2xl"
+                        >
+                            &times;
+                        </button>
                     </div>
-                </div>
-
+                )}
                 <nav className="p-2">
-                    {navItems.map((item, index) => (
-                        <div key={index} className="mb-1">
-                            <div
-                                className={`px-6 py-2 hover:bg-gray-100 rounded cursor-pointer ${activeItem === item ? "bg-gray-200 text-gray-950 font-medium" : ""
-                                    }`}
-                                onClick={() => setActiveItem(item)}
-                            >
-                                {item}
-                            </div>
+                    {Object.keys(navRoutes).map((item, index) => {
+                        const Icon = navIcons[item];
+                        const showBadge =
+                            item === "Loan Application" ||
+                            item === "GIC Application" ||
+                            item === "Help / Support";
+                        const showNewBadge = item === "Growth Hub";
 
-                            {item === "Agent Management" && (
-                                <div className="ml-10 text-sm py-1 text-gray-600">• Sub-Agent Management</div>
-                            )}
+                        return (
+                            <div key={index} className="mb-1">
+                                <div
+                                    className={`flex items-center justify-between gap-2 mt-4 px-2 py-2 text-sm font-semibold hover:bg-gray-200 rounded-lg cursor-pointer ${location.pathname === navRoutes[item] ? "bg-[#D9D9DE] text-black font-semibold" : ""}}`}
+                                    onClick={() => {
+                                        navigate(navRoutes[item]);
+                                        if (window.innerWidth < 768) {
+                                          setMenuOpen(false);
+                                        }
+                                      }}
+                                      
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <Icon className="w-5 h-5" />
+                                        {item}
+                                    </div>
+
+                                    {showBadge && (
+                                        <span className="ml-auto bg-[#FC0101] text-white text-xs font-bold px-[5px] pl-[3px] py-1 rounded-full">
+                                            10
+                                        </span>
+                                    )}
+
+                                    {showNewBadge && (
+                                        <span className="ml-auto bg-[#DCFCE7] text-[#166534] text-xs  px-2 py-0.5 rounded-full">
+                                            NEW
+                                        </span>
+                                    )}
+                                </div>
+
+                                {item === "Agent Management" && (
+                                    <div className="ml-10 text-sm font-medium text-black">
+                                        *Sub-Agent Management
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+
+                    <div className="mt-10">
+                        <div className='flex flex-row items-center gap-2 p-2'>
+                            <IoSettingsOutline className='text-xl' />
+                            <div className="hover:bg-gray-100 rounded font-semibold mb-1">Admin Settings</div>
                         </div>
-                    ))}
+                    </div>
                 </nav>
             </div>
         </>
