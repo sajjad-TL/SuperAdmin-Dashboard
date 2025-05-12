@@ -1,25 +1,35 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 import { Mail, AlertCircle, ArrowLeft } from 'lucide-react';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [showOtpInput, setShowOtpInput] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    
+    e.preventDefault(); // prevent page reload
     try {
-      // Add your forgot password logic here
-      console.log('Forgot password request for:', email);
-      setSuccess(true);
-      setShowOtpInput(true);
-    } catch (err) {
-      setError('Failed to send reset link. Please try again.');
+      const res = await axios.post(
+        'http://localhost:5000/api/password/forgot-password',
+        { email },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (res.data.message) {
+        localStorage.setItem('email', email);
+        toast.success('OTP sent to your email');
+        setShowOtpInput(true); // show OTP input
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Something went wrong');
     }
   };
 
@@ -28,8 +38,6 @@ const ForgotPassword = () => {
       const newOtp = [...otp];
       newOtp[index] = value;
       setOtp(newOtp);
-
-      // Auto-focus next input
       if (value && index < 5) {
         const nextInput = document.querySelector(`input[name=otp-${index + 1}]`);
         if (nextInput) nextInput.focus();
@@ -39,14 +47,18 @@ const ForgotPassword = () => {
 
   const handleOtpSubmit = async (e) => {
     e.preventDefault();
-    const otpValue = otp.join('');
-    
     try {
-      // Add your OTP verification logic here
-      console.log('OTP verification:', otpValue);
-      // If successful, redirect to reset password page
-    } catch (err) {
-      setError('Invalid OTP. Please try again.');
+      const email = localStorage.getItem('email');
+      const res = await axios.post('http://localhost:5000/api/password/verify-otp', {
+        email,
+        otp: otp.join(''),
+      });
+      if (res.data.message) {
+        toast.success('OTP Verified');
+        navigate('/reset-password');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Invalid OTP');
     }
   };
 
@@ -63,19 +75,6 @@ const ForgotPassword = () => {
             Enter your email address and we'll send you a verification code
           </p>
         </div>
-
-        {error && (
-          <div className="bg-red-50 text-red-500 p-3 rounded-lg flex items-center gap-2">
-            <AlertCircle size={20} />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {success && !showOtpInput && (
-          <div className="bg-green-50 text-green-600 p-3 rounded-lg">
-            Verification code has been sent to your email
-          </div>
-        )}
 
         {!showOtpInput ? (
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -102,7 +101,7 @@ const ForgotPassword = () => {
 
             <button
               type="submit"
-              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition"
             >
               Send Verification Code
             </button>
@@ -130,7 +129,7 @@ const ForgotPassword = () => {
 
             <button
               type="submit"
-              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition"
             >
               Verify Code
             </button>
@@ -154,4 +153,4 @@ const ForgotPassword = () => {
   );
 };
 
-export default ForgotPassword; 
+export default ForgotPassword;
