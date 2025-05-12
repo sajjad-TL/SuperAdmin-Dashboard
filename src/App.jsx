@@ -9,6 +9,8 @@ import AdminPanel from './pages/AdminPanel';
 import Agent from './pages/Agent';
 import AgentProfile from './pages/AgentProfile';
 import StudentTable from './pages/Student';
+// import StudentProfile from './pages/StudentProfilie'
+import StudentProfile from './pages/Studentprofile';
 
 function App() {
   return (
@@ -38,6 +40,7 @@ function App() {
           <Route path="help" element={<Agent />} />
           <Route path="agentprofile" element={<AgentProfile />} />
           <Route path="student" element={<StudentTable />} />
+          <Route path="StudentProfile" element={<StudentProfile />} />
           {/* Add other protected routes here */}
         </Route>
 

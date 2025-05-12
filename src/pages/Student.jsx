@@ -1,6 +1,6 @@
-import React from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import Admin from '../layout/Adminnavbar';
+import { Link } from 'react-router-dom';
 
 const students = [
     {
@@ -70,7 +70,11 @@ export default function StudentTable() {
                                 <tr key={index} className="border-b hover:bg-gray-50">
                                     <td className="px-4 py-3">
                                         <div className="flex items-center gap-3">
-                                            <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">{student.name.charAt(0)}</div>
+                                            <Link to="/studentprofile">
+  <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 cursor-pointer hover:bg-gray-300 transition">
+    {student.name.charAt(0)}
+  </div>
+</Link>
                                             <div>
                                                 <div className="font-medium">{student.name}</div>
                                                 <div className="text-gray-500 text-xs">{student.email}</div>
