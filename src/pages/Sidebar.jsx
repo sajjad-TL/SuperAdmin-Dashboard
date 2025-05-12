@@ -54,10 +54,7 @@ const navIcons = {
 export default function Sidebar() {
     const [menuOpen, setMenuOpen] = useState(false);
     const navigate = useNavigate();
-<<<<<<< HEAD
-=======
     // const [activeItem, setActiveItem] = useState(""); ❌ Remove this
->>>>>>> 1f318ac027c0de7ac1d9ba8bf606842d616f72a5
     const location = useLocation();
 
 

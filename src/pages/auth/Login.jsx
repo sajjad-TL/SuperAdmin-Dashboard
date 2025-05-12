@@ -7,7 +7,6 @@ import { setAuthToken, setUserSession } from '../../utils/auth';
 
 
 const Login = () => {
-<<<<<<< HEAD
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -42,34 +41,7 @@ const handleSubmit = async (e) => {
   }
 };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#E0E7FF] to-[#59585b] flex items-center justify-center p-4">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">Welcome Admin</h2>
-        
-        </div>
-=======
-    const [showPassword, setShowPassword] = useState(false);
-    const [formData, setFormData] = useState({
-        email: '',
-        password: '',
-    });
-    const [error, setError] = useState('');
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
-
-        try {
-            // Add your login logic here
-            console.log('Login attempt with:', formData);
-        } catch (err) {
-            setError('Invalid email or password');
-        }
-    };
->>>>>>> 1f318ac027c0de7ac1d9ba8bf606842d616f72a5
-
+  
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#E0E7FF] to-[#59585b] flex items-center justify-center p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl w-full bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -213,30 +185,7 @@ const handleSubmit = async (e) => {
               </div>
             </div>
           </div>
-<<<<<<< HEAD
-
-          <div className="flex items-center justify-between">
-           
-
-            <Link
-              to="/forgot-password"
-              className="text-sm font-medium text-blue-600 hover:text-blue-500"
-            >
-              Forgot password?
-            </Link>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-          >
-            Sign in
-          </button>
-        </form>
-
-=======
         </div>
->>>>>>> 1f318ac027c0de7ac1d9ba8bf606842d616f72a5
       </div>
       
     );
