@@ -20,8 +20,8 @@ import { FiMenu } from "react-icons/fi";
 const navRoutes = {
     "Dashboard Overview": "/admin",
     "Agent Management": "/agent",
-    "Universities Management": "/students",
-    "Students Management": "/universities",
+    "Universities Management": "/universities",
+    "Students Management": "/student",
     "Application Management": "/application",
     "Commission & Payment": "/commission",
     "Tasks / Workflows": "/tasks",
@@ -54,6 +54,10 @@ const navIcons = {
 export default function Sidebar() {
     const [menuOpen, setMenuOpen] = useState(false);
     const navigate = useNavigate();
+<<<<<<< HEAD
+=======
+    // const [activeItem, setActiveItem] = useState(""); ❌ Remove this
+>>>>>>> 1f318ac027c0de7ac1d9ba8bf606842d616f72a5
     const location = useLocation();
 
 

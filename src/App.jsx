@@ -7,9 +7,9 @@ import Layout from './layout/Layout';
 import AdminPanel from './pages/AdminPanel';
 import Agent from './pages/Agent';
 import AgentProfile from './pages/AgentProfile';
-
-import ProtectedRoute from './components/ProtectedRoute';
-import PublicRoute from './components/PublicRoute';
+import StudentTable from './pages/Student';
+// import StudentProfile from './pages/StudentProfilie'
+import StudentProfile from './pages/Studentprofile';
 
 function App() {
   return (
@@ -27,19 +27,9 @@ function App() {
         
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-
-        {/* Protected Routes */}
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
-
-            <Route index element={<Navigate to="/admin" replace />} />
-
+        
+        {/* Protected Layout with Sidebar */}
+        <Route path="/" element={<Layout />}>
           <Route path="admin" element={<AdminPanel />} />
           <Route path="agent" element={<Agent />} />
           <Route path="students" element={<Agent />} />
@@ -55,6 +45,9 @@ function App() {
           <Route path="gic" element={<Agent />} />
           <Route path="help" element={<Agent />} />
           <Route path="agentprofile" element={<AgentProfile />} />
+          <Route path="student" element={<StudentTable />} />
+          <Route path="StudentProfile" element={<StudentProfile />} />
+          {/* Add other protected routes here */}
         </Route>
       </Routes>
     </Router>
