@@ -1,27 +1,47 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { setAuthToken, setUserSession } from '../../utils/auth'; 
+
 
 const Login = () => {
-    const [showPassword, setShowPassword] = useState(false);
-    const [formData, setFormData] = useState({
-        email: '',
-        password: '',
-    });
-    const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
+  const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
+  const [error, setError] = useState('');
 
-        try {
-            // Add your login logic here
-            console.log('Login attempt with:', formData);
-        } catch (err) {
-            setError('Invalid email or password');
-        }
-    };
 
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
+
+  try {
+    const response = await axios.post('http://localhost:5000/api/auth/login', formData);
+    
+    // ✅ Save token using helper
+    setAuthToken(response.data.token);
+
+    // ✅ Save user session (optional, if you're storing user data)
+    setUserSession(response.data.user); // assuming response.data.user exists
+
+    // ✅ Redirect to admin
+    navigate('/admin');
+  } catch (err) {
+    if (err.response && err.response.status === 401) {
+      setError('Invalid email or password');
+    } else {
+      setError('Something went wrong. Please try again.');
+    }
+  }
+};
+
+  
     return (
         <div className="min-h-screen bg-gradient-to-br from-[#E0E7FF] to-[#59585b] flex items-center justify-center p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl w-full bg-white rounded-2xl shadow-xl overflow-hidden">

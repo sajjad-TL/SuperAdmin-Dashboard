@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Lock, AlertCircle, ArrowLeft } from 'lucide-react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const ResetPassword = () => {
     const navigate = useNavigate();
@@ -146,4 +148,4 @@ const ResetPassword = () => {
     );
 };
 
-export default ResetPassword; 
+export default ResetPassword;

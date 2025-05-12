@@ -58,7 +58,6 @@ export default function Sidebar() {
     const location = useLocation();
 
 
-    // Close sidebar when clicking outside of it (for mobile)
     useEffect(() => {
         const handleClickOutside = (event) => {
             const sidebar = document.getElementById('mobile-sidebar');
@@ -114,20 +113,21 @@ export default function Sidebar() {
                     md:translate-x-0
                 `}
             >
-                <div className="p-2">
+                <div className="p-2 flex flex-row items-center justify-between bg-white">
                     <img src={migracon} alt="migracon" className="img-fluid" style={{ height: "70px" }} />
+                    {/* Close Button (only for mobile) */}
+                    {menuOpen && (
+                        <div className="md:hidden flex justify-end px-4">
+                            <button
+                                onClick={() => setMenuOpen(false)}
+                                className="text-gray-500 hover:text-gray-700 focus:outline-none text-4xl"
+                            >
+                                &times;
+                            </button>
+                        </div>
+                    )}
                 </div>
-                {/* Close Button (only for mobile) */}
-                {menuOpen && (
-                    <div className="md:hidden flex justify-end px-4 pt-2">
-                        <button
-                            onClick={() => setMenuOpen(false)}
-                            className="text-gray-500 hover:text-gray-700 focus:outline-none text-2xl"
-                        >
-                            &times;
-                        </button>
-                    </div>
-                )}
+
                 <nav className="p-2">
                     {Object.keys(navRoutes).map((item, index) => {
                         const Icon = navIcons[item];
@@ -155,7 +155,7 @@ export default function Sidebar() {
                                     </div>
 
                                     {showBadge && (
-                                        <span className="ml-auto bg-[#FC0101] text-white text-xs font-bold px-[5px] pl-[3px] py-1 rounded-full">
+                                        <span className="ml-auto bg-[#FC0101] text-white text-xs font-bold px-[5px] pl-[3px] py-[3px] rounded-full">
                                             10
                                         </span>
                                     )}
