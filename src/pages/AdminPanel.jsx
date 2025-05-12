@@ -73,7 +73,7 @@ export default function MigraconDashboard() {
                 {/* Sidebar */}
 
                 {/* Main Content */}
-                <div className="flex-1 -mx-10 xl:mx-10">
+                <div className="flex-1  xl:mx-10">
 
                     {/* Header */}
                     <header className="p-4 flex flex-col lg:flex-row justify-between items-center mt-7">
@@ -82,14 +82,14 @@ export default function MigraconDashboard() {
                             <div className="text-sm font-normal text-gray-500">Here's what's happening with your  applications today.</div>
                         </h1>
                         <div className="flex items-center pr-6">
-                            {/* <div className="relative mr-2">
+                            <div className="relative mr-2">
                             <input
                                 type="text"
                                 placeholder="Search applications, agents..."
                                 className="pl-8 pr-4 py-2 border rounded-lg text-sm w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                             <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
-                        </div> */}
+                        </div>
                             {/* <div className="h-10 w-10 bg-white rounded-md flex items-center justify-center mr-3">
 
                             <button className="p-2">
