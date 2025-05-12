@@ -135,16 +135,33 @@ const ForgotPassword = () => {
             </button>
 
             <div className="text-center">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowOtpInput(false);
-                  setOtp(['', '', '', '', '', '']);
-                }}
-                className="text-sm text-blue-600 hover:text-blue-500"
-              >
-                Didn't receive the code? Resend
-              </button>
+             <button
+  type="button"
+  onClick={async () => {
+    try {
+      const storedEmail = localStorage.getItem('email');
+      if (!storedEmail) {
+        toast.error('Email not found, please try again.');
+        return;
+      }
+
+      const res = await axios.post('http://localhost:5000/api/password/forgot-password', {
+        email: storedEmail,
+      });
+
+      if (res.data.message) {
+        toast.success('OTP resent to your email');
+        setOtp(['', '', '', '', '', '']); // Clear OTP fields
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to resend OTP');
+    }
+  }}
+  className="text-sm text-blue-600 hover:text-blue-500"
+>
+  Didn't receive the code? Resend
+</button>
+
             </div>
           </form>
         )}

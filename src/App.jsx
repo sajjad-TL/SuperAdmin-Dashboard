@@ -8,8 +8,10 @@ import AdminPanel from './pages/AdminPanel';
 import Agent from './pages/Agent';
 import AgentProfile from './pages/AgentProfile';
 import StudentTable from './pages/Student';
-// import StudentProfile from './pages/StudentProfilie'
 import StudentProfile from './pages/Studentprofile';
+
+import ProtectedRoute from './components/ProtectedRoute';
+import PublicRoute from './components/PublicRoute';
 
 function App() {
   return (
@@ -19,15 +21,24 @@ function App() {
         <Route
           path="/login"
           element={
+            <PublicRoute>
               <Login />
+            </PublicRoute>
           }
         />
-        
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        
-        {/* Protected Layout with Sidebar */}
-        <Route path="/" element={<Layout />}>
+
+        {/* Protected Routes */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Navigate to="/admin" replace />} />
           <Route path="admin" element={<AdminPanel />} />
           <Route path="agent" element={<Agent />} />
           <Route path="students" element={<Agent />} />
