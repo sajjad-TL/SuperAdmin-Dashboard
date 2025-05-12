@@ -20,8 +20,8 @@ import { FiMenu } from "react-icons/fi";
 const navRoutes = {
     "Dashboard Overview": "/admin",
     "Agent Management": "/agent",
-    "Universities Management": "/students",
-    "Students Management": "/universities",
+    "Universities Management": "/universities",
+    "Students Management": "/student",
     "Application Management": "/application",
     "Commission & Payment": "/commission",
     "Tasks / Workflows": "/tasks",
