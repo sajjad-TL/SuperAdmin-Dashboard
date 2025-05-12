@@ -21,7 +21,7 @@ export default function StudentProfile() {
             <button className="p-2 rounded-full hover:bg-gray-200">
               <Bell size={20} />
             </button>
-            <button className="bg-teal-600 text-white px-4 py-2 rounded flex items-center space-x-2">
+            <button className="bg-[#2A7B88] text-white px-4 py-2 rounded flex items-center space-x-2">
               <span>Edit Profile</span>
             </button>
           </div>
@@ -66,7 +66,7 @@ export default function StudentProfile() {
           <div className="bg-white p-6 rounded-lg shadow-sm">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">Documents</h2>
-              <button className="bg-teal-600 text-white px-3 py-1 rounded text-sm flex items-center space-x-1">
+              <button className="bg-[#2A7B88] text-white px-3 py-1 rounded text-sm flex items-center space-x-1">
                 <Upload size={16} />
                 <span>Upload New</span>
               </button>

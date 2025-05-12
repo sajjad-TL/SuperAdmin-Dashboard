@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { Bell, Upload } from 'lucide-react';
+import Admin from '../layout/Adminnavbar';
 
 export default function AgentProfile() {
 
   return (
+    <>
+      <Admin />   
     <div className='bg-gray-100 px-10 min-h-screen'>
-      <div className="mx-auto px-10 bg-gray-100 pt-40">
+      <div className="mx-auto px-10 bg-gray-100 pt-14">
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-xl font-bold text-gray-800">Agent Profile</h1>
@@ -15,7 +18,7 @@ export default function AgentProfile() {
             <button className="p-2 rounded-full hover:bg-gray-200">
               <Bell size={20} />
             </button>
-            <button className="bg-teal-600 text-white px-4 py-2 rounded flex items-center space-x-2">
+            <button className=" bg-[#2A7B88] text-white px-4 py-2 rounded flex items-center space-x-2">
               <span>Edit Profile</span>
             </button>
           </div>
@@ -60,7 +63,7 @@ export default function AgentProfile() {
           <div className="bg-white p-6 rounded-lg shadow-sm">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">Documents</h2>
-              <button className="bg-teal-600 text-white px-3 py-1 rounded text-sm flex items-center space-x-1">
+              <button className=" bg-[#2A7B88] text-white px-3 py-1 rounded text-sm flex items-center space-x-1">
                 <Upload size={16} />
                 <span>Upload New</span>
               </button>
@@ -118,7 +121,7 @@ export default function AgentProfile() {
           <div className="bg-white p-6 rounded-lg shadow-sm">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">Linked Sub Agent</h2>
-              <button className="bg-teal-600 text-white px-4 py-1 rounded text-sm">
+              <button className=" bg-[#2A7B88] text-white px-4 py-1 rounded text-sm">
                 Edit Profile
               </button>
             </div>
@@ -139,7 +142,7 @@ export default function AgentProfile() {
           <div className="bg-white p-6 rounded-lg shadow-sm">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">Students Applications</h2>
-              <button className="text-teal-600 text-sm flex items-center">
+              <button className=" font-semibold text-sm flex items-center">
                 <span>View All</span>
               </button>
             </div>
@@ -171,5 +174,7 @@ export default function AgentProfile() {
         </div>
       </div>
     </div>
+    
+    </>
   );
 }
