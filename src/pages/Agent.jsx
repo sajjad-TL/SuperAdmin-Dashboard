@@ -13,7 +13,7 @@ export default function Agent() {
 
             <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
                 {/* Main Content */}
-                <div className="flex-1 p-0 lg:p-16 border broder-gray-900">
+                <div className="flex-1 p-0 lg:p-5 border broder-gray-900">
                     <div>
                         {/* Header */}
                         <header className="bg-gray-100 p-4 flex flex-col lg:flex-row justify-between items-center mt-7">
