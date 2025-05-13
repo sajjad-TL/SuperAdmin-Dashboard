@@ -11,8 +11,13 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 0.5rem;
 }
+}
 
+@media (min-width: 318px) and (max-width: 321px) {
 
+.pai{
+  padding: 0%;
+}
 }
 
 @media (max-width: 375px) {

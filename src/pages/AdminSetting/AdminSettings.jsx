@@ -27,7 +27,7 @@ export default function AdminSettings() {
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
                                         <input
                                             type="text"
-                                            value="Migracon Study"
+                                            defaultValue="Migracon Study"
                                             className="w-full p-2 border border-gray-300 rounded"
                                         />
                                     </div>
@@ -35,7 +35,7 @@ export default function AdminSettings() {
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Website URL</label>
                                         <input
                                             type="text"
-                                            value="https://migracon.com"
+                                            defaultValue="https://migracon.com"
                                             className="w-full p-2 border border-gray-300 rounded"
                                         />
                                     </div>
@@ -43,7 +43,7 @@ export default function AdminSettings() {
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
                                         <input
                                             type="email"
-                                            value="contact@migracon.com"
+                                            defaultValue="contact@migracon.com"
                                             className="w-full p-2 border border-gray-300 rounded"
                                         />
                                     </div>
@@ -51,7 +51,7 @@ export default function AdminSettings() {
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
                                         <input
                                             type="text"
-                                            value="+1 (555) 123-4567"
+                                            defaultValue="+1 (555) 123-4567"
                                             className="w-full p-2 border border-gray-300 rounded"
                                         />
                                     </div>
@@ -126,7 +126,7 @@ export default function AdminSettings() {
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Webhook URL</label>
                                         <input
                                             type="text"
-                                            value="https://api.migracon.com/webhooks"
+                                            defaultValue="https://api.migracon.com/webhooks"
                                             className="w-full p-2 border border-gray-300 rounded"
                                         />
                                     </div>
