@@ -6,7 +6,7 @@ export default function Layout() {
   return (
     <div className="flex">
       <Sidebar />
-      <main className="flex-1 md:ml-60"> {/* md:ml-64 matches sidebar width */}
+      <main className="flex-1 md:ml-[13rem]"> {/* md:ml-64 matches sidebar width */}
         <Outlet />
       </main>
     </div>

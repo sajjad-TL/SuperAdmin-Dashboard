@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Bell, Upload } from 'lucide-react';
 import Admin from '../layout/Adminnavbar';
-
+import { TbEdit } from "react-icons/tb";
 
 export default function StudentProfile() {
 
@@ -21,9 +21,10 @@ export default function StudentProfile() {
         <button className="p-2 rounded-full hover:bg-gray-200">
           <Bell size={20} />
         </button>
-        <button className="bg-[#2A7B88] text-white px-4 py-2 rounded flex items-center space-x-2">
-          <span>Edit Profile</span>
-        </button>
+       <button className="bg-[#2A7B88] text-white px-[30px] py-2 rounded flex items-center space-x-2">
+  <TbEdit />
+  <span>Edit Profile</span>
+</button>
       </div>
     </div>
 
@@ -84,7 +85,7 @@ export default function StudentProfile() {
             title: "SOP",
             date: "2023-12-20"
           }].map((doc, index) => (
-            <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-gray-100 rounded">
+            <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-gray-100 rounded-2xl">
               <div className="flex items-center mb-2 sm:mb-0">
                 <div className="mr-4">
                   <div className="p-2 rounded x">
@@ -111,7 +112,7 @@ export default function StudentProfile() {
       {/* Linked Agent */}
       <div className="bg-white p-6 rounded-lg shadow-sm">
         <h2 className="text-lg font-semibold mb-4">Linked Agent</h2>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center p-4 bg-gray-100 rounded">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center p-4 bg-gray-100 rounded-2xl">
           <div className="mb-4 sm:mb-0 sm:mr-4">
             <img src="/api/placeholder/60/60" alt="Sub Agent" className="rounded-full w-12 h-12 bg-gray-300" />
           </div>
@@ -144,7 +145,7 @@ export default function StudentProfile() {
             status: "DOCUMENTS PENDING",
             date: "2024-01-18"
           }].map((app, index) => (
-            <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-gray-100 rounded">
+            <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-100 rounded-2xl">
               <div>
                 <h3 className="font-medium">{app.university}</h3>
                 <p className="text-sm text-gray-500">{app.course}</p>
