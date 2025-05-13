@@ -167,18 +167,20 @@ export default function MigraconDashboard() {
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td
-                                                    className="px-4 py-3 text-base text-blue-600 cursor-pointer hover:underline"
-                                                    onClick={() => navigate('/agentprofile')}
-                                                >
-                                                    Sarah Johnson
-                                                </td>                                            <td className="px-4 py-3 text-sm">Computer Science</td>
-                                                <td className="px-4 py-3 text-sm">University of Toronto</td>
-                                                <td className="px-4 py-3">
-                                                    <span className="px-2 py-1  text-black rounded text-xs font-medium">PENDING</span>
-                                                </td>
-                                                <td className="px-4 py-3 text-sm text-gray-500">2024-01-20</td>
-                                            </tr>
+  <td
+    className="px-4 py-3 text-base text-blue-600 cursor-pointer hover:underline"
+    onClick={() => navigate('/agentprofile')}
+  >
+    Sarah Johnson
+  </td>                                            
+  <td className="px-4 py-3 text-sm">Computer Science</td>
+  <td className="px-4 py-3 text-sm">University of Toronto</td>
+  <td className="px-4 py-3">
+    <span className="px-2 py-1 text-black rounded text-xs font-medium">PENDING</span>
+  </td>
+  <td className="px-4 py-3 text-sm text-gray-500">2024-01-20</td>
+</tr>
+
                                             <tr>
                                                 <td
                                                     className="px-4 py-3 text-base text-blue-600 cursor-pointer hover:underline"
