@@ -9,7 +9,7 @@ const Admin = () => {
                 <div className="flex justify-between items-center">
 
                     {/* Right Icons */}
-                    <div className="flex items-center space-x-4 ms-auto">
+<div className=" items-center space-x-4 ms-auto hidden sm:flex">
                         <button className="text-gray-600 hover:text-black focus:outline-none">
                             <FaBell className="w-5 h-5" />
                         </button>

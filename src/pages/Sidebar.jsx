@@ -15,9 +15,13 @@ import { FaHandHoldingDollar } from "react-icons/fa6";
 import { BsBank2 } from "react-icons/bs";
 import { FaUserPlus } from "react-icons/fa";
 import { IoSettingsOutline } from "react-icons/io5";
-import { FiMenu } from "react-icons/fi";
 import { Link } from 'react-router-dom';
+import { RxHamburgerMenu } from "react-icons/rx";
+import { FaBell } from 'react-icons/fa';
+import avatar from '../assets/avatar.png';
+
 const navRoutes = {
+
     "Dashboard Overview": "/admin",
     "Agent Management": "/agent",
     "Universities Management": "/universities",
@@ -84,15 +88,31 @@ export default function Sidebar() {
     return (
         <>
             {/* Hamburger Menu Button (visible only on mobile) */}
-            <div className=" top-4 left-4 z-20 md:static md:top-auto md:left-auto">
-                <button
-                    id="hamburger-button"
-                    className="p-2 bg-gray-100 rounded-full shadow-md focus:outline-none"
-                    onClick={toggleMenu}
-                >
-                    <FiMenu className="w-6 h-6" />
-                </button>
-            </div>
+
+            <div className="mt-4 md:hidden flex flex-row justify-between items-center px-4">
+  
+  {/* Hamburger on the left */}
+  <button
+    id="hamburger-button"
+    className="p-2 rounded-full hover:bg-gray-200 focus:outline-none"
+    onClick={toggleMenu}
+  >
+    <RxHamburgerMenu className="w-6 h-6" />
+  </button>
+
+  {/* Bell + Avatar on the right */}
+  <div className="flex flex-row items-center space-x-4">
+    <button className="text-gray-600 hover:text-black focus:outline-none">
+      <FaBell className="w-5 h-5" />
+    </button>
+    <img
+      src={avatar}
+      alt="User Avatar"
+      className="w-8 h-8 rounded-full object-cover border border-gray-300"
+    />
+  </div>
+  
+</div>
 
             {/* Overlay for mobile when menu is open */}
             {menuOpen && (
