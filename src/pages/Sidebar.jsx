@@ -84,7 +84,7 @@ export default function Sidebar() {
     return (
         <>
             {/* Hamburger Menu Button (visible only on mobile) */}
-            <div className="fixed top-4 left-4 md:hidden z-20">
+            <div className=" top-4 left-4 z-20 md:static md:top-auto md:left-auto">
                 <button
                     id="hamburger-button"
                     className="p-2 bg-gray-100 rounded-full shadow-md focus:outline-none"
