@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Bell, Upload } from 'lucide-react';
 import Admin from '../layout/Adminnavbar';
 
@@ -23,6 +22,7 @@ export default function StudentProfile() {
         </button>
         <button className="bg-[#2A7B88] text-white px-4 py-2 rounded flex items-center space-x-2">
           <span>Edit Profile</span>
+          
         </button>
       </div>
     </div>
