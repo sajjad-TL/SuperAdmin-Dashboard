@@ -13,6 +13,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 import StudentProfile from './pages/StudentProfile';
 import Application from './pages/Application';
+import AdminSettings from './pages/AdminSetting/AdminSettings';
+import AdminPermission from './pages/AdminSetting/AdminPermission';
 
 function App() {
   return (
@@ -57,6 +59,9 @@ function App() {
           <Route path="agentprofile" element={<AgentProfile />} />
           <Route path="student" element={<StudentTable />} />
           <Route path="StudentProfile" element={<StudentProfile />} />
+          <Route path="/settings" element={<AdminSettings />} />
+          <Route path="/settings/roles" element={<AdminPermission />} />
+
           {/* Add other protected routes here */}
         </Route>
       </Routes>
