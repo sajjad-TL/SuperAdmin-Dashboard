@@ -16,7 +16,7 @@ import { BsBank2 } from "react-icons/bs";
 import { FaUserPlus } from "react-icons/fa";
 import { IoSettingsOutline } from "react-icons/io5";
 import { FiMenu } from "react-icons/fi";
-
+import { Link } from 'react-router-dom';
 const navRoutes = {
     "Dashboard Overview": "/admin",
     "Agent Management": "/agent",
@@ -177,10 +177,10 @@ export default function Sidebar() {
                     })}
 
                     <div className="mt-10">
-                        <div className='flex flex-row items-center gap-2 p-2'>
-                            <IoSettingsOutline className='text-xl' />
-                            <div className="hover:bg-gray-100 rounded font-semibold mb-1">Admin Settings</div>
-                        </div>
+                        <Link to="/settings" className="flex flex-row items-center gap-2 p-2 hover:bg-gray-100 rounded font-semibold mb-1">
+                            <IoSettingsOutline className="text-xl" />
+                            <span>Admin Settings</span>
+                        </Link>
                     </div>
                 </nav>
             </div>
