@@ -8,12 +8,11 @@ import AdminPanel from './pages/AdminPanel';
 import Agent from './pages/Agent';
 import AgentProfile from './pages/AgentProfile';
 import StudentTable from './pages/Student';
-import StudentProfile from './pages/Studentprofile';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
-import AdminSettings from './pages/AdminSetting/AdminSettings';
-import AdminPermission from './pages/AdminSetting/AdminPermission';
+import StudentProfile from './pages/StudentProfile';
+import Application from './pages/Application';
 
 function App() {
   return (
@@ -45,7 +44,7 @@ function App() {
           <Route path="agent" element={<Agent />} />
           <Route path="students" element={<Agent />} />
           <Route path="universities" element={<Agent />} />
-          <Route path="application" element={<Agent />} />
+          <Route path="application" element={<Application />} />
           <Route path="commission" element={<Agent />} />
           <Route path="tasks" element={<Agent />} />
           <Route path="trainhub" element={<Agent />} />
