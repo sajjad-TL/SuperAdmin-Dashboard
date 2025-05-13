@@ -13,6 +13,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 import StudentProfile from './pages/StudentProfile';
 import Application from './pages/Application';
+import AdminSettings from './pages/AdminSetting/AdminSettings';
+import AdminPermission from './pages/AdminSetting/AdminPermission';
 
 function App() {
   return (
