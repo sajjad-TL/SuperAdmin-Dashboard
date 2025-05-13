@@ -11,7 +11,7 @@ import StudentTable from './pages/Student';
 
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
-import StudentProfile from './pages/StudentProfile';
+import StudentProfile from './pages/Studentprofile';
 import Application from './pages/Application';
 import AdminSettings from './pages/AdminSetting/AdminSettings';
 import AdminPermission from './pages/AdminSetting/AdminPermission';

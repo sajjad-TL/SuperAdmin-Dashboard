@@ -1,9 +1,6 @@
-import { Search, Bell } from 'lucide-react';
 import { FaPlus } from "react-icons/fa";
-
 import avatar from '../assets/avatar.png';
 import Admin from '../layout/Adminnavbar'
-
 
 export default function Agent() {
     return (
