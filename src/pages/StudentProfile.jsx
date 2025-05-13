@@ -21,7 +21,7 @@ export default function StudentProfile() {
                 <Bell size={20} />
               </button>
               <button className="bg-[#2A7B88] text-white px-[30px] py-2 rounded flex items-center space-x-2">
-                <TbEdit className='mr-2' />
+                <TbEdit />
                 <span>Edit Profile</span>
               </button>
             </div>

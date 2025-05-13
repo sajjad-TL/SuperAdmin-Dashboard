@@ -15,6 +15,7 @@ import StudentProfile from './pages/Studentprofile';
 import Application from './pages/Application';
 import AdminSettings from './pages/AdminSetting/AdminSettings';
 import AdminPermission from './pages/AdminSetting/AdminPermission';
+import AdminEmail from './pages/AdminSetting/AdminEmail';
 
 function App() {
   return (
@@ -61,6 +62,7 @@ function App() {
           <Route path="StudentProfile" element={<StudentProfile />} />
           <Route path="/settings" element={<AdminSettings />} />
           <Route path="/settings/roles" element={<AdminPermission />} />
+          <Route path="/settings/email" element={<AdminEmail />} />
 
           {/* Add other protected routes here */}
         </Route>
