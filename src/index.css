@@ -20,3 +20,27 @@
       gap: 35px; 
     }
   }
+@media (min-width: 1700px) {
+    .mrg {
+      margin-right: 3rem;
+      margin-left: 3rem;
+    }
+  }
+
+
+  @media (max-width: 425px) {
+    .mrg {
+
+      padding: 1rem;
+    }
+  }
+
+  @media (max-width: 885px) {
+    .cl {
+
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+  }
+
