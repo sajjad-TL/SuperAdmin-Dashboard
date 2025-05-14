@@ -17,10 +17,10 @@ export default function EmailTemplates() {
                         <div className="flex flex-col xl:flex-row gap-8">
                             <div className="flex-[7] ">
                                 <div className='bg-white rounded-lg p-5 shadow-sm border border-[#eaeef2]'>
-                                    <div className='flex flex-row justify-between pb-5'>
+                                    <div className='flex flex-col sm:flex-row gap-4 items-center justify-between pb-5'>
                                         <h2 className="font-bold text-xl ">Email Templates</h2>
                                         <div className=' '>
-                                            <button className="bg-[#3b7eff] text-white border-none py-2 px-4 rounded-md font-medium cursor-pointer flex items-center gap-2 ">
+                                            <button className="bg-[#3b7eff] text-white border-none py-2 px-4 rounded-md font-medium cursor-pointer flex items-center gap-2 text-nowrap">
                                                 <Plus size={18} stroke="white" />
                                                 Create Template
                                             </button>

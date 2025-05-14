@@ -5,7 +5,7 @@ export default function SchoolProgramModal({ onClose }) {
   const [activeTab, setActiveTab] = useState("school");
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-70 z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl h-[90vh] flex flex-col mx-4">
 
         {/* Scrollable Content */}
