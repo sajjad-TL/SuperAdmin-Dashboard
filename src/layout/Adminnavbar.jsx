@@ -37,7 +37,7 @@ const Admin = () => {
       <header className="w-full bg-white shadow-sm border-b px-10 py-2 z-50">
         <div className="flex justify-between items-center">
 
-          <div className="items-center space-x-4 ms-auto hidden sm:flex" ref={dropdownRef}>
+          <div className="items-center gap-3 ms-auto flex" ref={dropdownRef}>
             <div className="relative">
               <button
                 className="text-gray-600 hover:text-black focus:outline-none"
