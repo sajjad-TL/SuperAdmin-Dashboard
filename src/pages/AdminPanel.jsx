@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState , useEffect} from 'react';
 import { Search } from 'lucide-react';
 import avatar from '../assets/avatar.png';
 import {
@@ -14,7 +14,7 @@ import {
     Bar,
 } from "recharts";
 import { useNavigate } from 'react-router-dom';
-import Admin from '../layout/Adminnavbar'
+import Admin from '../layout/Adminnavbar';
 
 export default function MigraconDashboard() {
     const navigate = useNavigate();
@@ -63,7 +63,7 @@ export default function MigraconDashboard() {
         { name: "Jun", paid: 30, offers: 25, visas: 22, promos: 7 },
         { name: "Jul", paid: 40, offers: 35, visas: 32, promos: 12 },
     ];
-
+    
     return (
         <div className="div">
             <Admin />

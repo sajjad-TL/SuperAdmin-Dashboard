@@ -16,11 +16,17 @@ import Application from './pages/Application';
 import AdminSettings from './pages/AdminSetting/AdminSettings';
 import AdminPermission from './pages/AdminSetting/AdminPermission';
 import AdminEmail from './pages/AdminSetting/AdminEmail';
+import NotificationPage from './pages/NotificationPage';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import AdminPlatform from './pages/AdminSetting/AdminPlatform';
 import Trainhub from './pages/Trainhub';
 
 function App() {
   return (
+
+    <><ToastContainer position="top-right" autoClose={3000} />
     <Router>
       <Routes>
         {/* Public Routes - blocked if user is already logged in */}
@@ -65,13 +71,16 @@ function App() {
           <Route path="/settings" element={<AdminSettings />} />
           <Route path="/settings/roles" element={<AdminPermission />} />
           <Route path="/settings/email" element={<AdminEmail />} />
+          <Route path="/notification" element={<NotificationPage />} />
           <Route path="/settings/rules" element={<AdminPlatform />} />
 
           {/* Add other protected routes here */}
         </Route>
       </Routes>
     </Router>
+    </>
   );
 }
+
 
 export default App;
