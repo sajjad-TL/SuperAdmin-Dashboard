@@ -32,6 +32,7 @@ const handleSubmit = async (e) => {
 
     // ✅ Redirect to admin
     navigate('/admin');
+    
   } catch (err) {
     if (err.response && err.response.status === 401) {
       setError('Invalid email or password');
