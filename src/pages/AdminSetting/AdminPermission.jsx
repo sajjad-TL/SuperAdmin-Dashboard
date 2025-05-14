@@ -1,4 +1,4 @@
-import { Users, UserCog, Settings, CheckCircle, XCircle, Info, Plus, MoreVertical } from 'lucide-react';
+import { Users, UserCog, Settings, CheckCircle, XCircle, Plus, MoreVertical } from 'lucide-react';
 import Admin from '../../layout/Adminnavbar';
 import SettingsTabs from './SettingsTabs';
 
@@ -22,9 +22,7 @@ export default function AdminPermission() {
                                     </button>
                                 </div>
 
-                                {/* Role Cards */}
                                 <div className="space-y-4">
-                                    {/* Super Admin Role */}
                                     <div className="border border-gray-200 rounded-lg p-4">
                                         <div className="flex justify-between">
                                             <div className="flex items-center">
@@ -50,7 +48,6 @@ export default function AdminPermission() {
                                         </div>
                                     </div>
 
-                                    {/* Admin Role */}
                                     <div className="border border-gray-200 rounded-lg p-4">
                                         <div className="flex justify-between">
                                             <div className="flex items-center">

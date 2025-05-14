@@ -41,9 +41,7 @@ export default function AdminPlatform() {
                                     <SettingsTabs />
                 
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                    {/* Main Content - 2/3 width */}
                     <div className="lg:col-span-2 space-y-6">
-                        {/* Commission Rules Section */}
                         <div className="bg-white rounded-lg shadow p-6">
                             <div className="flex  justify-between items-center mb-6">
                                 <h2 className="text-xl font-medium text-gray-800">Commission Rules</h2>
