@@ -29,7 +29,6 @@ const handleSubmit = async (e) => {
 
     // ✅ Save user session (optional, if you're storing user data)
     setUserSession(response.data.user); // assuming response.data.user exists
-
     // ✅ Redirect to admin
     navigate('/admin');
   } catch (err) {
