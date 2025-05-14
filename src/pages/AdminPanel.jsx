@@ -73,7 +73,7 @@ export default function MigraconDashboard() {
                 {/* Sidebar */}
 
                 {/* Main Content */}
-                <div className="flex-1  xl:mx-10">
+                <div className="flex-1  xl:mx-5">
 
                     {/* Header */}
                     <header className="p-4 flex flex-col lg:flex-row justify-between items-center mt-7">
