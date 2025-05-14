@@ -15,7 +15,7 @@ export default function AdminSettings() {
             <div className="bg-gray-100 min-h-[94vh]">
                 <div className="mrg p-12 ">
                     <SettingsTabs />
-                    <div className="bg-white py-10 px-4 md:px-8 rounded-lg">
+                    <div className="bg-white py-10 px-4 md:px-8 rounded-lg  shadow-sm border border-[#eaeef2]">
                         <div className=" flex flex-col lg:flex-row gap-8">
                             {/* Left Column */}
                             <div className=" w-full lg:w-2/3 space-y-8">

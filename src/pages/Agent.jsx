@@ -13,7 +13,7 @@ export default function Agent() {
                 <div className="flex-1 p-0 lg:p-5 border broder-gray-900">
                     <div>
                         {/* Header */}
-                        <header className="bg-gray-100 p-4 flex flex-col lg:flex-row justify-between items-center mt-7">
+                        <header className="bg-gray-100 p-4 flex flex-col lg:flex-row gap-4 justify-between items-center mt-7">
                             <h1 className="text-xl font-bold pl-6">
                                 Agent Management
                                 <div className="text-sm font-normal text-gray-500">Monitor and manage your agent network</div>

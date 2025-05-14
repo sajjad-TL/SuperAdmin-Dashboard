@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useRef, useEffect } from "react";
 import migracon from '../assets/Migracon Study.png';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AiFillHome } from "react-icons/ai";
@@ -19,6 +19,7 @@ import { Link } from 'react-router-dom';
 import { RxHamburgerMenu } from "react-icons/rx";
 import { FaBell } from 'react-icons/fa';
 import avatar from '../assets/avatar.png';
+import { toast } from "react-toastify";
 
 const navRoutes = {
 
@@ -56,12 +57,22 @@ const navIcons = {
 
 
 export default function Sidebar() {
+    const notifications = [
+    { id: 1, message: "New student registered" },
+    { id: 2, message: "Payment confirmed" },
+    { id: 3, message: "Profile updated" },
+  ];
+
     const [menuOpen, setMenuOpen] = useState(false);
+      const [isOpen, setIsOpen] = useState(false);
+
     const navigate = useNavigate();
     // const [activeItem, setActiveItem] = useState(""); ❌ Remove this
     const location = useLocation();
+  const dropdownRef = useRef();
 
-
+  const unreadCount = notifications.length;
+ 
     useEffect(() => {
         const handleClickOutside = (event) => {
             const sidebar = document.getElementById('mobile-sidebar');
@@ -85,12 +96,15 @@ export default function Sidebar() {
     const toggleMenu = () => {
         setMenuOpen(!menuOpen);
     };
+    const handleLogout = () => {
+        localStorage.removeItem("authToken");
+        toast.success("Logged out successfully!");
+        navigate("/login");
+      };
     return (
         <>
             {/* Hamburger Menu Button (visible only on mobile) */}
-
-            <div className="mt-4 md:hidden flex flex-row justify-between items-center px-4">
-  
+<div className="mt-4 md:hidden flex flex-row justify-between items-center px-4" ref={dropdownRef}>
   {/* Hamburger on the left */}
   <button
     id="hamburger-button"
@@ -100,27 +114,64 @@ export default function Sidebar() {
     <RxHamburgerMenu className="w-6 h-6" />
   </button>
 
-  {/* Bell + Avatar on the right */}
-  <div className="flex flex-row items-center space-x-4">
-    <button className="text-gray-600 hover:text-black focus:outline-none">
+  {/* Notification + Avatar on the right */}
+  <div className="flex flex-row items-center space-x-4 relative">
+    {/* Notification Bell */}
+    <button
+      className="text-gray-600 hover:text-black focus:outline-none relative"
+      onClick={() => navigate("/notification")}
+    >
       <FaBell className="w-5 h-5" />
+      {unreadCount > 0 && (
+        <span className="absolute -top-2 -right-2 inline-flex items-center justify-center text-xs font-bold leading-none text-white bg-red-600 rounded-full h-5 w-5">
+          {unreadCount}
+        </span>
+      )}
     </button>
-    <img
-      src={avatar}
-      alt="User Avatar"
-      className="w-8 h-8 rounded-full object-cover border border-gray-300"
-    />
-  </div>
-  
-</div>
 
-            {/* Overlay for mobile when menu is open */}
-            {menuOpen && (
-                <div
-                    className="fixed inset-0 bg-black bg-opacity-50 z-10 md:hidden"
-                    onClick={toggleMenu}
-                ></div>
-            )}
+    {/* Avatar */}
+    <button
+      onClick={() => setIsOpen(!isOpen)}
+      className="focus:outline-none"
+    >
+      <img
+        src={avatar}
+        alt="User Avatar"
+        className="w-8 h-8 rounded-full object-cover border border-gray-300"
+      />
+    </button>
+
+    {/* Dropdown */}
+    {isOpen && (
+      <div className="absolute right-0 top-12 bg-white border rounded shadow-md w-40 z-50">
+        <ul className="py-2 text-sm text-gray-700">
+          <li>
+            <button
+              className="w-full text-left px-4 py-2 hover:bg-gray-100"
+              onClick={() => {
+                navigate("/settings");
+                setIsOpen(false);
+              }}
+            >
+              Profile
+            </button>
+          </li>
+          <li>
+            <button
+              className="w-full text-left px-4 py-2 hover:bg-gray-100"
+              onClick={() => {
+                handleLogout();
+                setIsOpen(false);
+              }}
+            >
+              Logout
+            </button>
+          </li>
+        </ul>
+      </div>
+    )}
+  </div>
+</div>
 
 
             {/* Sidebar */}
