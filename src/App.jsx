@@ -16,10 +16,15 @@ import Application from './pages/Application';
 import AdminSettings from './pages/AdminSetting/AdminSettings';
 import AdminPermission from './pages/AdminSetting/AdminPermission';
 import AdminEmail from './pages/AdminSetting/AdminEmail';
+<<<<<<< HEAD
 import NotificationPage from './pages/NotificationPage';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+=======
+import AdminPlatform from './pages/AdminSetting/AdminPlatform';
+import Trainhub from './pages/Trainhub';
+>>>>>>> b9dcef069cd7e96bd6195ebbdabc186c145bdd32
 
 function App() {
   return (
@@ -56,7 +61,7 @@ function App() {
           <Route path="application" element={<Application />} />
           <Route path="commission" element={<Agent />} />
           <Route path="tasks" element={<Agent />} />
-          <Route path="trainhub" element={<Agent />} />
+          <Route path="trainhub" element={<Trainhub />} />
           <Route path="growth" element={<Agent />} />
           <Route path="tests" element={<Agent />} />
           <Route path="reports" element={<Agent />} />
@@ -69,7 +74,11 @@ function App() {
           <Route path="/settings" element={<AdminSettings />} />
           <Route path="/settings/roles" element={<AdminPermission />} />
           <Route path="/settings/email" element={<AdminEmail />} />
+<<<<<<< HEAD
           <Route path="/notification" element={<NotificationPage />} />
+=======
+          <Route path="/settings/rules" element={<AdminPlatform />} />
+>>>>>>> b9dcef069cd7e96bd6195ebbdabc186c145bdd32
 
           {/* Add other protected routes here */}
         </Route>

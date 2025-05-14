@@ -1,5 +1,5 @@
 import { useState , useEffect} from 'react';
-import { Search, Bell } from 'lucide-react';
+import { Search } from 'lucide-react';
 import avatar from '../assets/avatar.png';
 import {
     LineChart,
@@ -147,7 +147,7 @@ export default function MigraconDashboard() {
                         </div>
 
                         {/* Recent Applications & Top Performing Agents */}
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                             {/* Recent Applications */}
                             <div className="bg-white rounded-2xl border border-gray-300 shadow-sm lg:col-span-2">
                                 <div className="p-4 flex justify-between items-center ">
@@ -220,7 +220,7 @@ export default function MigraconDashboard() {
                                                 <div>
                                                     <div className='text-md'>Michael Chen</div>
                                                 </div>
-                                                <div className="spce grid grid-cols-3 gap-8 text-sm">
+                                                <div className="spce grid grid-cols-3 overflow-x-auto scrollbar-hide gap-8 text-sm">
                                                     <div>
                                                         <div className="text-gray-500">Applications</div>
                                                         <div className="font-medium">45</div>
@@ -251,11 +251,10 @@ export default function MigraconDashboard() {
                                                 <div>
                                                     <div className='text-md'>Emma Wilson</div>
                                                 </div>
-                                                <div className="spce grid grid-cols-3 gap-8 text-sm">
-                                                    <div>
-                                                        <div className="text-gray-500">Applications</div>
-                                                        <div className="font-medium">38</div>
-                                                    </div>
+                                                <div className="spce grid grid-cols-3 overflow-x-auto scrollbar-hide gap-8 text-sm">                                                    <div>
+                                                    <div className="text-gray-500">Applications</div>
+                                                    <div className="font-medium">38</div>
+                                                </div>
                                                     <div className='pl-2'>
                                                         <div className="text-gray-500 ">Success Rate</div>
                                                         <div className="font-medium">88%</div>
@@ -273,13 +272,13 @@ export default function MigraconDashboard() {
                         </div>
 
                         <div className="min-h-screen bg-gray-100 pt-8 font-sans">
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                                 {/* LEFT SECTION */}
                                 <div className="lg:col-span-2 space-y-6">
                                     {/* Tabs */}
                                     <div className="bg-white border border-gray-300 rounded-lg shadow  p-4 md:p-6">
                                         <h2 className="text-lg font-medium mb-4">Applications Status</h2>
-                                        <div className="flex flex-wrap overflow-x-auto mb-4">
+                                        <div className="flex flex-nowrap scrollbar-hide overflow-x-auto mb-4 ">
                                             {[
                                                 "Summer 2025",
                                                 "Fall 2025",
@@ -292,9 +291,9 @@ export default function MigraconDashboard() {
                                             ].map((tab) => (
                                                 <button
                                                     key={tab}
-                                                    className={`px-4 py-2 text-sm font-medium ${activeTab === tab
-                                                        ? "text-blue-600 border-b-2 border-blue-600"
-                                                        : "text-gray-500"
+                                                    className={`px-4 py-2 text-sm font-medium whitespace-nowrap ${activeTab === tab
+                                                            ? "text-blue-600 border-b-2 border-blue-600"
+                                                            : "text-gray-500"
                                                         }`}
                                                     onClick={() => setActiveTab(tab)}
                                                 >
@@ -483,7 +482,7 @@ export default function MigraconDashboard() {
                                                         <p className="font-semibold text-sm">{user.name}</p>
                                                         <p className="text-xs text-gray-500">{user.university}</p>
                                                     </div>
-                                                    <span className={`px-2 py-0.5 text-xs text-center rounded-full text-nowrap ${statusColorMap[user.color]}`}>
+                                                    <span className={`px-2 py-0.5 text-xs text-center rounded-full ${statusColorMap[user.color]}`}>
                                                         {user.status}
                                                     </span>
                                                 </div>
