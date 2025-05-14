@@ -247,12 +247,19 @@ export default function Sidebar() {
                         );
                     })}
 
-                    <div className="mt-10">
-                        <Link to="/settings" className="flex flex-row items-center gap-2 p-2 hover:bg-gray-100 rounded font-semibold mb-1">
-                            <IoSettingsOutline className="text-xl" />
-                            <span>Admin Settings</span>
-                        </Link>
-                    </div>
+                   <div
+    className="flex flex-row items-center gap-2 p-2 hover:bg-gray-100 rounded font-semibold mb-1 cursor-pointer mt-10"
+    onClick={() => {
+        navigate("/settings");
+        if (window.innerWidth < 768) {
+            setMenuOpen(false);
+        }
+    }}
+>
+    <IoSettingsOutline className="text-xl" />
+    <span>Admin Settings</span>
+</div>
+
                 </nav>
             </div>
         </>

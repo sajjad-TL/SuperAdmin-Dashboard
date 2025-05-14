@@ -43,9 +43,9 @@ export default function AdminPlatform() {
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 space-y-6">
                         <div className="bg-white rounded-lg shadow p-6">
-                            <div className="flex  justify-between items-center mb-6">
+                            <div className="flex flex-col sm:flex-row gap-4 justify-between items-center mb-6">
                                 <h2 className="text-xl font-medium text-gray-800">Commission Rules</h2>
-                                <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors">
+                                <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors text-nowrap">
                                     Save Changes
                                 </button>
                             </div>
