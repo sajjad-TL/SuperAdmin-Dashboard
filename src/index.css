@@ -22,7 +22,11 @@
 
 @media (max-width: 375px) {
     .spce {
-      gap: 35px; 
+      gap: 70px; 
+    }
+
+    .pa{
+      padding-right: 10px;
     }
   }
 @media (min-width: 1700px) {

@@ -26,44 +26,45 @@ export default function EmailTemplates() {
                                             </button>
                                         </div>
                                     </div>
-                                    <div className="flex flex-col lg:flex-row gap-5 mb-8">
-                                        <div className="bg-white rounded-lg p-5 shadow-sm border border-[#eaeef2]">
-                                            <div className="flex items-center mb-2.5">
-                                                <div className="flex items-center justify-center w-9 h-9 rounded-lg mr-3 bg-[#e8f1ff] text-[#3b7eff]">
-                                                    <Mail size={20} />
-                                                </div>
-                                                <h3 className="font-semibold">Welcome Emails</h3>
-                                            </div>
-                                            <p className="text-[#6b7280] text-sm">3 templates</p>
-                                        </div>
-                                        <div className="bg-white rounded-lg p-5 shadow-sm border border-[#eaeef2]">
-                                            <div className="flex items-center mb-2.5">
-                                                <div className="flex items-center justify-center w-9 h-9 rounded-lg mr-3 bg-[#e6f7f0] text-[#34d399]">
-                                                    <FileText size={20} />
-                                                </div>
-                                                <h3 className="font-semibold">Application Status</h3>
-                                            </div>
-                                            <p className="text-[#6b7280] text-sm">5 templates</p>
-                                        </div>
-                                        <div className="bg-white rounded-lg p-5 shadow-sm border border-[#eaeef2]">
-                                            <div className="flex items-center mb-2.5">
-                                                <div className="flex items-center justify-center w-9 h-9 rounded-lg mr-3 bg-[#f0e7ff] text-[#8b5cf6]">
-                                                    <Bell size={20} />
-                                                </div>
-                                                <h3 className="font-semibold">Notifications</h3>
-                                            </div>
-                                            <p className="text-[#6b7280] text-sm">4 templates</p>
-                                        </div>
-                                        <div className="bg-white rounded-lg p-5 shadow-sm border border-[#eaeef2]">
-                                            <div className="flex items-center mb-2.5">
-                                                <div className="flex items-center justify-center w-9 h-9 rounded-lg mr-3 bg-[#fff2e6] text-[#ff9249]">
-                                                    <CreditCard size={20} />
-                                                </div>
-                                                <h3 className="font-semibold">Payment Updates</h3>
-                                            </div>
-                                            <p className="text-[#6b7280] text-sm">3 templates</p>
-                                        </div>
-                                    </div>
+<div className="grid grid-cols-1 xl:grid-cols-2 gap-5 mb-8">
+    <div className="bg-white rounded-lg p-5 shadow-sm border border-[#eaeef2]">
+        <div className="flex items-center mb-2.5">
+            <div className="flex items-center justify-center w-9 h-9 rounded-lg mr-3 bg-[#e8f1ff] text-[#3b7eff]">
+                <Mail size={20} />
+            </div>
+            <h3 className="font-semibold">Welcome Emails</h3>
+        </div>
+        <p className="text-[#6b7280] text-sm">3 templates</p>
+    </div>
+    <div className="bg-white rounded-lg p-5 shadow-sm border border-[#eaeef2]">
+        <div className="flex items-center mb-2.5">
+            <div className="flex items-center justify-center w-9 h-9 rounded-lg mr-3 bg-[#e6f7f0] text-[#34d399]">
+                <FileText size={20} />
+            </div>
+            <h3 className="font-semibold">Application Status</h3>
+        </div>
+        <p className="text-[#6b7280] text-sm">5 templates</p>
+    </div>
+    <div className="bg-white rounded-lg p-5 shadow-sm border border-[#eaeef2]">
+        <div className="flex items-center mb-2.5">
+            <div className="flex items-center justify-center w-9 h-9 rounded-lg mr-3 bg-[#f0e7ff] text-[#8b5cf6]">
+                <Bell size={20} />
+            </div>
+            <h3 className="font-semibold">Notifications</h3>
+        </div>
+        <p className="text-[#6b7280] text-sm">4 templates</p>
+    </div>
+    <div className="bg-white rounded-lg p-5 shadow-sm border border-[#eaeef2]">
+        <div className="flex items-center mb-2.5">
+            <div className="flex items-center justify-center w-9 h-9 rounded-lg mr-3 bg-[#fff2e6] text-[#ff9249]">
+                <CreditCard size={20} />
+            </div>
+            <h3 className="font-semibold">Payment Updates</h3>
+        </div>
+        <p className="text-[#6b7280] text-sm">3 templates</p>
+    </div>
+</div>
+
 
                                 </div>
                                 <div className="bg-white rounded-xl p-5 shadow-sm border border-[#eaeef2] mt-4">
@@ -180,11 +181,11 @@ export default function EmailTemplates() {
                                     </div>
                                 </div>
 
-                                <div className="bg-[#3b7eff] text-white p-5 rounded-lg mt-8">
-                                    <h3 className="font-semibold mb-2">Template Guidelines</h3>
-                                    <p className="mb-4 text-sm">Learn best practices for creating effective email templates.</p>
-                                    <button className="bg-white text-[#3b7eff] border-none py-2 px-4 rounded-md font-medium cursor-pointer w-full text-center">
-                                        View Guidelines
+                              <div className="bg-blue-500 mt-5 rounded-lg p-6 text-white">
+                                    <h2 className="text-xl font-bold mb-2">Template Guidelines</h2>
+                                    <p className="mb-4">Learn best practices for creating effective email templates.</p>
+                                    <button className="w-full text-nowrap bg-white text-blue-500 py-2 px-4 rounded font-medium">
+                                       View Guidelines
                                     </button>
                                 </div>
                             </div>

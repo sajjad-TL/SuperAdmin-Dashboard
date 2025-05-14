@@ -16,6 +16,8 @@ import Application from './pages/Application';
 import AdminSettings from './pages/AdminSetting/AdminSettings';
 import AdminPermission from './pages/AdminSetting/AdminPermission';
 import AdminEmail from './pages/AdminSetting/AdminEmail';
+import AdminPlatform from './pages/AdminSetting/AdminPlatform';
+import Trainhub from './pages/Trainhub';
 
 function App() {
   return (
@@ -50,7 +52,7 @@ function App() {
           <Route path="application" element={<Application />} />
           <Route path="commission" element={<Agent />} />
           <Route path="tasks" element={<Agent />} />
-          <Route path="trainhub" element={<Agent />} />
+          <Route path="trainhub" element={<Trainhub />} />
           <Route path="growth" element={<Agent />} />
           <Route path="tests" element={<Agent />} />
           <Route path="reports" element={<Agent />} />
@@ -63,6 +65,7 @@ function App() {
           <Route path="/settings" element={<AdminSettings />} />
           <Route path="/settings/roles" element={<AdminPermission />} />
           <Route path="/settings/email" element={<AdminEmail />} />
+          <Route path="/settings/rules" element={<AdminPlatform />} />
 
           {/* Add other protected routes here */}
         </Route>
