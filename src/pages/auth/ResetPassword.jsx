@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Lock, AlertCircle, ArrowLeft } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
@@ -12,33 +14,43 @@ const ResetPassword = () => {
         confirmPassword: '',
     });
     const [error, setError] = useState('');
+    const location = useLocation();
+const queryParams = new URLSearchParams(location.search);
+const email = queryParams.get('email');
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
 
-        if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
-            return;
-        }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
 
-        if (formData.password.length < 8) {
-            setError('Password must be at least 8 characters long');
-            return;
-        }
+    if (formData.password !== formData.confirmPassword) {
+        setError('Passwords do not match');
+        return;
+    }
 
-        try {
-            // Add your reset password logic here
-            console.log('Reset password attempt with:', formData);
-            // If successful, redirect to login page
-            navigate('/login');
-        } catch (err) {
-            setError('Failed to reset password. Please try again.');
-        }
-    };
+    if (formData.password.length < 8) {
+        setError('Password must be at least 8 characters long');
+        return;
+    }
+
+    try {
+     await axios.post('http://localhost:5000/api/password/reset-password', {
+    email: email,
+    newPassword: formData.password,
+});
+
+
+        toast.success('Password reset successful!');
+        navigate('/login');
+    } catch (err) {
+        const errorMessage = err.response?.data?.message || 'Failed to reset password. Please try again.';
+        setError(errorMessage);
+    }
+};
+
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#E0E7FF] to-[#59585b] flex items-center justify-center p-4 bg-gradient-to-br">
+        <div className="min-h-screen bg-gradient-to-br from-[#E0E7FF] to-[#59585b] flex items-center justify-center p-4">
             <div className="max-w-5xl w-full grid grid-cols-1 md:grid-cols-12 gap-6 bg-white rounded-2xl shadow-xl overflow-hidden">
 
                 {/* Left Column: Image */}

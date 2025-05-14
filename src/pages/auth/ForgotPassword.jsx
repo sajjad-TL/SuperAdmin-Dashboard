@@ -55,7 +55,7 @@ const ForgotPassword = () => {
       });
       if (res.data.message) {
         toast.success('OTP Verified');
-        navigate('/reset-password');
+navigate(`/reset-password?email=${email}`);
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Invalid OTP');
