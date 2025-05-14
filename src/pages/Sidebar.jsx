@@ -173,7 +173,6 @@ export default function Sidebar() {
                 </div>
             </div>
 
-
             {/* Sidebar */}
             <div
                 id="mobile-sidebar"
@@ -248,10 +247,15 @@ export default function Sidebar() {
                     })}
 
                     <div className="mt-10">
-                        <Link to="/settings" className="flex flex-row items-center gap-2 p-2 hover:bg-gray-100 rounded font-semibold mb-1">
+                        <Link
+                            to="/settings"
+                            className={`flex flex-row items-center gap-2 p-2 rounded font-semibold mb-1 ${location.pathname === "/settings" ? "bg-[#D9D9DE] text-black font-semibold" : "hover:bg-gray-100"
+                                }`}
+                        >
                             <IoSettingsOutline className="text-xl" />
                             <span>Admin Settings</span>
                         </Link>
+
                     </div>
                 </nav>
             </div>

@@ -1,4 +1,4 @@
-import { useState , useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import avatar from '../assets/avatar.png';
 import {
@@ -63,7 +63,7 @@ export default function MigraconDashboard() {
         { name: "Jun", paid: 30, offers: 25, visas: 22, promos: 7 },
         { name: "Jul", paid: 40, offers: 35, visas: 32, promos: 12 },
     ];
-    
+
     return (
         <div className="div">
             <Admin />
@@ -292,8 +292,8 @@ export default function MigraconDashboard() {
                                                 <button
                                                     key={tab}
                                                     className={`px-4 py-2 text-sm font-medium whitespace-nowrap ${activeTab === tab
-                                                            ? "text-blue-600 border-b-2 border-blue-600"
-                                                            : "text-gray-500"
+                                                        ? "text-blue-600 border-b-2 border-blue-600"
+                                                        : "text-gray-500"
                                                         }`}
                                                     onClick={() => setActiveTab(tab)}
                                                 >
