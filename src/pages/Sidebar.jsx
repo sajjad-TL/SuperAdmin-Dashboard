@@ -247,19 +247,21 @@ export default function Sidebar() {
                         );
                     })}
 
-                   <div
-    className="flex flex-row items-center gap-2 p-2 hover:bg-gray-100 rounded font-semibold mb-1 cursor-pointer mt-10"
-    onClick={() => {
-        navigate("/settings");
-        if (window.innerWidth < 768) {
-            setMenuOpen(false);
-        }
-    }}
->
-    <IoSettingsOutline className="text-xl" />
-    <span>Admin Settings</span>
-</div>
-
+                    <div
+                        className={`flex flex-row items-center gap-2 p-2 rounded font-semibold mb-1 cursor-pointer mt-10 ${location.pathname === "/settings"
+                                ? "bg-[#D8E2FC] text-[#1A726C] font-semibold "
+                                : "hover:bg-gray-100"
+                            }`}
+                        onClick={() => {
+                            navigate("/settings");
+                            if (window.innerWidth < 768) {
+                                setMenuOpen(false);
+                            }
+                        }}
+                    >
+                        <IoSettingsOutline className="text-xl" />
+                        <span>Admin Settings</span>
+                    </div>
                 </nav>
             </div>
         </>
