@@ -173,7 +173,6 @@ export default function Sidebar() {
                 </div>
             </div>
 
-
             {/* Sidebar */}
             <div
                 id="mobile-sidebar"

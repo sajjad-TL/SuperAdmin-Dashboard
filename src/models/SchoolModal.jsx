@@ -7,7 +7,7 @@ export default function SchoolProgramModal({ onClose }) {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl h-[90vh] flex flex-col mx-4">
-        
+
         {/* Scrollable Content */}
         <div className="p-6 overflow-y-auto flex-1 scrollbar-hide">
           {/* Header with close button */}
@@ -21,21 +21,19 @@ export default function SchoolProgramModal({ onClose }) {
           {/* Tabs */}
           <div className="flex border-b mb-6">
             <button
-              className={`pb-3 px-1 mr-6 ${
-                activeTab === "school"
+              className={`pb-3 px-1 mr-6 ${activeTab === "school"
                   ? "text-blue-500 border-b-2 border-blue-500 font-medium"
                   : "text-gray-500"
-              }`}
+                }`}
               onClick={() => setActiveTab("school")}
             >
               Add School
             </button>
             <button
-              className={`pb-3 px-1 mr-6 ${
-                activeTab === "program"
+              className={`pb-3 px-1 mr-6 ${activeTab === "program"
                   ? "text-blue-500 border-b-2 border-blue-500 font-medium"
                   : "text-gray-500"
-              }`}
+                }`}
               onClick={() => setActiveTab("program")}
             >
               Add Program
@@ -128,7 +126,7 @@ export default function SchoolProgramModal({ onClose }) {
 
         {/* Fixed Footer Buttons */}
         <div className="flex justify-end space-x-2 border-t p-4">
-          <button onClick={onClose}  className="border py-2 px-6 rounded hover:bg-gray-50">
+          <button onClick={onClose} className="border py-2 px-6 rounded hover:bg-gray-50">
             Cancel
           </button>
           <button className="bg-blue-500 text-white py-2 px-6 rounded hover:bg-blue-600">
