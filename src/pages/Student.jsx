@@ -1,41 +1,32 @@
+import { useEffect, useState, useContext } from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import Admin from '../layout/Adminnavbar';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
-const students = [
-    {
-        name: 'Sarah Johnson', email: 'sarah.j@email.com', program: 'Computer Science', university: 'University of Toronto', status: 'ACTIVE', payment: 'PAID'
-    },
-    {
-        name: 'Michael Chen', email: 'michael.c@email.com', program: 'Business Administration', university: 'McGill University', status: 'ACTIVE', payment: 'PENDING'
-    },
-    {
-        name: 'Emily Rodriguez', email: 'emily.r@email.com', program: 'Psychology', university: 'University of British Columbia', status: 'INACTIVE', payment: 'UNDER VERIFICATION'
-    },
-    {
-        name: 'David Kim', email: 'david.k@email.com', program: 'Engineering', university: 'University of Waterloo', status: 'ACTIVE', payment: 'PAID'
-    },
-    {
-        name: 'Jessica Lee', email: 'jessica.l@email.com', program: 'Medicine', university: 'McMaster University', status: 'ACTIVE', payment: 'PENDING'
-    },
-    {
-        name: 'John Smith', email: 'john.s@email.com', program: 'Law', university: 'Queens University', status: 'INACTIVE', payment: 'UNDER VERIFICATION'
-    },
-    {
-        name: 'Maria Garcia', email: 'maria.g@email.com', program: 'Architecture', university: 'Ryerson University', status: 'ACTIVE', payment: 'PAID'
-    },
-    {
-        name: 'Alex Wong', email: 'alex.w@email.com', program: 'Data Science', university: 'Simon Fraser University', status: 'ACTIVE', payment: 'PENDING'
-    },
-    {
-        name: 'Sophie Martin', email: 'sophie.m@email.com', program: 'Fine Arts', university: 'OCAD University', status: 'ACTIVE', payment: 'PAID'
-    },
-    {
-        name: 'Ryan Taylor', email: 'ryan.t@email.com', program: 'Economics', university: 'Western University', status: 'INACTIVE', payment: 'UNDER VERIFICATION'
-    },
-];
+// Optional: If you're using UserContext to store agent info like agentId
+import { UserContext } from '../context/UserContext';
 
 export default function StudentTable() {
+    const [students, setStudents] = useState([]);
+    const { user } = useContext(UserContext); // This should give you agentId from context
+    const agentId = user?.agentId; // make sure user is logged in and context is loaded
+
+    useEffect(() => {
+        const fetchStudents = async () => {
+            try {
+                const res = await axios.get(`http://localhost:5000/agent/all-students/${agentId}`);
+                setStudents(res.data.students);
+            } catch (error) {
+                console.error("Failed to fetch students:", error);
+            }
+        };
+
+        if (agentId) {
+            fetchStudents();
+        }
+    }, [agentId]);
+
     return (
         <div className="student w-full">
             <Admin />
@@ -71,12 +62,12 @@ export default function StudentTable() {
                         </thead>
                         <tbody className="text-gray-700">
                             {students.map((student, index) => (
-                                <tr key={index} className="border-b hover:bg-gray-50">
+                                <tr key={student._id || index} className="border-b hover:bg-gray-50">
                                     <td className="px-4 py-3">
                                         <div className="flex items-center gap-3">
                                             <Link to="/studentprofile">
                                                 <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 cursor-pointer hover:bg-gray-300 transition">
-                                                    {student.name.charAt(0)}
+                                                    {student.name?.charAt(0)}
                                                 </div>
                                             </Link>
                                             <div>
@@ -102,6 +93,5 @@ export default function StudentTable() {
                 </div>
             </div>
         </div>
-
     );
 }
