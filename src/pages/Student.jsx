@@ -12,13 +12,37 @@ export default function StudentTable() {
   const [editIndex, setEditIndex] = useState(null);
   const { user } = useContext(UserContext);
 
-  const agentId = user?.agentId;
 
+  const handleDelete = async (studentId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this student?");
+    if (!confirmDelete) return;
 
-  // ✅ Fetch all students from backend
+    try {
+      const res = await fetch(`http://localhost:5000/student/delete`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ studentId }),
+      });
+
+      const result = await res.json();
+      if (res.ok) {
+        // ✅ Remove student from local state
+        setStudents(prev => prev.filter(student => student._id !== studentId));
+        alert("Student deleted successfully");
+      } else {
+        alert(result.message || "Failed to delete student");
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert("Something went wrong while deleting");
+    }
+  };
+
   const fetchStudents = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/agent/all-students/${agentId}`); // Change API route if needed
+      const res = await fetch("http://localhost:5000/student/getAllStudents");
       const data = await res.json();
 
       const normalized = (data?.students || []).map(s => ({
@@ -26,9 +50,9 @@ export default function StudentTable() {
         name: `${s.firstName} ${s.lastName}`,
         email: s.email,
         program: s.applications?.map(app => app.program).join(', ') || "N/A",
-        university: s.applications?.map(app => app.university || "N/A").join(', ') || "N/A",
+        university: s.applications?.map(app => app.institute).join(', ') || "N/A",
         status: s.status || "N/A",
-        payment: s.paymentStatus || "N/A", // Adjust if payment info comes from a different field
+        payment: s.paymentStatus || "N/A",
         avatar: `https://i.pravatar.cc/40?u=${s._id}`,
         applications: s.applications || [],
       }));
@@ -38,6 +62,7 @@ export default function StudentTable() {
       console.error("Error fetching students:", error);
     }
   };
+
 
   useEffect(() => {
     fetchStudents();
@@ -66,9 +91,14 @@ export default function StudentTable() {
           </button>
 
           {/* Add Modal */}
-          {isAddModalOpen && (
-            <StudentProgramModal onClose={() => setIsAddModalOpen(false)} />
-          )}
+          <StudentProgramModal
+            isOpen={isAddModalOpen}
+            onClose={() => setIsAddModalOpen(false)}
+            onStudentAdded={(newStudent) => {
+              // Update your students array with the new student
+              fetchStudents(); // Re-fetch all students after adding a new one
+            }}
+          />
         </div>
 
         {/* Table */}
@@ -115,7 +145,10 @@ export default function StudentTable() {
                         <FaEdit />
                       </button>
 
-                      <button className="text-gray-600 hover:text-red-600">
+                      <button
+                        className="text-gray-600 hover:text-red-600"
+                        onClick={() => handleDelete(student._id)}
+                      >
                         <FaTrash />
                       </button>
                     </div>
@@ -128,6 +161,7 @@ export default function StudentTable() {
                       />
                     )}
                   </td>
+
                 </tr>
               ))}
             </tbody>
