@@ -83,12 +83,12 @@ const Register = () => {
       });
 
       if (res.status === 201) {
-        navigate('/login');
-        toast.success("User Register Successfully")
+        navigate('/admin');
+        toast.success("Add an Agent Successfully")
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
-      toast.error("Registration failed. Please try again.")
+      toast.error("Agent failed. Please try again.")
     }
   };
   const handleClick = () => {
@@ -120,10 +120,10 @@ const Register = () => {
   );
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat" >
+    <div className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat bg-gray-100 z-50" >
       <div className="bg-white rounded-xl shadow-lg w-full max-w-[37rem] p-8">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold">Register as a Recruitment Partner</h2>
+          <h2 className="text-2xl font-semibold">Create an Agent.</h2>
           <button onClick={handleClick} className="text-gray-400 hover:text-black">&times;</button>
         </div>
 
