@@ -27,6 +27,7 @@ import PaymentHistory from './pages/PaymentHistory';
 import TabLayout from './layout/TabLayout';
 import PaymentProfile from './pages/PaymentProfile';
 import NewPayment from './pages/NewPayment';
+import Register from './pages/auth/Register'
 
 function App() {
   return (
@@ -84,6 +85,7 @@ function App() {
             <Route path="/newpayment" element={<NewPayment />} />
             
             <Route path="commission" element={<Comission />} />
+            <Route path="/create-agent" element={<Register />} />
           </Route>
 
         </Routes>
