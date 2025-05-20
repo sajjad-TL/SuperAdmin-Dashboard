@@ -1,225 +1,228 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, User, Phone, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+// import bgImage from '../assets/Auth-banner.png';
+import { Eye, EyeOff } from 'lucide-react';
+import { toast } from 'react-toastify';
+import { CheckCircle, Circle } from 'lucide-react';
+
 
 const Register = () => {
-    const [showPassword, setShowPassword] = useState(false);
-    const [formData, setFormData] = useState({
-        fullName: '',
-        email: '',
-        phone: '',
-        password: '',
-        confirmPassword: '',
-    });
-    const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
+  const [form, setForm] = useState({
+    firstName: '',
+    lastName: '',
+    phone: '',
+    countryCode: '+92',
+    email: '',
+    confirmEmail: '',
+    password: '',
+    consentAccepted: false,
+  });
 
-        console.log("submit data ")
-        e.preventDefault();
-        setError('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
 
-        if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
-            return;
-        }
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
 
-        try {
-            // Add your registration logic here
-            console.log('Registration attempt with:', formData);
-        } catch (err) {
-            setError('Registration failed. Please try again.');
-        }
-    };
+  const isStrongPassword = (password, first, last) => {
+    const hasUpper = /[A-Z]/.test(password);
+    const hasLower = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSymbol = /[^A-Za-z0-9]/.test(password);
+    const longEnough = password.length >= 12;
+    const noName = !password.toLowerCase().includes(first.toLowerCase()) && !password.toLowerCase().includes(last.toLowerCase());
+    return hasUpper && hasLower && hasNumber && hasSymbol && longEnough && noName;
+  };
 
-    return (
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
 
-        <div className="min-h-screen bg-gradient-to-br from-[#E0E7FF] to-[#59585b] flex items-center justify-center p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-6xl w-full bg-white rounded-2xl shadow-xl overflow-hidden">
-          
-          {/* Left Column - Image */}
-          <div className="hidden md:flex items-center justify-center bg-gray-100">
-            <img
-              src="../src/assets/Left@1x.png" 
-              alt="Login Visual"
-              className="object-cover h-full w-full"
-            />
-          </div>
-      
-          {/* Right Column - Form */}
-          <div className="w-full p-8 space-y-8">
-          <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">Create Account</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Already have an account?{' '}
-            <Link to="/login" className="text-blue-600 hover:text-blue-500 font-medium">
-              Sign in
-            </Link>
-          </p>
+    const {
+      firstName, lastName, phone, countryCode,
+      email, confirmEmail, password, consentAccepted
+    } = form;
+
+    if (!firstName || !lastName || !phone || !email || !confirmEmail || !password) {
+      setError('All fields are required.');
+      return;
+    }
+
+    if (email !== confirmEmail) {
+      setError('Emails do not match.');
+      return;
+    }
+
+    if (!isStrongPassword(password, firstName, lastName)) {
+      setError('Password must be at least 12 characters and include uppercase, lowercase, a number, a symbol, and not contain your name.');
+      return;
+    }
+
+    if (!consentAccepted) {
+      setError('Please accept the terms and conditions to register.');
+      return;
+    }
+
+    try {
+      const res = await axios.post('http://localhost:5000/api/auth/create-agent', {
+        firstName,
+        lastName,
+        phone: `${countryCode} ${phone}`,
+        email,
+        confirmEmail,
+        password,
+        consentAccepted,
+      });
+
+      if (res.status === 201) {
+        navigate('/login');
+        toast.success("User Register Successfully")
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      toast.error("Registration failed. Please try again.")
+    }
+  };
+  const handleClick = () => {
+    navigate('/login')
+  }
+
+  const password = form.password || '';
+  const { firstName, lastName } = form;
+
+  const checks = {
+    length: password.length >= 12,
+    lower: /[a-z]/.test(password),
+    upper: /[A-Z]/.test(password),
+    number: /\d/.test(password),
+    symbol: /[^A-Za-z0-9]/.test(password),
+    noFirstName: !firstName || !password.toLowerCase().includes(firstName.toLowerCase()),
+    noLastName: !lastName || !password.toLowerCase().includes(lastName.toLowerCase())
+  };
+
+  const renderCheck = (condition, text) => (
+    <div className="flex items-center gap-2 text-sm text-gray-700">
+      {condition ? (
+        <CheckCircle className="text-green-600" size={16} />
+      ) : (
+        <Circle className="text-gray-400" size={16} />
+      )}
+      {text}
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat" >
+      <div className="bg-white rounded-xl shadow-lg w-full max-w-[37rem] p-8">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-semibold">Register as a Recruitment Partner</h2>
+          <button onClick={handleClick} className="text-gray-400 hover:text-black">&times;</button>
         </div>
-      
-            {error && (
-              <div className="bg-red-50 text-red-500 p-3 rounded-lg flex items-center gap-2">
-                <AlertCircle size={20} />
-                <span>{error}</span>
-              </div>
-            )}
-      
-      <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
-                Full Name
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User size={18} className="text-gray-400" />
-                </div>
-                <input
-                  id="fullName"
-                  name="fullName"
-                  type="text"
-                  required
-                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter your full name"
-                  value={formData.fullName}
-                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                />
-              </div>
-            </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail size={18} className="text-gray-400" />
-                </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter your email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                />
-              </div>
-            </div>
+        <div className="bg-blue-100 text-blue-800 p-3 rounded-md mb-6 text-sm">
+          ℹ️ Please make sure only the business owner completes this form.
+        </div>
 
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                Phone Number
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Phone size={18} className="text-gray-400" />
-                </div>
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  required
-                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter your phone number"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                />
-              </div>
-            </div>
+        {error && (
+          <div className="bg-red-100 text-red-800 p-3 rounded-md mb-4 text-sm">
+            ⚠️ {error}
+          </div>
+        )}
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock size={18} className="text-gray-400" />
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  className="appearance-none block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Create a password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                />
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="text-gray-400 hover:text-gray-500"
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-              </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col">
+              <label className="mb-1 text-sm font-medium text-gray-700">First name <span className="text-red-500">*</span></label>
+              <input name="firstName" value={form.firstName} onChange={handleChange} type="text" className="p-3 border rounded-lg w-full" />
             </div>
-
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirm Password
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock size={18} className="text-gray-400" />
-                </div>
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Confirm your password"
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                />
-              </div>
+            <div className="flex flex-col">
+              <label className="mb-1 text-sm font-medium text-gray-700">Last name <span className="text-red-500">*</span></label>
+              <input name="lastName" value={form.lastName} onChange={handleChange} type="text" className="p-3 border rounded-lg w-full" />
             </div>
           </div>
 
-          <button
-            type="submit"
-            className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-          >
-            Create Account
+          <div className="flex flex-col">
+            <label className="mb-1 text-sm font-medium text-gray-700">Phone <span className="text-red-500">*</span></label>
+            <div className="flex">
+              <select name="countryCode" value={form.countryCode} onChange={handleChange} className="w-30 p-3 border border-r-0 rounded-l-lg bg-white text-sm">
+                <option value="+92">🇵🇰 +92</option>
+                <option value="+91">🇮🇳 +91</option>
+                <option value="+1">🇺🇸 +1</option>
+                <option value="+44">🇬🇧 +44</option>
+                <option value="+971">🇦🇪 +971</option>
+              </select>
+              <input name="phone" value={form.phone} onChange={handleChange} type="tel" className="flex-1 p-3 border rounded-r-lg focus:outline-none" />
+            </div>
+          </div>
+
+          <div className="flex flex-col">
+            <label className="mb-1 text-sm font-medium text-gray-700">Email <span className="text-red-500">*</span></label>
+            <input name="email" value={form.email} onChange={handleChange} type="email" className="p-3 border rounded-lg w-full" />
+          </div>
+
+          <div className="flex flex-col">
+            <label className="mb-1 text-sm font-medium text-gray-700">Confirm Email <span className="text-red-500">*</span></label>
+            <input name="confirmEmail" value={form.confirmEmail} onChange={handleChange} type="email" className="p-3 border rounded-lg w-full" />
+          </div>
+          <div className="flex flex-col">
+            <label className="mb-1 text-sm font-medium text-gray-700">Password <span className="text-red-500">*</span></label>
+            <div className="relative">
+
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-5 text-gray-500">
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+          </div>
+          <div className="relative">
+            <input
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              type={showPassword ? 'text' : 'password'}
+              className="p-3 border rounded-lg w-full"
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-5 text-gray-500"
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-2 mt-3">
+            {renderCheck(checks.length, 'At least 12 characters')}
+            {renderCheck(checks.lower, 'A lowercase letter')}
+            {renderCheck(checks.upper, 'An uppercase letter')}
+            {renderCheck(checks.number, 'A number')}
+            {renderCheck(checks.symbol, 'A symbol')}
+            </div>
+
+            <div className="text-sm text-blue-600 mt-4 space-x-4">
+              <a href="#" className="underline">Terms and Conditions</a>
+              <a href="#" className="underline">Privacy Policy</a>
+            </div>
+            <div className="flex items-start gap-2 mt-4 text-sm">
+              <input name="consentAccepted" checked={form.consentAccepted} onChange={handleChange} type="checkbox" className="mt-1" />
+              <p className="text-gray-700">
+                I have reviewed and consented to the ApplyBoard Terms and Conditions and Privacy Policy. The foregoing information/application/document(s) are true and complete.
+              </p>
+            </div>
+          <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 mt-4">
+            Submit
           </button>
         </form>
-      
-            {/* Divider */}
-            <div className="mt-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300" />
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Or continue with</span>
-                </div>
-              </div>
-      
-              {/* Social Buttons */}
-              <div className="mt-6 grid grid-cols-2 gap-3">
-                <button className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z" />
-                  </svg>
-                </button>
-      
-                <button className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    {/* <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504..." clipRule="evenodd" /> */}
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
-    );
+    </div>
+  );
 };
 
-export default Register; 
+export default Register;

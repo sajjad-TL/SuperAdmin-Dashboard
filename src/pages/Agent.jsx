@@ -1,8 +1,16 @@
 import { FaPlus } from "react-icons/fa";
 import avatar from '../assets/avatar.png';
 import Admin from '../layout/Adminnavbar'
+import { useNavigate } from 'react-router-dom';
 
 export default function Agent() {
+
+const navigate = useNavigate();
+
+     const handleAddAgent = () => {
+    navigate('/create-agent');
+  };
+
     return (
         <div className="agent">
             <Admin />
@@ -22,10 +30,13 @@ export default function Agent() {
                                 <div className='flex flex-row items-center text-center'>
                                 </div>
                                 <div>
-                                    <button className='flex flex-row items-center gap-2 bg-[#2A7B88] text-white rounded-lg px-4 py-2 shadow-sm hover:bg-[#135c67] transition duration-200 text-nowrap'>
-                                        <FaPlus />
-                                        Add New Agent
-                                    </button>
+                                   <button
+      onClick={handleAddAgent}
+      className="flex flex-row items-center gap-2 bg-[#2A7B88] text-white rounded-lg px-4 py-2 shadow-sm hover:bg-[#135c67] transition duration-200 text-nowrap"
+    >
+      <FaPlus />
+      Add New Agent
+    </button>
                                 </div>
                             </div>
                         </header>
