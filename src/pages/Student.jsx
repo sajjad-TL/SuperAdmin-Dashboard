@@ -98,7 +98,6 @@ export default function StudentTable() {
       <Admin />
 
       <div className="p-4 sm:p-6 md:p-10 lg:p-12 bg-gray-100 w-full">
-        {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
             <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Students</h1>
@@ -115,13 +114,11 @@ export default function StudentTable() {
             <span>Add New</span>
           </button>
 
-          {/* Add Modal */}
           <StudentProgramModal
             isOpen={isAddModalOpen}
             onClose={() => setIsAddModalOpen(false)}
             onStudentAdded={(newStudent) => {
-              // Update your students array with the new student
-              fetchStudents(); // Re-fetch all students after adding a new one
+              fetchStudents();
             }}
           />
         </div>
