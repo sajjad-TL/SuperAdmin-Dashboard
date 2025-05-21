@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import Admin from '../layout/Adminnavbar';
 import { Link } from 'react-router-dom';
@@ -35,7 +35,7 @@ const students = [
 export default function StudentTable() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
-  const { user } = useContext(UserContext);
+//   const { user } = useContext(UserContext);
 
 
   const handleDelete = async (studentId) => {
