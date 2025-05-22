@@ -43,7 +43,7 @@ export default function PaymentRequestsDashboard() {
         <div className=" mx-auto">
           {/* Header */}
           <div className="mb-6">
-            <h1 className="text-xl font-semibold text-gray-800">Payment Requests</h1>
+            <h1 className="text-3xl font-bold text-gray-800">Payment Requests</h1>
             <p className="text-sm text-gray-600">Review and process agent payment requests</p>
           </div>
 

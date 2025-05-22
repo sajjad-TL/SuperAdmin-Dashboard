@@ -17,14 +17,12 @@ import AdminEmail from './pages/AdminSetting/AdminEmail';
 import NotificationPage from './pages/NotificationPage';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
 import AdminPlatform from './pages/AdminSetting/AdminPlatform';
 import Trainhub from './pages/Trainhub';
 import Report from './pages/Report';
 import Comission from './pages/Comission';
 import PaymentRequests from './pages/PaymentRequests';
 import PaymentHistory from './pages/PaymentHistory';
-import TabLayout from './layout/TabLayout';
 import PaymentProfile from './pages/PaymentProfile';
 import NewPayment from './pages/NewPayment';
 import Register from './pages/auth/Register'
@@ -82,12 +80,10 @@ function App() {
             <Route path="/payment-requests" element={<PaymentRequests />} />
             <Route path="/payment-history" element={<PaymentHistory />} />
             <Route path="/commisionprofile" element={<PaymentProfile />} />
-            <Route path="/newpayment" element={<NewPayment />} />
-            
+            <Route path="/newpayment" element={<NewPayment />} />            
             <Route path="commission" element={<Comission />} />
             <Route path="/create-agent" element={<Register />} />
           </Route>
-
         </Routes>
       </Router>
     </>
