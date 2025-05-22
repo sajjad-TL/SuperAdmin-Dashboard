@@ -10,6 +10,8 @@ const StudentProgramModal = ({ isOpen, onClose, onStudentAdded }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const { user } = useContext(UserContext);
+  const [agents, setAgents] = useState([]);  // New state for agents list
+const isSuperAdmin = user?.role === 'superadmin'; // Make sure this matches your role naming
 
   const initialFormState = {
     firstName: "",
@@ -27,9 +29,30 @@ const StudentProgramModal = ({ isOpen, onClose, onStudentAdded }) => {
     countryOfInterest: "",
     serviceOfInterest: "",
     conditionsAccepted: false,
+    agentId: "",  // add this new field to track selected agent
+
   };
 
   const [formData, setFormData] = useState(initialFormState);
+  useEffect(() => {
+    if (isOpen) {
+      fetchAgents();
+    }
+  }, [isOpen]);
+
+  const fetchAgents = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/agent/allagents/getAllAgents");
+      const data = await response.json();
+      if (data.success && data.agents) {
+        setAgents(data.agents);
+      } else {
+        toast.error("Failed to fetch agents");
+      }
+    } catch (error) {
+      toast.error("Error fetching agents");
+    }
+  };
 
   useEffect(() => {
     if (!isOpen) {
@@ -50,7 +73,7 @@ const StudentProgramModal = ({ isOpen, onClose, onStudentAdded }) => {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
-    
+
     // Clear validation error when field is updated
     if (validationErrors[name]) {
       setValidationErrors(prev => ({ ...prev, [name]: "" }));
@@ -60,7 +83,7 @@ const StudentProgramModal = ({ isOpen, onClose, onStudentAdded }) => {
   const validateForm = () => {
     const errors = {};
     const requiredFields = ["firstName", "lastName", "email", "phoneNumber", "status", "citizenOf"];
-    
+
     requiredFields.forEach(field => {
       if (!formData[field]) {
         errors[field] = `${field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1')} is required`;
@@ -71,7 +94,7 @@ const StudentProgramModal = ({ isOpen, onClose, onStudentAdded }) => {
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       errors.email = "Please enter a valid email address";
     }
-    
+
     // Phone validation
     if (formData.phoneNumber && !/^\d+$/.test(formData.phoneNumber)) {
       errors.phoneNumber = "Phone number should contain only digits";
@@ -91,50 +114,62 @@ const StudentProgramModal = ({ isOpen, onClose, onStudentAdded }) => {
       toast.error("Please fix the errors in the form");
       return;
     }
-
+ // Validate agent assignment for superadmin
+  if (isSuperAdmin && !formData.agentId) {
+    toast.error("Please select an agent to assign the student");
+    return;
+  }
     setIsSubmitting(true);
 
-    try {
-      const apiUrl = process.env.NODE_ENV === 'production' 
-        ? '/student/add-new' 
-        : 'http://localhost:5000/student/add-new';
+try {
+    const apiUrl = process.env.NODE_ENV === 'production'
+      ? '/student/add-new'
+      : 'http://localhost:5000/student/add-new';
 
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          agentId: user?.agentId,
-        }),
-      });
+    // Prepare data based on user role
+    const submitData = {
+      ...formData,
+      // If superadmin, use selected agentId, otherwise use current user's agentId
+      agentId: isSuperAdmin ? formData.agentId : user?.agentId,
+    };
 
-      const data = await response.json();
+    console.log('Submitting data:', submitData); // Debug log
 
-      if (!response.ok) {
-        if (data?.message === "Student already exists") {
-          toast.error("Student with this email already exists.");
-          return;
-        }
-        throw new Error(data?.message || "Failed to add student");
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(submitData),
+    });
+
+    
+         const data = await response.json();
+
+    if (!response.ok) {
+      if (data?.message === "Student already exists") {
+        toast.error("Student with this email already exists.");
+        return;
       }
-
-      toast.success("Student added successfully!");
-if (typeof onStudentAdded === 'function') {
-  onStudentAdded(data);
-}
-      onClose();
-      setFormData(initialFormState);
-    } catch (err) {
-      console.error(err);
-      toast.error(err.message || "Failed to add student!");
-    } finally {
-      setIsSubmitting(false);
+      throw new Error(data?.message || "Failed to add student");
     }
-  };
+
+    toast.success("Student added successfully!");
+    if (typeof onStudentAdded === 'function') {
+      onStudentAdded(data);
+    }
+    onClose();
+    setFormData(initialFormState);
+  } catch (err) {
+    console.error(err);
+    toast.error(err.message || "Failed to add student!");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+ 
 
   const renderField = (name, label, type = "text", placeholder = "", options = [], required = false) => {
     const error = validationErrors[name];
-    
+
     if (type === "select") {
       return (
         <div>
@@ -145,9 +180,8 @@ if (typeof onStudentAdded === 'function') {
             name={name}
             value={formData[name]}
             onChange={handleChange}
-            className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-blue-50 ${
-              error ? "border-red-500" : ""
-            }`}
+            className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-blue-50 ${error ? "border-red-500" : ""
+              }`}
           >
             <option value="">{`Please choose ${label.toLowerCase()}`}</option>
             {options.map((option) => (
@@ -160,7 +194,7 @@ if (typeof onStudentAdded === 'function') {
         </div>
       );
     }
-    
+
     if (type === "radio") {
       return (
         <div>
@@ -185,7 +219,7 @@ if (typeof onStudentAdded === 'function') {
         </div>
       );
     }
-    
+
     if (type === "checkbox") {
       return (
         <div className="mt-4">
@@ -205,7 +239,7 @@ if (typeof onStudentAdded === 'function') {
         </div>
       );
     }
-    
+
     return (
       <div>
         <label className="text-sm text-gray-600 mb-1 block">
@@ -217,9 +251,8 @@ if (typeof onStudentAdded === 'function') {
           value={formData[name]}
           onChange={handleChange}
           placeholder={placeholder}
-          className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${
-            error ? "border-red-500" : ""
-          }`}
+          className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${error ? "border-red-500" : ""
+            }`}
           onInput={name === "phoneNumber" ? (e) => {
             e.target.value = e.target.value.replace(/[^0-9]/g, '');
           } : undefined}
@@ -243,31 +276,28 @@ if (typeof onStudentAdded === 'function') {
         {/* Tabs */}
         <div className="flex px-6 pt-4 border-b">
           <button
-            className={`pb-3 mr-6 font-medium transition ${
-              activeTab === "personal"
+            className={`pb-3 mr-6 font-medium transition ${activeTab === "personal"
                 ? "text-blue-600 border-b-2 border-blue-600"
                 : "text-gray-500 hover:text-gray-800"
-            }`}
+              }`}
             onClick={() => setActiveTab("personal")}
           >
             Personal Info
           </button>
           <button
-            className={`pb-3 mr-6 font-medium transition ${
-              activeTab === "contact"
+            className={`pb-3 mr-6 font-medium transition ${activeTab === "contact"
                 ? "text-blue-600 border-b-2 border-blue-600"
                 : "text-gray-500 hover:text-gray-800"
-            }`}
+              }`}
             onClick={() => setActiveTab("contact")}
           >
             Contact Info
           </button>
           <button
-            className={`pb-3 font-medium transition ${
-              activeTab === "additional"
+            className={`pb-3 font-medium transition ${activeTab === "additional"
                 ? "text-blue-600 border-b-2 border-blue-600"
                 : "text-gray-500 hover:text-gray-800"
-            }`}
+              }`}
             onClick={() => setActiveTab("additional")}
           >
             Additional Info
@@ -328,6 +358,11 @@ if (typeof onStudentAdded === 'function') {
               ])}
               {renderField("countryOfInterest", "Country of Interest", "text", "Enter country of interest")}
               {renderField("serviceOfInterest", "Services of Interest", "text", "Enter services of interest")}
+              {/* NEW Dropdown for agents */}
+              {renderField("agentId", "Assign Agent", "select", "", agents.map(agent => ({
+                value: agent._id,
+                label: `${agent.firstName} ${agent.lastName}`
+              })), true)}
               {renderField("conditionsAccepted", "I confirm that I have received express written consent from the student and I can provide proof of their consent upon request.", "checkbox", "", [], true)}
 
               <p className="text-sm mt-4">
@@ -339,15 +374,15 @@ if (typeof onStudentAdded === 'function') {
 
         {/* Footer */}
         <div className="flex justify-end space-x-2 border-t p-4 bg-gray-50">
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="px-5 py-2 rounded border hover:bg-gray-100 text-gray-700 transition"
             disabled={isSubmitting}
           >
             Cancel
           </button>
-          <button 
-            onClick={handleSubmit} 
+          <button
+            onClick={handleSubmit}
             className={`px-5 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition flex items-center justify-center ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
             disabled={isSubmitting}
           >
