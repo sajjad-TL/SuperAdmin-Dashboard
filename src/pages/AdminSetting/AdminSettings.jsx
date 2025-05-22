@@ -1,6 +1,5 @@
 import { useState } from "react";
 import Admin from "../../layout/Adminnavbar";
-import { Link } from "react-router-dom";
 import SettingsTabs from "./SettingsTabs";
 import { FaDatabase, FaPaintbrush } from "react-icons/fa6";
 import { TfiMenuAlt } from "react-icons/tfi";
@@ -101,7 +100,6 @@ export default function AdminSettings() {
                                     </div>
                                 </div>
 
-                                {/* API Configuration */}
                                 <div>
                                     <h2 className="text-xl font-bold mb-4 text-gray-800">API Configuration</h2>
                                     <div className="space-y-4">

@@ -5,40 +5,13 @@ import { Link } from 'react-router-dom';
 import StudentProgramModal from '../models/StudentModal';
 import EditStudentProgramModal from '../models/EditStudentProgramModal';
 import { UserContext } from '../context/userContext';
+import { toast } from 'react-toastify';
 
 export default function StudentTable() {
   const [students, setStudents] = useState([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [editIndex, setEditIndex] = useState(null);
+  const [editStudent, setEditStudent] = useState(null);
   const { user } = useContext(UserContext);
-
-
-  const handleDelete = async (studentId) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this student?");
-    if (!confirmDelete) return;
-
-    try {
-      const res = await fetch(`http://localhost:5000/student/delete`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ studentId }),
-      });
-
-      const result = await res.json();
-      if (res.ok) {
-        // ✅ Remove student from local state
-        setStudents(prev => prev.filter(student => student._id !== studentId));
-        alert("Student deleted successfully");
-      } else {
-        alert(result.message || "Failed to delete student");
-      }
-    } catch (error) {
-      console.error("Delete error:", error);
-      alert("Something went wrong while deleting");
-    }
-  };
 
   const fetchStudents = async () => {
     try {
@@ -47,7 +20,8 @@ export default function StudentTable() {
 
       const normalized = (data?.students || []).map(s => ({
         _id: s._id,
-        name: `${s.firstName} ${s.lastName}`,
+        firstName: s.firstName || "N/A",
+        lastName: s.lastName || "N/A",
         email: s.email,
         program: s.applications?.map(app => app.program).join(', ') || "N/A",
         university: s.applications?.map(app => app.institute).join(', ') || "N/A",
@@ -63,10 +37,44 @@ export default function StudentTable() {
     }
   };
 
-
   useEffect(() => {
     fetchStudents();
   }, []);
+
+  const handleDelete = async (studentId) => {
+
+    try {
+      const res = await fetch(`http://localhost:5000/student/delete`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studentId }),
+      });
+
+      const result = await res.json();
+      if (res.ok) {
+        setStudents(prev => prev.filter(student => student._id !== studentId));
+        toast.success("Student deleted successfully");
+      } else {
+        toast.error(result.message || "Failed to delete student");
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert("Something went wrong while deleting");
+    }
+  };
+
+  const openEditModal = (student) => {
+    setEditStudent(student);
+  };
+
+  const closeEditModal = () => {
+    setEditStudent(null);
+  };
+
+  const handleUpdate = () => {
+    fetchStudents();
+    closeEditModal();
+  };
 
   return (
     <div className="student w-full">
@@ -81,18 +89,18 @@ export default function StudentTable() {
 
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="flex flex-row gap-2 items-center px-3 py-2 rounded-md bg-blue-600 text-white"
+            className="flex flex-row gap-2 items-center px-3 py-2 rounded-md bg-[#2A7B88] text-white"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path d="M8 3V13M3 8H13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            <span>Add New</span>
+            <span>Add Student</span>
           </button>
 
           <StudentProgramModal
             isOpen={isAddModalOpen}
             onClose={() => setIsAddModalOpen(false)}
-            onStudentAdded={(newStudent) => {
+            onStudentAdded={() => {
               fetchStudents();
             }}
           />
@@ -112,8 +120,8 @@ export default function StudentTable() {
               </tr>
             </thead>
             <tbody className="text-gray-700">
-              {students.map((student, index) => (
-                <tr key={index} className="border-b hover:bg-gray-50">
+              {students.map((student) => (
+                <tr key={student._id} className="border-b hover:bg-gray-50">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <Link to="/studentprofile">
@@ -124,7 +132,7 @@ export default function StudentTable() {
                         />
                       </Link>
                       <div>
-                        <div className="font-medium">{student.name}</div>
+                        <div className="font-medium">{student.firstName} {student.lastName}</div>
                         <div className="text-gray-500 text-xs">{student.email}</div>
                       </div>
                     </div>
@@ -136,7 +144,7 @@ export default function StudentTable() {
                   <td className="px-4 py-3">
                     <div className="flex justify-center items-center gap-4">
                       <button
-                        onClick={() => setEditIndex(index)}
+                        onClick={() => openEditModal(student)}
                         className="text-gray-600 hover:text-blue-600"
                       >
                         <FaEdit />
@@ -149,21 +157,21 @@ export default function StudentTable() {
                         <FaTrash />
                       </button>
                     </div>
-
-                    {/* Edit Modal */}
-                    {editIndex === index && (
-                      <EditStudentProgramModal
-                        student={student}
-                        onClose={() => setEditIndex(null)}
-                      />
-                    )}
                   </td>
-
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+
+        {/* Edit Modal */}
+        {editStudent && (
+          <EditStudentProgramModal
+            student={editStudent}
+            onClose={closeEditModal}
+            onUpdate={handleUpdate}
+          />
+        )}
       </div>
     </div>
   );

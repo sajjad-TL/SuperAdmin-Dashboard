@@ -14,7 +14,7 @@ export default function AdminPlatform() {
     const [paymentSchedule, setPaymentSchedule] = useState('Monthly');
     const [reviewTime, setReviewTime] = useState(3);
     const [expiryWarning, setExpiryWarning] = useState(30);
-    const [verificationPeriod, setVerificationPeriod] = useState(7);
+    // const [verificationPeriod, setVerificationPeriod] = useState(7);
     const [maxSubAgents, setMaxSubAgents] = useState(5);
     const [minSuccessRate, setMinSuccessRate] = useState(60);
     const [monthlyTarget, setMonthlyTarget] = useState(10);

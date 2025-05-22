@@ -22,8 +22,7 @@ export default function SettingsTabs() {
                             location.pathname === tab.path
                                 ? "text-blue-500 border-blue-500"
                                 : "text-gray-500 border-transparent"
-                        }`}
-                    >
+                        }`}>
                         {tab.name}
                     </Link>
                 ))}

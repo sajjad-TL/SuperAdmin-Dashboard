@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { Mail, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Mail, ArrowLeft } from 'lucide-react';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -11,9 +11,11 @@ const ForgotPassword = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // prevent page reload
+    debugger
+    e.preventDefault();
     try {
       const res = await axios.post(
+        console.log(res,"sdfj"),
         'http://localhost:5000/api/password/forgot-password',
         { email },
         {
@@ -26,7 +28,7 @@ const ForgotPassword = () => {
       if (res.data.message) {
         localStorage.setItem('email', email);
         toast.success('OTP sent to your email');
-        setShowOtpInput(true); // show OTP input
+        setShowOtpInput(true);
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Something went wrong');
@@ -136,32 +138,31 @@ navigate(`/reset-password?email=${email}`);
 
             <div className="text-center">
              <button
-  type="button"
-  onClick={async () => {
-    try {
-      const storedEmail = localStorage.getItem('email');
-      if (!storedEmail) {
-        toast.error('Email not found, please try again.');
-        return;
-      }
+              type="button"
+              onClick={async () => {
+              try {
+                const storedEmail = localStorage.getItem('email');
+                console.log(storedEmail,"sjdfaio")
+                if (!storedEmail) {
+                  toast.error('Email not found, please try again.');
+                  return;
+                }
 
-      const res = await axios.post('http://localhost:5000/api/password/forgot-password', {
-        email: storedEmail,
-      });
+                const res = await axios.post('http://localhost:5000/api/password/forgot-password', {
+                  email: storedEmail,
+                });
 
-      if (res.data.message) {
-        toast.success('OTP resent to your email');
-        setOtp(['', '', '', '', '', '']); // Clear OTP fields
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to resend OTP');
-    }
-  }}
-  className="text-sm text-blue-600 hover:text-blue-500"
->
-  Didn't receive the code? Resend
-</button>
-
+                if (res.data.message) {
+                  toast.success('OTP resent to your email');
+                  setOtp(['', '', '', '', '', '']);
+                }
+              } catch (error) {
+                toast.error(error.response?.data?.message || 'Failed to resend OTP');
+              }
+            }}
+                className="text-sm text-blue-600 hover:text-blue-500">
+                Didn't receive the code? Resend
+              </button>
             </div>
           </form>
         )}
