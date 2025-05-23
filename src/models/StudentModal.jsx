@@ -11,7 +11,7 @@ const StudentProgramModal = ({ isOpen, onClose, onStudentAdded }) => {
   const [validationErrors, setValidationErrors] = useState({});
   const { user } = useContext(UserContext);
   const [agents, setAgents] = useState([]);  // New state for agents list
-const isSuperAdmin = user?.role === 'superadmin'; // Make sure this matches your role naming
+  const isSuperAdmin = user?.role === 'superadmin'; // Make sure this matches your role naming
 
   const initialFormState = {
     firstName: "",
@@ -29,21 +29,23 @@ const isSuperAdmin = user?.role === 'superadmin'; // Make sure this matches your
     countryOfInterest: "",
     serviceOfInterest: "",
     conditionsAccepted: false,
-    agentId: "",  // add this new field to track selected agent
+    agentId: ""
 
   };
 
   const [formData, setFormData] = useState(initialFormState);
+  const [selectdAgent, setSelectedAgent] = useState(""); // initialize with an empty string or null
+ 
+    
+
+
   useEffect(() => {
-    if (isOpen) {
-      fetchAgents();
-    }
-  }, [isOpen]);
 
   const fetchAgents = async () => {
     try {
       const response = await fetch("http://localhost:5000/agent/allagents/getAllAgents");
       const data = await response.json();
+      console.log(data)
       if (data.success && data.agents) {
         setAgents(data.agents);
       } else {
@@ -54,12 +56,18 @@ const isSuperAdmin = user?.role === 'superadmin'; // Make sure this matches your
     }
   };
 
-  useEffect(() => {
+if (isOpen) {
+      fetchAgents();
+    }
+
     if (!isOpen) {
+
       const timeout = setTimeout(() => {
         setShouldRender(false);
       }, 300);
+
       return () => clearTimeout(timeout);
+
     } else {
       setShouldRender(true);
     }
@@ -108,32 +116,46 @@ const isSuperAdmin = user?.role === 'superadmin'; // Make sure this matches your
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = async () => {
-    if (!validateForm()) {
-      // Show toast with validation error
-      toast.error("Please fix the errors in the form");
-      return;
-    }
- // Validate agent assignment for superadmin
-  if (isSuperAdmin && !formData.agentId) {
-    toast.error("Please select an agent to assign the student");
+const handleSubmit = async () => {
+  if (!validateForm()) {
+    toast.error("Please fix the errors in the form");
     return;
   }
-    setIsSubmitting(true);
 
-try {
-    const apiUrl = process.env.NODE_ENV === 'production'
-      ? '/student/add-new'
-      : 'http://localhost:5000/student/add-new';
+{isSuperAdmin && (
+  <div className="mb-4">
+    <label className="block mb-2 font-medium text-gray-700">Select Agent</label>
+    <select
+      name="agentId"
+      value={formData.agentId || ""}
+      onChange={(e) =>
+        setFormData({ ...formData, agentId: e.target.value })
+      }
+      className="w-full p-2 border border-gray-300 rounded"
+    >
+      <option value="">-- Select Agent --</option>
+      {agents.map((agent) => (
+        <option key={agent._id} value={agent._id}>
+          {agent.firstName} {agent.lastName} ({agent.email})
+        </option>
+      ))}
+    </select>
+  </div>
+)}
 
-    // Prepare data based on user role
+
+setIsSubmitting(true);
+console.log("Selected Agent ID:", formData.agentId);
+
+  try {
+    const apiUrl = 'http://localhost:5000/student/add-new';
+
     const submitData = {
       ...formData,
-      // If superadmin, use selected agentId, otherwise use current user's agentId
-      agentId: isSuperAdmin ? formData.agentId : user?.agentId,
+      agentId: isSuperAdmin ? formData.agentId : formData.agentId, // Replace `currentUserAgentId` with actual value from auth
     };
 
-    console.log('Submitting data:', submitData); // Debug log
+    console.log('Submitting data:', submitData);
 
     const response = await fetch(apiUrl, {
       method: "POST",
@@ -141,8 +163,7 @@ try {
       body: JSON.stringify(submitData),
     });
 
-    
-         const data = await response.json();
+    const data = await response.json();
 
     if (!response.ok) {
       if (data?.message === "Student already exists") {
@@ -156,6 +177,7 @@ try {
     if (typeof onStudentAdded === 'function') {
       onStudentAdded(data);
     }
+
     onClose();
     setFormData(initialFormState);
   } catch (err) {
@@ -165,7 +187,8 @@ try {
     setIsSubmitting(false);
   }
 };
- 
+
+
 
   const renderField = (name, label, type = "text", placeholder = "", options = [], required = false) => {
     const error = validationErrors[name];
@@ -277,8 +300,8 @@ try {
         <div className="flex px-6 pt-4 border-b">
           <button
             className={`pb-3 mr-6 font-medium transition ${activeTab === "personal"
-                ? "text-blue-600 border-b-2 border-blue-600"
-                : "text-gray-500 hover:text-gray-800"
+              ? "text-blue-600 border-b-2 border-blue-600"
+              : "text-gray-500 hover:text-gray-800"
               }`}
             onClick={() => setActiveTab("personal")}
           >
@@ -286,8 +309,8 @@ try {
           </button>
           <button
             className={`pb-3 mr-6 font-medium transition ${activeTab === "contact"
-                ? "text-blue-600 border-b-2 border-blue-600"
-                : "text-gray-500 hover:text-gray-800"
+              ? "text-blue-600 border-b-2 border-blue-600"
+              : "text-gray-500 hover:text-gray-800"
               }`}
             onClick={() => setActiveTab("contact")}
           >
@@ -295,8 +318,8 @@ try {
           </button>
           <button
             className={`pb-3 font-medium transition ${activeTab === "additional"
-                ? "text-blue-600 border-b-2 border-blue-600"
-                : "text-gray-500 hover:text-gray-800"
+              ? "text-blue-600 border-b-2 border-blue-600"
+              : "text-gray-500 hover:text-gray-800"
               }`}
             onClick={() => setActiveTab("additional")}
           >

@@ -31,13 +31,13 @@ const navigate = useNavigate();
                                 </div>
                                 <div>
                                    <button
-      onClick={handleAddAgent}
-      className="flex flex-row items-center gap-2 bg-[#2A7B88] text-white rounded-lg px-4 py-2 shadow-sm hover:bg-[#135c67] transition duration-200 text-nowrap"
-    >
-      <FaPlus />
-      Add New Agent
-    </button>
-                                </div>
+                                    onClick={handleAddAgent}
+                                    className="flex flex-row items-center gap-2 bg-[#2A7B88] text-white rounded-lg px-4 py-2 shadow-sm hover:bg-[#135c67] transition duration-200 text-nowrap"
+                                    >
+                                    <FaPlus />
+                                    Add New Agent
+                                    </button>
+                             </div>
                             </div>
                         </header>
 
