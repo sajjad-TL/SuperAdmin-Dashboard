@@ -11,6 +11,9 @@ export default function StudentTable() {
   const [students, setStudents] = useState([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editStudent, setEditStudent] = useState(null);
+
+
+  
   const { user } = useContext(UserContext);
 
   const fetchStudents = async () => {
@@ -124,7 +127,7 @@ export default function StudentTable() {
                 <tr key={student._id} className="border-b hover:bg-gray-50">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <Link to={`/studentprofile/${student._id}`}> {/* Dynamic student ID */}
+                      <Link to={`/studentprofile/${student._id}`}>
                         <img
                           src={student.avatar || "/default-avatar.png"}
                           alt="Avatar"
@@ -163,8 +166,6 @@ export default function StudentTable() {
             </tbody>
           </table>
         </div>
-
-        {/* Edit Modal */}
         {editStudent && (
           <EditStudentProgramModal
             student={editStudent}
