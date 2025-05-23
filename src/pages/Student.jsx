@@ -11,9 +11,6 @@ export default function StudentTable() {
   const [students, setStudents] = useState([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editStudent, setEditStudent] = useState(null);
-
-
-  
   const { user } = useContext(UserContext);
 
   const fetchStudents = async () => {
@@ -26,10 +23,10 @@ export default function StudentTable() {
         firstName: s.firstName || "N/A",
         lastName: s.lastName || "N/A",
         email: s.email,
-        program: s.applications?.map(app => app.program).join(', ') || "N/A",
-        university: s.applications?.map(app => app.institute).join(', ') || "N/A",
+        program: s.applications?.map(app => app.program).join(', ') || "No Program",
+        university: s.applications?.map(app => app.institute).join(', ') || "No Institute",
         status: s.status || "N/A",
-        payment: s.paymentStatus || "N/A",
+        payment: s.paymentStatus || "No Payment",
         avatar: `https://i.pravatar.cc/40?u=${s._id}`,
         applications: s.applications || [],
       }));
@@ -127,7 +124,7 @@ export default function StudentTable() {
                 <tr key={student._id} className="border-b hover:bg-gray-50">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <Link to={`/studentprofile/${student._id}`}>
+                      <Link to={`/studentprofile/${student._id}`}> {/* Dynamic student ID */}
                         <img
                           src={student.avatar || "/default-avatar.png"}
                           alt="Avatar"
@@ -166,6 +163,8 @@ export default function StudentTable() {
             </tbody>
           </table>
         </div>
+
+        {/* Edit Modal */}
         {editStudent && (
           <EditStudentProgramModal
             student={editStudent}
