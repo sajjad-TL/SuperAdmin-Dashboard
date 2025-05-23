@@ -8,6 +8,9 @@ const StudentProgramModal = ({ isOpen, onClose, onStudentAdded }) => {
   const [activeTab, setActiveTab] = useState("personal");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
+  const { user } = useContext(UserContext);
+  const [agents, setAgents] = useState([]);  // New state for agents list
+  const isSuperAdmin = user?.role === 'superadmin'; // Make sure this matches your role naming
 
   const initialFormState = {
     firstName: "",
@@ -25,20 +28,47 @@ const StudentProgramModal = ({ isOpen, onClose, onStudentAdded }) => {
     countryOfInterest: "",
     serviceOfInterest: "",
     conditionsAccepted: false,
+    agentId: "",  // add this new field to track selected agent
+
   };
 
   const [formData, setFormData] = useState(initialFormState);
-
   useEffect(() => {
+    if (isOpen) {
+      fetchAgents();
+    }
+  }, [isOpen]);
+
+  const fetchAgents = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/agent/allagents/getAllAgents");
+      const data = await response.json();
+      if (data.success && data.agents) {
+        setAgents(data.agents);
+      } else {
+        toast.error("Failed to fetch agents");
+      }
+    } catch (error) {
+      toast.error("Error fetching agents");
+    }
+  };
+
+if (isOpen) {
+      fetchAgents();
+    }
+
     if (!isOpen) {
+
       const timeout = setTimeout(() => {
         setShouldRender(false);
       }, 300);
+
       return () => clearTimeout(timeout);
+
     } else {
       setShouldRender(true);
     }
-  }, [isOpen]);
+  }, [isOpen];
 
   if (!shouldRender) return null;
 
@@ -93,36 +123,40 @@ const StudentProgramModal = ({ isOpen, onClose, onStudentAdded }) => {
   };
 
   const handleSubmit = async () => {
-    // First clear any existing errors
-    setValidationErrors({});
-    
     if (!validateForm()) {
-      // Show specific errors
-      const errorFields = Object.keys(validationErrors);
-      if (errorFields.length > 0) {
-        toast.error(`Please fill required fields: ${errorFields.join(', ')}`);
-      } else {
-        toast.error("Please fix the errors in the form");
-      }
+      // Show toast with validation error
+      toast.error("Please fix the errors in the form");
       return;
     }
-
+ // Validate agent assignment for superadmin
+  if (isSuperAdmin && !formData.agentId) {
+    toast.error("Please select an agent to assign the student");
+    return;
+  }
     setIsSubmitting(true);
 
-    try {
-      const apiUrl = process.env.NODE_ENV === 'production'
-        ? '/student/add-new'
-        : 'http://localhost:5000/student/add-new';
+try {
+    const apiUrl = process.env.NODE_ENV === 'production'
+      ? '/student/add-new'
+      : 'http://localhost:5000/student/add-new';
 
-      console.log('Submitting data:', formData);
+    // Prepare data based on user role
+    const submitData = {
+      ...formData,
+      // If superadmin, use selected agentId, otherwise use current user's agentId
+      agentId: isSuperAdmin ? formData.agentId : user?.agentId,
+    };
 
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+    console.log('Submitting data:', submitData); // Debug log
 
-      const data = await response.json();
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(submitData),
+    });
+
+    
+         const data = await response.json();
 
       if (!response.ok) {
         if (data?.message === "Student already exists") {
@@ -132,19 +166,20 @@ const StudentProgramModal = ({ isOpen, onClose, onStudentAdded }) => {
         throw new Error(data?.message || "Failed to add student");
       }
 
-      toast.success("Student added successfully!");
-      if (typeof onStudentAdded === 'function') {
-        onStudentAdded(data);
-      }
-      onClose();
-      setFormData(initialFormState);
-    } catch (err) {
-      console.error("Submit error:", err);
-      toast.error(err.message || "Failed to add student!");
-    } finally {
-      setIsSubmitting(false);
+    toast.success("Student added successfully!");
+    if (typeof onStudentAdded === 'function') {
+      onStudentAdded(data);
     }
-  };
+    onClose();
+    setFormData(initialFormState);
+  } catch (err) {
+    console.error(err);
+    toast.error(err.message || "Failed to add student!");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+ 
 
   const renderField = (name, label, type = "text", placeholder = "", options = [], required = false) => {
     const error = validationErrors[name];
@@ -254,8 +289,8 @@ const StudentProgramModal = ({ isOpen, onClose, onStudentAdded }) => {
         <div className="flex px-6 pt-4 border-b">
           <button
             className={`pb-3 mr-6 font-medium transition ${activeTab === "personal"
-                ? "text-blue-600 border-b-2 border-blue-600"
-                : "text-gray-500 hover:text-gray-800"
+              ? "text-blue-600 border-b-2 border-blue-600"
+              : "text-gray-500 hover:text-gray-800"
               }`}
             onClick={() => setActiveTab("personal")}
           >
@@ -263,8 +298,8 @@ const StudentProgramModal = ({ isOpen, onClose, onStudentAdded }) => {
           </button>
           <button
             className={`pb-3 mr-6 font-medium transition ${activeTab === "contact"
-                ? "text-blue-600 border-b-2 border-blue-600"
-                : "text-gray-500 hover:text-gray-800"
+              ? "text-blue-600 border-b-2 border-blue-600"
+              : "text-gray-500 hover:text-gray-800"
               }`}
             onClick={() => setActiveTab("contact")}
           >
@@ -272,8 +307,8 @@ const StudentProgramModal = ({ isOpen, onClose, onStudentAdded }) => {
           </button>
           <button
             className={`pb-3 font-medium transition ${activeTab === "additional"
-                ? "text-blue-600 border-b-2 border-blue-600"
-                : "text-gray-500 hover:text-gray-800"
+              ? "text-blue-600 border-b-2 border-blue-600"
+              : "text-gray-500 hover:text-gray-800"
               }`}
             onClick={() => setActiveTab("additional")}
           >
