@@ -12,14 +12,29 @@ export default function StudentTable() {
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false); // Modal toggle state
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [selectedApplication, setSelectedApplication] = useState(null); // Store selected application data
 
-  const handleOpenModal = () => setIsEditOpen(true);
-  const handleCloseModal = () => setIsEditOpen(false);
+
+
+  const handleOpenEditModal = (application) => {
+    setSelectedApplication(application);
+    setIsEditOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setSelectedApplication(null);
+    setIsEditOpen(false);
+  };
+
   useEffect(() => {
+
+
+
     const fetchApplications = async () => {
       try {
         setLoading(true);
         const response = await axios.get('http://localhost:5000/student/getAllApplications');
+        console.log(response.data)
         if (response.data.success) {
           setApplications(response.data.applications);
         } else {
@@ -36,6 +51,7 @@ export default function StudentTable() {
   }, []);
 
   const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return date.toISOString().split('T')[0];
   };
@@ -60,38 +76,27 @@ export default function StudentTable() {
           </button>
         </div>
 
-        {/* Modal */}
+        {/* Add New Application Modal */}
         {showModal && (
           <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex justify-center items-center">
             <div className="bg-white rounded-lg w-full max-w-xl p-6 relative">
-              <h2 className="text-lg font-semibold mb-4">Add New Application</h2>
-
-              {/* Modal Form - You can customize the inputs here */}
-              {showModal && (
-                <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex justify-center items-center">
-                  <div className="bg-white rounded-lg w-full max-w-xl p-6 relative">
-                    <ApplicationForm
-                      onClose={() => setShowModal(false)}
-                      refreshApplications={() => {
-                        axios.get('http://localhost:5000/student/getAllApplications')
-                          .then((res) => {
-                            if (res.data.success) {
-                              setApplications(res.data.applications);
-                            }
-                          })
-                          .catch((err) => {
-                            console.error("Error refreshing applications:", err);
-                          });
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-
-
-
+              <ApplicationForm
+                onClose={() => setShowModal(false)}
+                refreshApplications={refreshApplications}
+              />
             </div>
           </div>
+        )}
+
+        {/* Edit Application Modal */}
+        {isEditOpen && selectedApplication && (
+          <EditApplication 
+            onClose={handleCloseEditModal}
+            refreshApplications={refreshApplications}
+            studentId={selectedApplication.studentId}
+            applicationId={selectedApplication.applicationId}
+            existingData={selectedApplication}
+          />
         )}
 
         {/* Application Table */}
@@ -113,61 +118,74 @@ export default function StudentTable() {
                   <th className="px-4 py-3 font-bold">PROGRAM</th>
                   <th className="px-4 py-3 font-bold">UNIVERSITY</th>
                   <th className="px-4 py-3 font-bold">STATUS</th>
-                  <th className="px-4 py-3 font-bold">DATE</th>
+                  <th className="px-4 py-3 font-bold">APPLY DATE</th>
+                  <th className="px-4 py-3 font-bold">START DATE</th>
+                  <th className="px-4 py-3 font-bold">CURRENT STAGE</th>
                   <th className="px-4 py-3 font-bold text-center">ACTIONS</th>
                 </tr>
               </thead>
               <tbody className="text-gray-700">
                 {applications.length > 0 ? (
                   applications.map((application, index) => (
-                    <tr key={index} className="border-b hover:bg-gray-50">
+                    <tr key={`${application.studentId}-${application.applicationId}-${index}`} className="border-b hover:bg-gray-50">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
-                            {application.firstName ? application.firstName.charAt(0) : '?'}
+                            {application.studentName ? application.studentName.charAt(0) : '?'}
                           </div>
                           <div>
-                            <div className="font-medium">{`${application.firstName || ''} ${application.lastName || ''}`}</div>
-                            <div className="text-gray-500 text-xs">{application.studentEmail || 'No email'}</div>
+                            <div className="font-medium">{application.studentName || 'No name'}</div>
+                            <div className="text-gray-500 text-xs">{application.email || 'No email'}</div>
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-3">{application.program || 'N/A'}</td>
                       <td className="px-4 py-3">{application.institute || 'N/A'}</td>
                       <td className="px-4 py-3 font-semibold uppercase text-sm">
-                        <span className={`px-2 py-1 rounded-full text-xs ${application.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
-                          application.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                            application.status === 'REJECTED' ? 'bg-red-100 text-red-800' :
-                              'bg-gray-100 text-gray-800'
-                          }`}>
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          application.status?.toLowerCase() === 'accepted' ? 'bg-green-100 text-green-800' :
+                          application.status?.toLowerCase() === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          application.status?.toLowerCase() === 'rejected' ? 'bg-red-100 text-red-800' :
+                          application.status?.toLowerCase() === 'withdrawn' ? 'bg-gray-100 text-gray-800' :
+                          application.status?.toLowerCase() === 'not-paid' ? 'bg-orange-100 text-orange-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
                           {application.status || 'UNKNOWN'}
                         </span>
                       </td>
-                      <td className="px-4 py-3">{application.applyDate ? formatDate(application.applyDate) : 'N/A'}</td>
+                      <td className="px-4 py-3">{formatDate(application.applyDate)}</td>
+                      <td className="px-4 py-3">{formatDate(application.startDate)}</td>
+                      <td className="px-4 py-3">
+                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                          {application.currentStage || 'Not Set'}
+                        </span>
+                      </td>
                       <td className="px-4 py-3">
                         <div className="flex justify-center items-center gap-4">
-                          <button className="text-gray-600 hover:text-blue-600" title="View Application">
+                          <button 
+                            className="text-gray-600 hover:text-blue-600 transition-colors" 
+                            title="View Application"
+                            onClick={() => {
+                              // You can implement view functionality here
+                              console.log('View application:', application);
+                            }}
+                          >
                             <FaEye />
                           </button>
                           <button
-                            className=" text-gray-600 hover:text-blue-600"
+                            className="text-gray-600 hover:text-green-600 transition-colors"
                             title="Edit Application"
-                            onClick={handleOpenModal}
+                            onClick={() => handleOpenEditModal(application)}
                           >
                             <FaEdit />
                           </button>
-
-                          {/* Modal render conditionally */}
-                          {isEditOpen && (
-                            <EditApplication onClose={handleCloseModal} />
-                          )}
                         </div>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="px-4 py-6 text-center text-gray-500">
+                    <td colSpan="8" className="px-4 py-6 text-center text-gray-500">
                       No applications found
                     </td>
                   </tr>

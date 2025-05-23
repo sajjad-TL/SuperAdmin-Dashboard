@@ -9,7 +9,7 @@ import AgentProfile from './pages/AgentProfile';
 import StudentTable from './pages/Student';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
-import StudentProfile from './pages/Studentprofile';
+import StudentProfile from './pages/StudentProfile';
 import Application from './pages/Application';
 import AdminSettings from './pages/AdminSetting/AdminSettings';
 import AdminPermission from './pages/AdminSetting/AdminPermission';
@@ -71,7 +71,7 @@ function App() {
             <Route path="help" element={<Agent />} />
             <Route path="agentprofile" element={<AgentProfile />} />
             <Route path="student" element={<StudentTable />} />
-            <Route path="StudentProfile" element={<StudentProfile />} />
+        <Route path="/studentprofile/:studentId" element={<StudentProfile />} />
             <Route path="/settings" element={<AdminSettings />} />
             <Route path="/settings/roles" element={<AdminPermission />} />
             <Route path="/settings/email" element={<AdminEmail />} />

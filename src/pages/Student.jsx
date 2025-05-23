@@ -124,9 +124,9 @@ export default function StudentTable() {
                 <tr key={student._id} className="border-b hover:bg-gray-50">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <Link to="/studentprofile">
+                      <Link to={`/studentprofile/${student._id}`}> {/* Dynamic student ID */}
                         <img
-                          src={student.avatar}
+                          src={student.avatar || "/default-avatar.png"}
                           alt="Avatar"
                           className="h-8 w-8 rounded-full"
                         />
