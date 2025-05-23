@@ -14,19 +14,7 @@ export default function StudentTable() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState(null); // Store selected application data
 
-  // Function to refresh applications
-  const refreshApplications = async () => {
-    try {
-      
-      const response = await axios.get('http://localhost:5000/student/getAllApplications');
-      console.log(response.data);
-      if (response.data.success) {
-        setApplications(response.data.applications);
-      }
-    } catch (error) {
-      console.error("Error refreshing applications:", error);
-    }
-  };
+
 
   const handleOpenEditModal = (application) => {
     setSelectedApplication(application);
@@ -39,10 +27,14 @@ export default function StudentTable() {
   };
 
   useEffect(() => {
+
+
+
     const fetchApplications = async () => {
       try {
         setLoading(true);
         const response = await axios.get('http://localhost:5000/student/getAllApplications');
+        console.log(response.data)
         if (response.data.success) {
           setApplications(response.data.applications);
         } else {
@@ -142,7 +134,7 @@ export default function StudentTable() {
                             {application.studentName ? application.studentName.charAt(0) : '?'}
                           </div>
                           <div>
-                            <div className="font-medium">{application.studentName || 'No email'}</div>
+                            <div className="font-medium">{application.studentName || 'No name'}</div>
                             <div className="text-gray-500 text-xs">{application.email || 'No email'}</div>
                           </div>
                         </div>
