@@ -26,10 +26,10 @@ export default function StudentTable() {
         firstName: s.firstName || "N/A",
         lastName: s.lastName || "N/A",
         email: s.email,
-        program: s.applications?.map(app => app.program).join(', ') || "No Program",
-        university: s.applications?.map(app => app.institute).join(', ') || "No Institute",
+        program: s.applications?.map(app => app.program).join(', ') || "N/A",
+        university: s.applications?.map(app => app.institute).join(', ') || "N/A",
         status: s.status || "N/A",
-        payment: s.paymentStatus || "No Payment",
+        payment: s.paymentStatus || "N/A",
         avatar: `https://i.pravatar.cc/40?u=${s._id}`,
         applications: s.applications || [],
       }));
