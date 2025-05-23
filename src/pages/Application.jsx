@@ -14,17 +14,7 @@ export default function StudentTable() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState(null); // Store selected application data
 
-  // Function to refresh applications
-  const refreshApplications = async () => {
-    try {
-      const response = await axios.get('http://localhost:5000/student/getAllApplications');
-      if (response.data.success) {
-        setApplications(response.data.applications);
-      }
-    } catch (error) {
-      console.error("Error refreshing applications:", error);
-    }
-  };
+
 
   const handleOpenEditModal = (application) => {
     setSelectedApplication(application);
@@ -37,10 +27,14 @@ export default function StudentTable() {
   };
 
   useEffect(() => {
+
+
+
     const fetchApplications = async () => {
       try {
         setLoading(true);
         const response = await axios.get('http://localhost:5000/student/getAllApplications');
+        console.log(response.data)
         if (response.data.success) {
           setApplications(response.data.applications);
         } else {
@@ -137,11 +131,11 @@ export default function StudentTable() {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
-                            {application.firstName ? application.firstName.charAt(0) : '?'}
+                            {application.studentName ? application.studentName.charAt(0) : '?'}
                           </div>
                           <div>
-                            <div className="font-medium">{`${application.firstName || ''} ${application.lastName || ''}`}</div>
-                            <div className="text-gray-500 text-xs">{application.studentEmail || 'No email'}</div>
+                            <div className="font-medium">{application.studentName || 'No name'}</div>
+                            <div className="text-gray-500 text-xs">{application.email || 'No email'}</div>
                           </div>
                         </div>
                       </td>

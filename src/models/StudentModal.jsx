@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { X } from "lucide-react";
+import { UserContext } from "../context/userContext";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -28,21 +29,23 @@ const StudentProgramModal = ({ isOpen, onClose, onStudentAdded }) => {
     countryOfInterest: "",
     serviceOfInterest: "",
     conditionsAccepted: false,
-    agentId: "",  // add this new field to track selected agent
+    agentId: ""
 
   };
 
   const [formData, setFormData] = useState(initialFormState);
+  const [selectdAgent, setSelectedAgent] = useState(""); // initialize with an empty string or null
+ 
+    
+
+
   useEffect(() => {
-    if (isOpen) {
-      fetchAgents();
-    }
-  }, [isOpen]);
 
   const fetchAgents = async () => {
     try {
       const response = await fetch("http://localhost:5000/agent/allagents/getAllAgents");
       const data = await response.json();
+      console.log(data)
       if (data.success && data.agents) {
         setAgents(data.agents);
       } else {
@@ -68,7 +71,7 @@ if (isOpen) {
     } else {
       setShouldRender(true);
     }
-  }, [isOpen];
+  }, [isOpen]);
 
   if (!shouldRender) return null;
 
@@ -87,12 +90,10 @@ if (isOpen) {
 
   const validateForm = () => {
     const errors = {};
-    
-    // Basic required fields
-    const basicRequiredFields = ["firstName", "lastName", "email", "phoneNumber", "citizenOf"];
+    const requiredFields = ["firstName", "lastName", "email", "phoneNumber", "status", "citizenOf"];
 
-    basicRequiredFields.forEach(field => {
-      if (!formData[field] || formData[field].trim() === "") {
+    requiredFields.forEach(field => {
+      if (!formData[field]) {
         errors[field] = `${field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, ' $1')} is required`;
       }
     });
@@ -107,47 +108,54 @@ if (isOpen) {
       errors.phoneNumber = "Phone number should contain only digits";
     }
 
-    // Conditions acceptance
     if (!formData.conditionsAccepted) {
       errors.conditionsAccepted = "You must accept the consent confirmation";
     }
 
     setValidationErrors(errors);
-    
-    // Debug: Console mein errors show karo
-    if (Object.keys(errors).length > 0) {
-      console.log("Validation errors:", errors);
-    }
-    
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = async () => {
-    if (!validateForm()) {
-      // Show toast with validation error
-      toast.error("Please fix the errors in the form");
-      return;
-    }
- // Validate agent assignment for superadmin
-  if (isSuperAdmin && !formData.agentId) {
-    toast.error("Please select an agent to assign the student");
+const handleSubmit = async () => {
+  if (!validateForm()) {
+    toast.error("Please fix the errors in the form");
     return;
   }
-    setIsSubmitting(true);
 
-try {
-    const apiUrl = process.env.NODE_ENV === 'production'
-      ? '/student/add-new'
-      : 'http://localhost:5000/student/add-new';
+{isSuperAdmin && (
+  <div className="mb-4">
+    <label className="block mb-2 font-medium text-gray-700">Select Agent</label>
+    <select
+      name="agentId"
+      value={formData.agentId || ""}
+      onChange={(e) =>
+        setFormData({ ...formData, agentId: e.target.value })
+      }
+      className="w-full p-2 border border-gray-300 rounded"
+    >
+      <option value="">-- Select Agent --</option>
+      {agents.map((agent) => (
+        <option key={agent._id} value={agent._id}>
+          {agent.firstName} {agent.lastName} ({agent.email})
+        </option>
+      ))}
+    </select>
+  </div>
+)}
 
-    // Prepare data based on user role
+
+setIsSubmitting(true);
+console.log("Selected Agent ID:", formData.agentId);
+
+  try {
+    const apiUrl = 'http://localhost:5000/student/add-new';
+
     const submitData = {
       ...formData,
-      // If superadmin, use selected agentId, otherwise use current user's agentId
-      agentId: isSuperAdmin ? formData.agentId : user?.agentId,
+      agentId: isSuperAdmin ? formData.agentId : formData.agentId, // Replace `currentUserAgentId` with actual value from auth
     };
 
-    console.log('Submitting data:', submitData); // Debug log
+    console.log('Submitting data:', submitData);
 
     const response = await fetch(apiUrl, {
       method: "POST",
@@ -155,21 +163,21 @@ try {
       body: JSON.stringify(submitData),
     });
 
-    
-         const data = await response.json();
+    const data = await response.json();
 
-      if (!response.ok) {
-        if (data?.message === "Student already exists") {
-          toast.error("Student with this email already exists.");
-          return;
-        }
-        throw new Error(data?.message || "Failed to add student");
+    if (!response.ok) {
+      if (data?.message === "Student already exists") {
+        toast.error("Student with this email already exists.");
+        return;
       }
+      throw new Error(data?.message || "Failed to add student");
+    }
 
     toast.success("Student added successfully!");
     if (typeof onStudentAdded === 'function') {
       onStudentAdded(data);
     }
+
     onClose();
     setFormData(initialFormState);
   } catch (err) {
@@ -179,7 +187,8 @@ try {
     setIsSubmitting(false);
   }
 };
- 
+
+
 
   const renderField = (name, label, type = "text", placeholder = "", options = [], required = false) => {
     const error = validationErrors[name];
@@ -194,7 +203,8 @@ try {
             name={name}
             value={formData[name]}
             onChange={handleChange}
-            className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-blue-50 ${error ? "border-red-500" : ""}`}
+            className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-blue-50 ${error ? "border-red-500" : ""
+              }`}
           >
             <option value="">{`Please choose ${label.toLowerCase()}`}</option>
             {options.map((option) => (
@@ -264,7 +274,8 @@ try {
           value={formData[name]}
           onChange={handleChange}
           placeholder={placeholder}
-          className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${error ? "border-red-500" : ""}`}
+          className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${error ? "border-red-500" : ""
+            }`}
           onInput={name === "phoneNumber" ? (e) => {
             e.target.value = e.target.value.replace(/[^0-9]/g, '');
           } : undefined}
@@ -360,7 +371,7 @@ try {
                 { value: "Active", label: "Active" },
                 { value: "In Active", label: "In Active" },
                 { value: "Pending", label: "Pending" },
-              ])}
+              ], true)}
               {renderField("referralSource", "Referral Source", "select", "", [
                 { value: "Facebook", label: "Facebook" },
                 { value: "Instagram", label: "Instagram" },
@@ -370,7 +381,11 @@ try {
               ])}
               {renderField("countryOfInterest", "Country of Interest", "text", "Enter country of interest")}
               {renderField("serviceOfInterest", "Services of Interest", "text", "Enter services of interest")}
-              
+              {/* NEW Dropdown for agents */}
+              {renderField("agentId", "Assign Agent", "select", "", agents.map(agent => ({
+                value: agent._id,
+                label: `${agent.firstName} ${agent.lastName}`
+              })), true)}
               {renderField("conditionsAccepted", "I confirm that I have received express written consent from the student and I can provide proof of their consent upon request.", "checkbox", "", [], true)}
 
               <p className="text-sm mt-4">
