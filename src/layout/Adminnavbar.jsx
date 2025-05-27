@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import avatar from '../assets/avatar.png';
 import { useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
+import { logout } from '../utils/auth'; // Import the proper logout function
 
 const Admin = () => {
   const notifications = [
@@ -27,9 +28,10 @@ const Admin = () => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
+    // Using the proper logout function from auth utils
+    logout();
     toast.success("Logged out successfully!");
-    navigate("/login");
+    // No need to navigate manually as logout() handles it
   };
 
   return (
@@ -72,6 +74,7 @@ const Admin = () => {
                         className="w-full text-left px-4 py-2 hover:bg-gray-100"
                         onClick={() => {
                           navigate("/settings");
+                          setIsOpen(false); // Close dropdown after click
                         }}
                       >
                         Profile
@@ -79,7 +82,7 @@ const Admin = () => {
                     </li>
                     <li>
                       <button
-                        className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
                         onClick={handleLogout}
                       >
                         Logout
