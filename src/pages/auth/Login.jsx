@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react';
-import axios from 'axios';
+import api from '../../utils/axiosConfig'; // Updated import
 import { useNavigate } from 'react-router-dom';
 import { setAuthToken, setUserSession } from '../../utils/auth';
 import { toast } from 'react-toastify';
-
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -14,29 +13,31 @@ const Login = () => {
     password: '',
   });
   const navigate = useNavigate();
-
   const [error, setError] = useState('');
-
+  const [isLoading, setIsLoading] = useState(false); // Added loading state
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', formData);
+      // Using api instance instead of axios
+      const response = await api.post('/api/auth/login', formData);
       setAuthToken(response.data.token);
       setUserSession(response.data.user);
       navigate('/admin');
-      toast.success('Login successfully')
+      toast.success('Login successfully');
     } catch (err) {
       if (err.response && err.response.status === 401) {
         setError('Invalid email or password');
       } else {
         setError('Something went wrong. Please try again.');
       }
+    } finally {
+      setIsLoading(false);
     }
   };
-
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#E0E7FF] to-[#59585b] flex items-center justify-center p-4">
@@ -45,7 +46,7 @@ const Login = () => {
         {/* Left Column - Image */}
         <div className="hidden md:flex items-center justify-center bg-gray-100">
           <img
-            src="../src/assets/Left@1x.png" // Replace with your image URL
+            src="../src/assets/Left@1x.png"
             alt="Login Visual"
             className="object-cover h-full w-full"
           />
@@ -54,13 +55,7 @@ const Login = () => {
         {/* Right Column - Form */}
         <div className="w-full p-8 space-y-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
-            <p className="mt-2 text-sm text-gray-600">
-              Don't have an account?{' '}
-              <Link to="/register" className="text-blue-600 hover:text-blue-500 font-medium">
-                Sign up
-              </Link>
-            </p>
+            <h2 className="text-3xl font-bold text-gray-900 pt-36 pb-10">Welcome Back</h2>
           </div>
 
           {error && (
@@ -86,7 +81,8 @@ const Login = () => {
                     name="email"
                     type="email"
                     required
-                    className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    disabled={isLoading}
+                    className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
                     placeholder="Enter your email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -108,7 +104,8 @@ const Login = () => {
                     name="password"
                     type={showPassword ? 'text' : 'password'}
                     required
-                    className="appearance-none block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    disabled={isLoading}
+                    className="appearance-none block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
                     placeholder="Enter your password"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -117,7 +114,8 @@ const Login = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="text-gray-400 hover:text-gray-500"
+                      disabled={isLoading}
+                      className="text-gray-400 hover:text-gray-500 disabled:opacity-50"
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
@@ -133,7 +131,8 @@ const Login = () => {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  disabled={isLoading}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded disabled:opacity-50"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
                   Remember me
@@ -148,43 +147,25 @@ const Login = () => {
             {/* Submit */}
             <button
               type="submit"
-              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+              disabled={isLoading}
+              className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign in
+              {isLoading ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Signing in...
+                </div>
+              ) : (
+                'Sign in'
+              )}
             </button>
           </form>
 
-          {/* Divider */}
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
-              </div>
-            </div>
-
-            {/* Social Buttons */}
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <button className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z" />
-                </svg>
-              </button>
-
-              <button className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  {/* <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504..." clipRule="evenodd" /> */}
-                </svg>
-              </button>
-            </div>
-          </div>
+       
         </div>
       </div>
     </div>
-
   );
 };
 
-export default Login; 
+export default Login;
