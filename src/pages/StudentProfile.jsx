@@ -353,7 +353,7 @@ export default function StudentProfile() {
         {student.firstName?.[0]}{student.lastName?.[0]}
       </div>
       <div>
-        <p className="font-semibold">Agent ID:  {student._id} {student.lastName}</p>
+        <p className="font-semibold">Agent ID:  {student._id}</p>
         <p className="text-sm text-gray-500">Status: {student.status}</p>
         <p className="text-sm text-gray-500">Referral: {student.referralSource || 'N/A'}</p>
       </div>

@@ -5,6 +5,7 @@ import axios from 'axios';
 import { HiOutlineDocumentAdd } from "react-icons/hi";
 import ApplicationForm from '../models/ApplicationModal';
 import EditApplication from '../models/EditApplicationModal';
+import ViewApplication from '../models/ViewApplicationModal';
 
 export default function StudentTable() {
   const [applications, setApplications] = useState([]);
@@ -13,11 +14,13 @@ export default function StudentTable() {
   const [showModal, setShowModal] = useState(false); // Modal toggle state
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState(null); // Store selected application data
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+
 
   // Function to refresh applications
   const refreshApplications = async () => {
     try {
-      
+
       const response = await axios.get('http://localhost:5000/student/getAllApplications');
       console.log(response.data);
       if (response.data.success) {
@@ -38,7 +41,19 @@ export default function StudentTable() {
     setIsEditOpen(false);
   };
 
+  const handleOpenApplication = (application) => {
+  setSelectedApplication(application);
+  setIsViewModalOpen(true);
+};
+
+const closeViewModal = () => {
+  setIsViewModalOpen(false);
+  setSelectedApplication(null);
+};
+
+
   useEffect(() => {
+
     const fetchApplications = async () => {
       try {
         setLoading(true);
@@ -98,13 +113,23 @@ export default function StudentTable() {
 
         {/* Edit Application Modal */}
         {isEditOpen && selectedApplication && (
-          <EditApplication 
+          <EditApplication
             onClose={handleCloseEditModal}
             refreshApplications={refreshApplications}
             studentId={selectedApplication.studentId}
             applicationId={selectedApplication.applicationId}
             existingData={selectedApplication}
           />
+        )}
+        {isViewModalOpen && selectedApplication && (
+         <ViewApplication
+          onClose={closeViewModal}
+          refreshApplications={refreshApplications}
+          studentId={selectedApplication.studentId}
+          applicationId={selectedApplication.applicationId}
+          existingData={selectedApplication}
+        />
+
         )}
 
         {/* Application Table */}
@@ -138,11 +163,17 @@ export default function StudentTable() {
                     <tr key={`${application.studentId}-${application.applicationId}-${index}`} className="border-b hover:bg-gray-50">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
-                            {application.studentName ? application.studentName.charAt(0) : '?'}
+                          <div className="h-8 w-8 rounded-full bg-gray-800 text-white flex items-center justify-center text-xs font-bold">
+                            {application.firstName && application.lastName
+                              ? `${application.firstName.charAt(0)}${application.lastName.charAt(0)}`.toUpperCase()
+                              : application.firstName
+                                ? application.firstName.charAt(0).toUpperCase()
+                                : '?'}
                           </div>
                           <div>
-                            <div className="font-medium">{application.studentName || 'No email'}</div>
+                            <div className="font-medium">
+                              {application.firstName} {application.lastName}
+                            </div>
                             <div className="text-gray-500 text-xs">{application.email || 'No email'}</div>
                           </div>
                         </div>
@@ -150,14 +181,20 @@ export default function StudentTable() {
                       <td className="px-4 py-3">{application.program || 'N/A'}</td>
                       <td className="px-4 py-3">{application.institute || 'N/A'}</td>
                       <td className="px-4 py-3 font-semibold uppercase text-sm">
-                        <span className={`px-2 py-1 rounded-full text-xs ${
-                          application.status?.toLowerCase() === 'accepted' ? 'bg-green-100 text-green-800' :
-                          application.status?.toLowerCase() === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          application.status?.toLowerCase() === 'rejected' ? 'bg-red-100 text-red-800' :
-                          application.status?.toLowerCase() === 'withdrawn' ? 'bg-gray-100 text-gray-800' :
-                          application.status?.toLowerCase() === 'not-paid' ? 'bg-orange-100 text-orange-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs ${application.status?.toLowerCase() === 'accepted'
+                              ? 'bg-green-100 text-green-800'
+                              : application.status?.toLowerCase() === 'pending'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : application.status?.toLowerCase() === 'rejected'
+                                  ? 'bg-red-100 text-red-800'
+                                  : application.status?.toLowerCase() === 'withdrawn'
+                                    ? 'bg-gray-100 text-gray-800'
+                                    : application.status?.toLowerCase() === 'not-paid'
+                                      ? 'bg-orange-100 text-orange-800'
+                                      : 'bg-gray-100 text-gray-800'
+                            }`}
+                        >
                           {application.status || 'UNKNOWN'}
                         </span>
                       </td>
@@ -170,16 +207,14 @@ export default function StudentTable() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex justify-center items-center gap-4">
-                          <button 
-                            className="text-gray-600 hover:text-blue-600 transition-colors" 
-                            title="View Application"
-                            onClick={() => {
-                              // You can implement view functionality here
-                              console.log('View application:', application);
-                            }}
-                          >
-                            <FaEye />
-                          </button>
+                        <button
+                          className="text-gray-600 hover:text-blue-600 transition-colors"
+                          title="View Application"
+                          onClick={() => handleOpenApplication(application)}
+                        >
+                          <FaEye />
+                        </button>
+
                           <button
                             className="text-gray-600 hover:text-green-600 transition-colors"
                             title="Edit Application"
@@ -199,6 +234,7 @@ export default function StudentTable() {
                   </tr>
                 )}
               </tbody>
+
             </table>
           </div>
         )}

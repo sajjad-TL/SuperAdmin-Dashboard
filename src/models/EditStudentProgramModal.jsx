@@ -22,22 +22,26 @@ export default function EditStudentProgramModal({ onClose, student, onUpdate }) 
     }
   }, [student]);
 
-  useEffect(() => {
-    if (student && selectedApplicationId) {
-      const selectedApp = student.applications?.find(
-        (app) => app._id === selectedApplicationId
-      );
+useEffect(() => {
+  if (student) {
+    const defaultAppId = student.applications?.[0]?._id || "";
+    setSelectedApplicationId((prev) => prev || defaultAppId);
 
-      setFormData({
-        firstName: student.firstName || "",
-        lastName: student.lastName || "",
-        program: selectedApp?.program || "",
-        university: selectedApp?.institute || "",
-        status: student.status?.toLowerCase() || "",
-        payment: student.payment?.toLowerCase() || "",
-      });
-    }
-  }, [student, selectedApplicationId]);
+    const selectedApp = student.applications?.find(
+      (app) => app._id === (selectedApplicationId || defaultAppId)
+    );
+
+    setFormData({
+      firstName: student.firstName || "",
+      lastName: student.lastName || "",
+      program: selectedApp?.program || "",
+      university: selectedApp?.institute || "",
+      status: student.status?.toLowerCase() || "",
+      payment: student.payment?.toLowerCase() || "",
+    });
+  }
+}, [student, selectedApplicationId]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
