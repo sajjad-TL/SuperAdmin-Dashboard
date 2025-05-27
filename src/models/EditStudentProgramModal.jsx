@@ -47,39 +47,44 @@ export default function EditStudentProgramModal({ onClose, student, onUpdate }) 
     }));
   };
 
-  const handleSave = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/student/update-student", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          studentId: student._id,
-          applicationId: selectedApplicationId,
+const handleSave = async () => {
+  try {
+    debugger
+    const response = await fetch("http://localhost:5000/student/update-student", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        studentId: student._id,
+        applicationId: selectedApplicationId,
+        applications: {
           program: formData.program,
-          university: formData.university,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          status: formData.status,
-          payment: formData.payment,
-        }),
-      });
+          institute: formData.university,
+        },
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        status: formData.status,
+        payment: formData.payment,
+      }),
+    });
 
-      const result = await response.json();
+    const result = await response.json();
+    console.log(result,"jhijkijwo")
 
-      if (response.ok) {
-        toast.success("Student program updated successfully!");
-        onUpdate(); // Notify parent to refresh data
-        onClose();
-      } else {
-        toast.error(result.message || "Failed to update student program.");
-      }
-    } catch (error) {
-      console.error("Error updating student:", error);
-      toast.error("Something went wrong.");
+    if (response.ok) {
+      toast.success("Student program updated successfully!");
+      onUpdate(); // Notify parent to refresh data
+      onClose();
+    } else {
+      toast.error(result.message || "Failed to update student program.");
     }
-  };
+  } catch (error) {
+    console.error("Error updating student:", error);
+    toast.error("Something went wrong.");
+  }
+};
+
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">

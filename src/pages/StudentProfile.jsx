@@ -25,6 +25,7 @@ export default function StudentProfile() {
       const data = await response.json();
 
       if (data.success) {
+      console.log(data)
         setStudent(data.student);
         setEditedStudent(data.student);
         setApplications(data.student.applications || []);
@@ -211,7 +212,7 @@ export default function StudentProfile() {
                 ) : (
                   <div>
                     <h3 className="font-bold text-lg">
-                      {student.firstName} {student.middleName} {student.lastName}
+                      {student.firstName} {student.lastName}
                     </h3>
                     <p className="text-gray-500 text-sm">{student.email}</p>
                   </div>
@@ -343,21 +344,25 @@ export default function StudentProfile() {
           </div>
 
           {/* Agent Information */}
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-lg font-semibold mb-4">Linked Agent</h2>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center p-4 bg-gray-100 rounded-2xl">
-              <div className="mb-4 sm:mb-0 sm:mr-4">
-                <div className="rounded-full w-12 h-12 bg-[#2A7B88] flex items-center justify-center text-white font-bold">
-                  <User size={20} />
-                </div>
-              </div>
-              <div>
-                <h3 className="font-medium">Agent ID: {student.agentId || 'Not Assigned'}</h3>
-                <p className="text-sm text-gray-500">Status: {student.status || 'Active'}</p>
-                <p className="text-sm text-gray-500">Referral: {student.referralSource || 'Direct'}</p>
-              </div>
-            </div>
-          </div>
+
+<div className="bg-white p-6 rounded-lg shadow-sm">
+  <h2 className="text-lg font-semibold mb-4">Linked Agent</h2>
+  {student ? (
+    <div className="flex items-center space-x-4">
+      <div className="rounded-full w-12 h-12 bg-[#2A7B88] flex items-center justify-center text-white text-lg font-bold">
+        {student.firstName?.[0]}{student.lastName?.[0]}
+      </div>
+      <div>
+        <p className="font-semibold">Agent ID:  {student._id} {student.lastName}</p>
+        <p className="text-sm text-gray-500">Status: {student.status}</p>
+        <p className="text-sm text-gray-500">Referral: {student.referralSource || 'N/A'}</p>
+      </div>
+    </div>
+  ) : (
+    <p className="text-gray-500">No agent linked to this student</p>
+  )}
+</div>
+
 
           {/* Applications */}
           <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -415,4 +420,3 @@ export default function StudentProfile() {
     </div>
   );
 }
-
