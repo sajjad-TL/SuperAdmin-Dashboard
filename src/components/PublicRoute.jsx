@@ -8,9 +8,9 @@ const PublicRoute = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       try {
-        const authenticated = isAuthenticated();
+        const authenticated = await isAuthenticated();
         setAuthState(authenticated);
       } catch (error) {
         console.error('Auth check failed in PublicRoute:', error);

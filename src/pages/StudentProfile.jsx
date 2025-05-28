@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Upload, User, Phone, Calendar, MapPin, FileText, Edit } from 'lucide-react';
+import { Bell, User, Phone, Calendar, MapPin, FileText, Edit } from 'lucide-react';
 import { useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { Upload, Image, X, File } from 'lucide-react';
 
 export default function StudentProfile() {
   const [student, setStudent] = useState(null);
     const { studentId } = useParams(); // e.g., URL: /student/12345
-
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [isDragging, setIsDragging] = useState(false);
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -58,7 +61,7 @@ export default function StudentProfile() {
       if (data.success) {
         setStudent(data.student);
         setEditMode(false);
-        alert('Student updated successfully!');
+        toast.success('Student updated successfully!');
       } else {
         setError(data.message || 'Failed to update student');
       }
@@ -67,18 +70,93 @@ export default function StudentProfile() {
     }
   };
 
-  // Handle input change
-  const handleInputChange = (field, value) => {
-    setEditedStudent(prev => ({
-      ...prev,
-      [field]: value
-    }));
+
+useEffect(() => {
+    const storedFiles = localStorage.getItem('uploadedFiles');
+    if (storedFiles) {
+      setUploadedFiles(JSON.parse(storedFiles));
+    }
+  }, []);
+
+  // Save files to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('uploadedFiles', JSON.stringify(uploadedFiles));
+  }, [uploadedFiles]);
+
+  const handleFileUpload = (files) => {
+    const fileArray = Array.from(files);
+
+    fileArray.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const fileData = {
+          id: Date.now() + Math.random(),
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          uploadDate: new Date().toISOString(),
+          status: 'Uploaded',
+          isImage: file.type.startsWith('image/'),
+          preview: file.type.startsWith('image/') ? e.target.result : null,
+        };
+        setUploadedFiles(prev => [...prev, fileData]);
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
-  // Format date for display
+  // Input change handler
+  const handleInputChange = (e) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      handleFileUpload(files);
+    }
+  };
+
+  // Drag and drop handlers
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      handleFileUpload(files);
+    }
+  };
+
+  // Remove file handler
+  const removeFile = (fileId) => {
+    setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
+  };
+
+  // Format file size
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  // Format date
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString();
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   // Get status color
@@ -306,42 +384,153 @@ export default function StudentProfile() {
           </div>
 
           {/* Documents */}
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Documents</h2>
-              <button className="bg-[#2A7B88] text-white px-3 py-1 rounded text-sm flex items-center space-x-1 hover:bg-[#1f5d66]">
-                <Upload size={16} />
-                <span>Upload New</span>
-              </button>
-            </div>
+         <div className="">
+      <div className="bg-white p-6 rounded-lg shadow-sm">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-semibold text-gray-800">Documents & Files</h2>
+          <div className="text-sm text-gray-500">
+            Total Files: {uploadedFiles.length}
+          </div>
+        </div>
 
+        {/* Upload Area */}
+        <div 
+          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+            isDragging 
+              ? 'border-[#2A7B88] bg-blue-50' 
+              : 'border-gray-300 hover:border-[#2A7B88]'
+          }`}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          <div className="flex flex-col items-center space-y-4">
+            <div className="p-4 bg-[#2A7B88] bg-opacity-10 rounded-full">
+              <Upload size={32} className="text-[#2A7B88]" />
+            </div>
+            <div>
+              <h3 className="text-lg font-medium text-gray-700 mb-2">
+                Upload Your Files
+              </h3>
+              <p className="text-gray-500 mb-4">
+                Drag and drop files here, or click to browse
+              </p>
+              <p className="text-sm text-gray-400">
+                Supports: PDF, DOC, DOCX, JPG, PNG, GIF (Max 10MB)
+              </p>
+            </div>
+            <label className="bg-[#2A7B88] text-white px-6 py-2 rounded-lg cursor-pointer hover:bg-[#1f5d66] transition-colors flex items-center space-x-2">
+              <Upload size={16} />
+              <span>Choose Files</span>
+              <input 
+                type="file" 
+                multiple 
+                className="hidden" 
+                onChange={handleInputChange}
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
+              />
+            </label>
+          </div>
+        </div>
+
+        {/* Uploaded Files Display */}
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold mb-4 flex items-center">
+            <FileText size={20} className="mr-2" />
+            Uploaded Files ({uploadedFiles.length})
+          </h3>
+
+          {uploadedFiles.length > 0 ? (
             <div className="space-y-3">
-              {student.documents && student.documents.length > 0 ? (
-                student.documents.map((doc, index) => (
-                  <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-gray-100 rounded-2xl">
-                    <div className="flex items-center mb-2 sm:mb-0">
-                      <div className="mr-4">
-                        <div className="p-2 rounded">
-                          <FileText size={20} />
+              {uploadedFiles.map((file) => (
+                <div key={file.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
+                  <div className="flex items-center space-x-4">
+                    {/* File Icon/Preview */}
+                    <div className="flex-shrink-0">
+                      {file.isImage ? (
+                        file.preview ? (
+                          <img
+                            src={file.preview}
+                            alt={file.name}
+                            className="w-12 h-12 object-cover rounded border"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
+                            <Image size={20} className="text-gray-400" />
+                          </div>
+                        )
+                      ) : (
+                        <div className="w-12 h-12 bg-blue-100 rounded flex items-center justify-center">
+                          <File size={20} className="text-blue-600" />
                         </div>
-                      </div>
-                      <div>
-                        <span className="block font-medium text-gray-800">{doc.title}</span>
-                        <span className="text-sm text-gray-500">{formatDate(doc.uploadDate)}</span>
-                      </div>
+                      )}
                     </div>
-                    <div className="text-sm font-semibold text-green-600">
-                      {doc.status || 'Uploaded'}
+
+                    {/* File Info */}
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-800 truncate max-w-xs">
+                        {file.name}
+                      </h4>
+                      <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
+                        <span className="flex items-center">
+                          <Calendar size={14} className="mr-1" />
+                          {formatDate(file.uploadDate)}
+                        </span>
+                        <span>{formatFileSize(file.size)}</span>
+                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+                          {file.status}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-4 text-gray-500">
-                  No documents uploaded yet
+
+                  {/* Remove Button */}
+                  <button
+                    onClick={() => removeFile(file.id)}
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-full transition-colors"
+                    title="Remove file"
+                  >
+                    <X size={16} />
+                  </button>
                 </div>
-              )}
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-gray-500">
+              <div className="flex flex-col items-center space-y-3">
+                <div className="p-4 bg-gray-100 rounded-full">
+                  <FileText size={32} className="text-gray-400" />
+                </div>
+                <p className="text-lg">No files uploaded yet</p>
+                <p className="text-sm">Upload your first document or image above</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* File Statistics */}
+        {uploadedFiles.length > 0 && (
+          <div className="mt-6 p-4 bg-[#2A7B88] bg-opacity-5 rounded-lg">
+            <div className="flex flex-wrap gap-6 text-sm">
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <span>Documents: {uploadedFiles.filter(f => !f.isImage).length}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span>Images: {uploadedFiles.filter(f => f.isImage).length}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                <span>Total Size: {formatFileSize(uploadedFiles.reduce((acc, f) => acc + f.size, 0))}</span>
+              </div>
             </div>
           </div>
+        )}
+      </div>
+    </div>
+        
 
           {/* Agent Information */}
 
