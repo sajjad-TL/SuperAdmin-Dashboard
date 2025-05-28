@@ -42,8 +42,10 @@ function App() {
               </PublicRoute>
             }
           />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/forgot-password" element={<PublicRoute>
+            <ForgotPassword /></PublicRoute>} />
+          <Route path="/reset-password" element={<PublicRoute>
+            <ResetPassword /></PublicRoute>} />
 
           {/* Protected Routes */}
           <Route
@@ -71,7 +73,7 @@ function App() {
             <Route path="help" element={<Agent />} />
             <Route path="agentprofile" element={<AgentProfile />} />
             <Route path="student" element={<StudentTable />} />
-        <Route path="/studentprofile/:studentId" element={<StudentProfile />} />
+            <Route path="/studentprofile/:studentId" element={<StudentProfile />} />
             <Route path="/settings" element={<AdminSettings />} />
             <Route path="/settings/roles" element={<AdminPermission />} />
             <Route path="/settings/email" element={<AdminEmail />} />
@@ -80,7 +82,7 @@ function App() {
             <Route path="/payment-requests" element={<PaymentRequests />} />
             <Route path="/payment-history" element={<PaymentHistory />} />
             <Route path="/commisionprofile" element={<PaymentProfile />} />
-            <Route path="/newpayment" element={<NewPayment />} />            
+            <Route path="/newpayment" element={<NewPayment />} />
             <Route path="commission" element={<Comission />} />
             <Route path="/create-agent" element={<Register />} />
           </Route>
