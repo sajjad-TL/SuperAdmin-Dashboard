@@ -18,18 +18,18 @@ export default function StudentTable() {
 
 
   // Function to refresh applications
-  const refreshApplications = async () => {
-    try {
-
-      const response = await axios.get('http://localhost:5000/student/getAllApplications');
-      console.log(response.data);
-      if (response.data.success) {
-        setApplications(response.data.applications);
-      }
-    } catch (error) {
-      console.error("Error refreshing applications:", error);
+const refreshApplications = async () => {
+  try {
+    const response = await axios.get('http://localhost:5000/student/getAllApplications');
+    if (response.data.success) {
+      const sortedApps = response.data.applications.sort((a, b) => new Date(b.applyDate) - new Date(a.applyDate));
+      setApplications(sortedApps);
     }
-  };
+  } catch (error) {
+    console.error("Error refreshing applications:", error);
+  }
+};
+
 
   const handleOpenEditModal = (application) => {
     setSelectedApplication(application);
@@ -52,26 +52,27 @@ const closeViewModal = () => {
 };
 
 
-  useEffect(() => {
-
-    const fetchApplications = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get('http://localhost:5000/student/getAllApplications');
-        if (response.data.success) {
-          setApplications(response.data.applications);
-        } else {
-          setError('Failed to fetch applications');
-        }
-      } catch (error) {
-        setError(error.message || 'Failed to fetch applications');
-      } finally {
-        setLoading(false);
+useEffect(() => {
+  const fetchApplications = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('http://localhost:5000/student/getAllApplications');
+      if (response.data.success) {
+        const sortedApps = response.data.applications.sort((a, b) => new Date(b.applyDate) - new Date(a.applyDate));
+        setApplications(sortedApps);
+      } else {
+        setError('Failed to fetch applications');
       }
-    };
+    } catch (error) {
+      setError(error.message || 'Failed to fetch applications');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchApplications();
-  }, []);
+  fetchApplications();
+}, []);
+
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
