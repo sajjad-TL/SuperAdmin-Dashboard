@@ -15,9 +15,52 @@ import {
 } from "recharts";
 import { useNavigate } from 'react-router-dom';
 import Admin from '../layout/Adminnavbar';
+import axios from 'axios';
 
 export default function MigraconDashboard() {
     const navigate = useNavigate();
+
+
+
+    const [applications, setApplications] = useState([]);
+ const [topAgents, setTopAgents] = useState([]);
+    const [loadingTopAgents, setLoadingTopAgents] = useState(true);
+    useEffect(() => {
+        const fetchApplications = async () => {
+            try {
+                const response = await axios.get('http://localhost:5000/student/getAllApplications');
+                if (response.data.success) {
+                    setApplications(response.data.applications);
+                }
+            } catch (error) {
+                console.error("Error fetching applications:", error);
+            }
+        };
+
+        fetchApplications();
+    }, []);
+
+     // Fetch top agents
+    useEffect(() => {
+        const fetchTopAgents = async () => {
+            try {
+                setLoadingTopAgents(true);
+                const response = await axios.get('http://localhost:5000/agent/top-agents');
+                if (response.data.success) {
+                    setTopAgents(response.data.topAgents);
+                }
+            } catch (error) {
+                console.error("Error fetching top agents:", error);
+            } finally {
+                setLoadingTopAgents(false);
+            }
+        };
+
+        fetchTopAgents();
+    }, []);
+
+    const approvedApplications = applications.filter(app => app.status === "Accepted");
+
 
     const users = [
         { name: 'Sarah Chen', university: 'University of Toronto - Computer Science', status: 'New', color: 'green' },
@@ -96,7 +139,7 @@ export default function MigraconDashboard() {
                     {/* Dashboard Content */}
                     <div className="p-8">
                         {/* Metrics Cards */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                             <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-300">
                                 <div className="flex justify-between items-center mb-3">
                                     <div className="h-5 w-5 bg-cyan-500 rounded-full"></div>
@@ -104,9 +147,12 @@ export default function MigraconDashboard() {
                                 </div>
                                 <div className='flex flex-col'>
                                     <div className="text-gray-500 text-sm">Total Applications</div>
-                                    <div className="font-bold text-xl mt-1">1,234</div>
+                                    <div className="font-bold text-xl mt-1">
+                                        {applications.length.toLocaleString()}
+                                    </div>
                                 </div>
                             </div>
+
 
                             <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-300">
                                 <div className="flex justify-between items-center mb-3">
@@ -115,7 +161,7 @@ export default function MigraconDashboard() {
                                 </div>
                                 <div className='flex flex-col'>
                                     <div className="text-gray-500 text-sm">Approved Applications</div>
-                                    <div className="font-bold text-xl mt-1">856</div>
+                                    <div className="font-bold text-xl mt-1">{approvedApplications.length}</div>
                                 </div>
                             </div>
 
@@ -200,73 +246,68 @@ export default function MigraconDashboard() {
                                 </div>
                             </div>
 
-                            {/* Top Performing Agents */}
+                               {/* Top Performing Agents - Updated with Dynamic Data */}
                             <div className="bg-white rounded-2xl border border-gray-300 shadow-sm">
                                 <div className="p-4 flex justify-between items-center">
                                     <h2 className="font-semibold text-lg">Top Performing Agents</h2>
                                     <a href="#" className="text-sm text-black hover:underline">View All</a>
                                 </div>
                                 <div className="p-4 space-y-4">
-                                    <div className="bg-gray-100 p-3 rounded-lg border border-gray-300">
-                                        <div className='flex flex-row'>
-
-                                            <div className="flex items-center mb-3">
-                                                <div className="h-10 w-10 bg-gray-300 rounded-full mr-3 overflow-hidden">
-                                                    <img src={avatar} alt="Avatar" className="rounded-full" />
-                                                </div>
-                                            </div>
-
-                                            <div className='flex flex-col leading-8'>
-                                                <div>
-                                                    <div className='text-md'>Michael Chen</div>
-                                                </div>
-                                                <div className="spce grid grid-cols-3 overflow-x-auto scrollbar-hide gap-8 text-sm">
-                                                    <div>
-                                                        <div className="text-gray-500">Applications</div>
-                                                        <div className="font-medium">45</div>
-                                                    </div>
-                                                    <div className='pl-2'>
-                                                        <div className="text-gray-500 ">Success Rate</div>
-                                                        <div className="font-medium">92%</div>
-                                                    </div>
-                                                    <div className='pr-2'>
-                                                        <div className="text-gray-500">Revenue</div>
-                                                        <div className="font-medium">$125K</div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                    {loadingTopAgents ? (
+                                        <div className="flex justify-center items-center py-8">
+                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
                                         </div>
-                                    </div>
-
-                                    <div className="bg-gray-100 p-3 rounded-lg border border-gray-300">
-                                        <div className='flex flex-row'>
-
-                                            <div className="flex items-center mb-3">
-                                                <div className="h-10 w-10 bg-gray-300 rounded-full mr-3 overflow-hidden">
-                                                    <img src={avatar} alt="Avatar" className="rounded-full" />
-                                                </div>
-
-                                            </div>
-                                            <div className='flex flex-col leading-8'>
-                                                <div>
-                                                    <div className='text-md'>Emma Wilson</div>
-                                                </div>
-                                                <div className="spce grid grid-cols-3 overflow-x-auto scrollbar-hide gap-8 text-sm">                                                    <div>
-                                                    <div className="text-gray-500">Applications</div>
-                                                    <div className="font-medium">38</div>
-                                                </div>
-                                                    <div className='pl-2'>
-                                                        <div className="text-gray-500 ">Success Rate</div>
-                                                        <div className="font-medium">88%</div>
+                                    ) : topAgents.length > 0 ? (
+                                        topAgents.map((agent, index) => (
+                                            <div key={agent.agentId} className="bg-gray-100 p-3 rounded-lg border border-gray-300">
+                                                <div className='flex flex-row'>
+                                                    <div className="flex items-center mb-3">
+                                                        <div className="h-10 w-10 bg-gray-300 rounded-full mr-3 overflow-hidden">
+                                                            {agent.profilePicture ? (
+                                                                <img 
+                                                                    src={agent.profilePicture} 
+                                                                    alt="Avatar" 
+                                                                    className="w-full h-full object-cover rounded-full" 
+                                                                />
+                                                            ) : (
+                                                                <div className="w-full h-full bg-gray-300 rounded-full flex items-center justify-center">
+                                                                    <span className="text-gray-600 font-medium">
+                                                                        {agent.firstName.charAt(0)}{agent.lastName.charAt(0)}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                    <div className='pr-2'>
-                                                        <div className="text-gray-500">Revenue</div>
-                                                        <div className="font-medium">$98K</div>
+
+                                                    <div className='flex flex-col leading-8'>
+                                                        <div>
+                                                            <div className='text-md font-medium'>
+                                                                {agent.firstName} {agent.lastName}
+                                                            </div>
+                                                        </div>
+                                                        <div className="grid grid-cols-3 overflow-x-auto scrollbar-hide gap-8 text-sm">
+                                                            <div>
+                                                                <div className="text-gray-500">Applications</div>
+                                                                <div className="font-medium">{agent.totalApplications}</div>
+                                                            </div>
+                                                            <div className='pl-2'>
+                                                                <div className="text-gray-500">Success Rate</div>
+                                                                <div className="font-medium">{agent.successRate}%</div>
+                                                            </div>
+                                                            <div className='pr-2'>
+                                                                <div className="text-gray-500">Revenue</div>
+                                                                <div className="font-medium">${(agent.totalRevenue / 1000).toFixed(0)}K</div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-8 text-gray-500">
+                                            No agents found
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

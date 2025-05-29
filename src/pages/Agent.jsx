@@ -2,11 +2,30 @@ import { FaPlus } from "react-icons/fa";
 import avatar from '../assets/avatar.png';
 import Admin from '../layout/Adminnavbar'
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 export default function Agent() {
 
 const navigate = useNavigate();
+   const [applications, setApplications] = useState([]);
 
+    useEffect(() => {
+        const fetchApplications = async () => {
+            try {
+                const response = await axios.get('http://localhost:5000/student/getAllApplications');
+                if (response.data.success) {
+                    setApplications(response.data.applications);
+                }
+            } catch (error) {
+                console.error("Error fetching applications:", error);
+            }
+        };
+
+        fetchApplications();
+    }, []);
+
+    const approvedApplications = applications.filter(app => app.status === "Accepted");
      const handleAddAgent = () => {
     navigate('/create-agent');
   };
@@ -45,27 +64,30 @@ const navigate = useNavigate();
                         <div className="p-8 bg-gray-100">
                             {/* Metrics Cards */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-6">
-                                <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-300">
-                                    <div className="flex justify-between items-center mb-3">
-                                        <div className="h-5 w-5 bg-cyan-500 rounded-full"></div>
-                                        <span className="text-black text-sm font-medium">+15.2%</span>
-                                    </div>
-                                    <div className='flex flex-col'>
-                                        <div className="text-gray-500 text-sm">Total Applications</div>
-                                        <div className="font-bold text-xl mt-1">1,234</div>
+                            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-300">
+                                <div className="flex justify-between items-center mb-3">
+                                    <div className="h-5 w-5 bg-cyan-500 rounded-full"></div>
+                                    <span className="text-black text-sm font-medium">+15.2%</span>
+                                </div>
+                                <div className='flex flex-col'>
+                                    <div className="text-gray-500 text-sm">Total Applications</div>
+                                    <div className="font-bold text-xl mt-1">
+                                        {applications.length.toLocaleString()}
                                     </div>
                                 </div>
+                            </div>
 
-                                <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-300">
-                                    <div className="flex justify-between items-center mb-3">
-                                        <div className="h-5 w-5 bg-green-500 rounded-full"></div>
-                                        <span className="text-black text-sm font-medium">+8.5%</span>
-                                    </div>
-                                    <div className='flex flex-col'>
-                                        <div className="text-gray-500 text-sm">Approved Applications</div>
-                                        <div className="font-bold text-xl mt-1">856</div>
-                                    </div>
+
+                            <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-300">
+                                <div className="flex justify-between items-center mb-3">
+                                    <div className="h-5 w-5 bg-green-500 rounded-full"></div>
+                                    <span className="text-black text-sm font-medium">+8.5%</span>
                                 </div>
+                                <div className='flex flex-col'>
+                                    <div className="text-gray-500 text-sm">Approved Applications</div>
+                                    <div className="font-bold text-xl mt-1">{approvedApplications.length}</div>
+                                </div>
+                            </div>
 
                                 <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-300">
                                     <div className="flex justify-between items-center mb-3">
