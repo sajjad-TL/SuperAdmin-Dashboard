@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import avatar from '../assets/avatar.png';
+import axios from 'axios';
 import {
     LineChart,
     Line,
@@ -15,9 +16,13 @@ import {
 } from "recharts";
 import { useNavigate } from 'react-router-dom';
 import Admin from '../layout/Adminnavbar';
+import { Link } from 'react-router-dom';
 
 export default function MigraconDashboard() {
+
+    const [applications, setApplications] = useState([]);
     const navigate = useNavigate();
+
 
     const users = [
         { name: 'Sarah Chen', university: 'University of Toronto - Computer Science', status: 'New', color: 'green' },
@@ -63,6 +68,22 @@ export default function MigraconDashboard() {
         { name: "Jun", paid: 30, offers: 25, visas: 22, promos: 7 },
         { name: "Jul", paid: 40, offers: 35, visas: 32, promos: 12 },
     ];
+
+    useEffect(() => {
+        const fetchApplications = async () => {
+            try {
+                const response = await fetch("http://localhost:5000/student/latestApplications");
+                const data = await response.json();
+                setApplications(data.latestApplications); // ✅ fix here
+            } catch (error) {
+                console.error("Failed to fetch applications", error);
+            }
+        };
+
+        fetchApplications();
+    }, []);
+
+
 
     return (
         <div className="div">
@@ -150,9 +171,11 @@ export default function MigraconDashboard() {
                         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                             {/* Recent Applications */}
                             <div className="bg-white rounded-2xl border border-gray-300 shadow-sm lg:col-span-2">
-                                <div className="p-4 flex justify-between items-center ">
+                                <div className="p-4 flex justify-between items-center">
                                     <h2 className="font-semibold text-lg">Recent Applications</h2>
-                                    <a href="#" className="text-sm text-black hover:underline">View All</a>
+                                    <Link to="/application" className="text-sm text-black hover:underline">
+                                        View All
+                                    </Link>
                                 </div>
                                 <div className="overflow-x-auto">
                                     <table className="min-w-full">
@@ -166,35 +189,26 @@ export default function MigraconDashboard() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td
-                                                    className="px-4 py-3 text-base text-blue-600 cursor-pointer hover:underline"
-                                                    onClick={() => navigate('/agentprofile')}
-                                                >
-                                                    Sarah Johnson
-                                                </td>
-                                                <td className="px-4 py-3 text-sm">Computer Science</td>
-                                                <td className="px-4 py-3 text-sm">University of Toronto</td>
-                                                <td className="px-4 py-3">
-                                                    <span className="px-2 py-1 text-black rounded text-xs font-medium">PENDING</span>
-                                                </td>
-                                                <td className="px-4 py-3 text-sm text-gray-500">2024-01-20</td>
-                                            </tr>
-
-                                            <tr>
-                                                <td
-                                                    className="px-4 py-3 text-base text-blue-600 cursor-pointer hover:underline"
-                                                    onClick={() => navigate('/agentprofile')}
-                                                >
-                                                    Sarah Johnson
-                                                </td>
-                                                <td className="px-4 py-3 text-sm">Business Administration</td>
-                                                <td className="px-4 py-3 text-sm">McGill University</td>
-                                                <td className="px-4 py-3">
-                                                    <span className="px-2 py-1 text-black rounded text-xs font-medium">APPROVED</span>
-                                                </td>
-                                                <td className="px-4 py-3 text-sm text-gray-500">2024-01-14</td>
-                                            </tr>
+                                            {applications.map((app, index) => (
+                                                <tr key={index}>
+                                                    <td
+                                                        className="px-4 py-3 text-base text-blue-600 cursor-pointer hover:underline"
+                                                        onClick={() => navigate(`/studentprofile/${app.studentId}`)}
+                                                    >
+                                                        {app.firstName} {app.lastName}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm">{app.program}</td>
+                                                    <td className="px-4 py-3 text-sm">{app.institute}</td>
+                                                    <td className="px-4 py-3">
+                                                        <span className="px-2 py-1 text-black rounded text-xs font-medium">
+                                                            {app.status}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-500">
+                                                        {new Date(app.createdAt).toLocaleDateString()}
+                                                    </td>
+                                                </tr>
+                                            ))}
                                         </tbody>
                                     </table>
                                 </div>
@@ -207,66 +221,38 @@ export default function MigraconDashboard() {
                                     <a href="#" className="text-sm text-black hover:underline">View All</a>
                                 </div>
                                 <div className="p-4 space-y-4">
-                                    <div className="bg-gray-100 p-3 rounded-lg border border-gray-300">
-                                        <div className='flex flex-row'>
-
-                                            <div className="flex items-center mb-3">
-                                                <div className="h-10 w-10 bg-gray-300 rounded-full mr-3 overflow-hidden">
-                                                    <img src={avatar} alt="Avatar" className="rounded-full" />
-                                                </div>
-                                            </div>
-
-                                            <div className='flex flex-col leading-8'>
-                                                <div>
-                                                    <div className='text-md'>Michael Chen</div>
-                                                </div>
-                                                <div className="spce grid grid-cols-3 overflow-x-auto scrollbar-hide gap-8 text-sm">
-                                                    <div>
-                                                        <div className="text-gray-500">Applications</div>
-                                                        <div className="font-medium">45</div>
-                                                    </div>
-                                                    <div className='pl-2'>
-                                                        <div className="text-gray-500 ">Success Rate</div>
-                                                        <div className="font-medium">92%</div>
-                                                    </div>
-                                                    <div className='pr-2'>
-                                                        <div className="text-gray-500">Revenue</div>
-                                                        <div className="font-medium">$125K</div>
+                                    {[{
+                                        name: 'Michael Chen', apps: 45, success: '92%', revenue: '$125K'
+                                    }, {
+                                        name: 'Emma Wilson', apps: 38, success: '88%', revenue: '$98K'
+                                    }].map((agent, index) => (
+                                        <div key={index} className="bg-gray-100 p-3 rounded-lg border border-gray-300">
+                                            <div className='flex flex-row'>
+                                                <div className="flex items-center mb-3">
+                                                    <div className="h-10 w-10 bg-gray-300 rounded-full mr-3 overflow-hidden">
+                                                        <img src={avatar} alt="Avatar" className="rounded-full" />
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="bg-gray-100 p-3 rounded-lg border border-gray-300">
-                                        <div className='flex flex-row'>
-
-                                            <div className="flex items-center mb-3">
-                                                <div className="h-10 w-10 bg-gray-300 rounded-full mr-3 overflow-hidden">
-                                                    <img src={avatar} alt="Avatar" className="rounded-full" />
-                                                </div>
-
-                                            </div>
-                                            <div className='flex flex-col leading-8'>
-                                                <div>
-                                                    <div className='text-md'>Emma Wilson</div>
-                                                </div>
-                                                <div className="spce grid grid-cols-3 overflow-x-auto scrollbar-hide gap-8 text-sm">                                                    <div>
-                                                    <div className="text-gray-500">Applications</div>
-                                                    <div className="font-medium">38</div>
-                                                </div>
-                                                    <div className='pl-2'>
-                                                        <div className="text-gray-500 ">Success Rate</div>
-                                                        <div className="font-medium">88%</div>
-                                                    </div>
-                                                    <div className='pr-2'>
-                                                        <div className="text-gray-500">Revenue</div>
-                                                        <div className="font-medium">$98K</div>
+                                                <div className='flex flex-col leading-8'>
+                                                    <div className='text-md'>{agent.name}</div>
+                                                    <div className="grid grid-cols-3 overflow-x-auto scrollbar-hide gap-8 text-sm">
+                                                        <div>
+                                                            <div className="text-gray-500">Applications</div>
+                                                            <div className="font-medium">{agent.apps}</div>
+                                                        </div>
+                                                        <div className='pl-2'>
+                                                            <div className="text-gray-500">Success Rate</div>
+                                                            <div className="font-medium">{agent.success}</div>
+                                                        </div>
+                                                        <div className='pr-2'>
+                                                            <div className="text-gray-500">Revenue</div>
+                                                            <div className="font-medium">{agent.revenue}</div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>

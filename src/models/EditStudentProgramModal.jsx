@@ -199,7 +199,7 @@ const handleSave = async () => {
                     onChange={handleChange}
                     className="w-full p-2 border rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none"
                   >
-                    <option value="">Select Status</option>
+                    <option value="">{formData.status}</option>
                     <option value="admitted">Admitted</option>
                     <option value="rejected">Rejected</option>
                     <option value="in-progress">In Progress</option>
