@@ -138,7 +138,7 @@ const [applications, setApplications] = useState([]);
                                                 <tr key={index}>
                                                     <td
                                                         className="px-4 py-3 text-base text-blue-600 cursor-pointer hover:underline"
-                                                        onClick={() => navigate(`/studentprofile/${app.studentId}`)}
+                                                        onClick={() => navigate(`/agentprofile`)}
                                                     >
                                                         {app.firstName} {app.lastName}
                                                     </td>

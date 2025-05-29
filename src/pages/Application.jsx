@@ -18,17 +18,17 @@ export default function StudentTable() {
 
 
   // Function to refresh applications
-const refreshApplications = async () => {
-  try {
-    const response = await axios.get('http://localhost:5000/student/getAllApplications');
-    if (response.data.success) {
-      const sortedApps = response.data.applications.sort((a, b) => new Date(b.applyDate) - new Date(a.applyDate));
-      setApplications(sortedApps);
+  const refreshApplications = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/student/getAllApplications');
+      if (response.data.success) {
+        const sortedApps = response.data.applications.sort((a, b) => new Date(b.applyDate) - new Date(a.applyDate));
+        setApplications(sortedApps);
+      }
+    } catch (error) {
+      console.error("Error refreshing applications:", error);
     }
-  } catch (error) {
-    console.error("Error refreshing applications:", error);
-  }
-};
+  };
 
 
   const handleOpenEditModal = (application) => {
@@ -42,36 +42,36 @@ const refreshApplications = async () => {
   };
 
   const handleOpenApplication = (application) => {
-  setSelectedApplication(application);
-  setIsViewModalOpen(true);
-};
-
-const closeViewModal = () => {
-  setIsViewModalOpen(false);
-  setSelectedApplication(null);
-};
-
-
-useEffect(() => {
-  const fetchApplications = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get('http://localhost:5000/student/getAllApplications');
-      if (response.data.success) {
-        const sortedApps = response.data.applications.sort((a, b) => new Date(b.applyDate) - new Date(a.applyDate));
-        setApplications(sortedApps);
-      } else {
-        setError('Failed to fetch applications');
-      }
-    } catch (error) {
-      setError(error.message || 'Failed to fetch applications');
-    } finally {
-      setLoading(false);
-    }
+    setSelectedApplication(application);
+    setIsViewModalOpen(true);
   };
 
-  fetchApplications();
-}, []);
+  const closeViewModal = () => {
+    setIsViewModalOpen(false);
+    setSelectedApplication(null);
+  };
+
+
+  useEffect(() => {
+    const fetchApplications = async () => {
+      try {
+        // setLoading(true);
+        const response = await axios.get('http://localhost:5000/student/getAllApplications');
+        if (response.data.success) {
+          const sortedApps = response.data.applications.sort((a, b) => new Date(b.applyDate) - new Date(a.applyDate));
+          setApplications(sortedApps);
+        } else {
+          setError('Failed to fetch applications');
+        }
+      } catch (error) {
+        setError(error.message || 'Failed to fetch applications');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchApplications();
+  }, []);
 
 
   const formatDate = (dateString) => {
@@ -123,13 +123,13 @@ useEffect(() => {
           />
         )}
         {isViewModalOpen && selectedApplication && (
-         <ViewApplication
-          onClose={closeViewModal}
-          refreshApplications={refreshApplications}
-          studentId={selectedApplication.studentId}
-          applicationId={selectedApplication.applicationId}
-          existingData={selectedApplication}
-        />
+          <ViewApplication
+            onClose={closeViewModal}
+            refreshApplications={refreshApplications}
+            studentId={selectedApplication.studentId}
+            applicationId={selectedApplication.applicationId}
+            existingData={selectedApplication}
+          />
 
         )}
 
@@ -184,16 +184,16 @@ useEffect(() => {
                       <td className="px-4 py-3 font-semibold uppercase text-sm">
                         <span
                           className={`px-2 py-1 rounded-full text-xs ${application.status?.toLowerCase() === 'accepted'
-                              ? 'bg-green-100 text-green-800'
-                              : application.status?.toLowerCase() === 'pending'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : application.status?.toLowerCase() === 'rejected'
-                                  ? 'bg-red-100 text-red-800'
-                                  : application.status?.toLowerCase() === 'withdrawn'
-                                    ? 'bg-gray-100 text-gray-800'
-                                    : application.status?.toLowerCase() === 'not-paid'
-                                      ? 'bg-orange-100 text-orange-800'
-                                      : 'bg-gray-100 text-gray-800'
+                            ? 'bg-green-100 text-green-800'
+                            : application.status?.toLowerCase() === 'pending'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : application.status?.toLowerCase() === 'rejected'
+                                ? 'bg-red-100 text-red-800'
+                                : application.status?.toLowerCase() === 'withdrawn'
+                                  ? 'bg-gray-100 text-gray-800'
+                                  : application.status?.toLowerCase() === 'not-paid'
+                                    ? 'bg-orange-100 text-orange-800'
+                                    : 'bg-gray-100 text-gray-800'
                             }`}
                         >
                           {application.status || 'UNKNOWN'}
@@ -208,13 +208,13 @@ useEffect(() => {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex justify-center items-center gap-4">
-                        <button
-                          className="text-gray-600 hover:text-blue-600 transition-colors"
-                          title="View Application"
-                          onClick={() => handleOpenApplication(application)}
-                        >
-                          <FaEye />
-                        </button>
+                          <button
+                            className="text-gray-600 hover:text-blue-600 transition-colors"
+                            title="View Application"
+                            onClick={() => handleOpenApplication(application)}
+                          >
+                            <FaEye />
+                          </button>
 
                           <button
                             className="text-gray-600 hover:text-green-600 transition-colors"
