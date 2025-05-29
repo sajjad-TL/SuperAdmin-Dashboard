@@ -22,22 +22,26 @@ export default function EditStudentProgramModal({ onClose, student, onUpdate }) 
     }
   }, [student]);
 
-  useEffect(() => {
-    if (student && selectedApplicationId) {
-      const selectedApp = student.applications?.find(
-        (app) => app._id === selectedApplicationId
-      );
+useEffect(() => {
+  if (student) {
+    const defaultAppId = student.applications?.[0]?._id || "";
+    setSelectedApplicationId((prev) => prev || defaultAppId);
 
-      setFormData({
-        firstName: student.firstName || "",
-        lastName: student.lastName || "",
-        program: selectedApp?.program || "",
-        university: selectedApp?.institute || "",
-        status: student.status?.toLowerCase() || "",
-        payment: student.payment?.toLowerCase() || "",
-      });
-    }
-  }, [student, selectedApplicationId]);
+    const selectedApp = student.applications?.find(
+      (app) => app._id === (selectedApplicationId || defaultAppId)
+    );
+
+    setFormData({
+      firstName: student.firstName || "",
+      lastName: student.lastName || "",
+      program: selectedApp?.program || "",
+      university: selectedApp?.institute || "",
+      status: student.status?.toLowerCase() || "",
+      payment: student.payment?.toLowerCase() || "",
+    });
+  }
+}, [student, selectedApplicationId]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -195,7 +199,7 @@ const handleSave = async () => {
                     onChange={handleChange}
                     className="w-full p-2 border rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none"
                   >
-                    <option value="">Select Status</option>
+                    <option value="">{formData.status}</option>
                     <option value="admitted">Admitted</option>
                     <option value="rejected">Rejected</option>
                     <option value="in-progress">In Progress</option>

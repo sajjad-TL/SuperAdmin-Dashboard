@@ -16,8 +16,10 @@ import {
 import { useNavigate } from 'react-router-dom';
 import Admin from '../layout/Adminnavbar';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 export default function MigraconDashboard() {
+
     const navigate = useNavigate();
 
 
@@ -60,6 +62,7 @@ export default function MigraconDashboard() {
     }, []);
 
     const approvedApplications = applications.filter(app => app.status === "Accepted");
+
 
 
     const users = [
@@ -106,6 +109,22 @@ export default function MigraconDashboard() {
         { name: "Jun", paid: 30, offers: 25, visas: 22, promos: 7 },
         { name: "Jul", paid: 40, offers: 35, visas: 32, promos: 12 },
     ];
+
+    useEffect(() => {
+        const fetchApplications = async () => {
+            try {
+                const response = await fetch("http://localhost:5000/student/latestApplications");
+                const data = await response.json();
+                setApplications(data.latestApplications); // ✅ fix here
+            } catch (error) {
+                console.error("Failed to fetch applications", error);
+            }
+        };
+
+        fetchApplications();
+    }, []);
+
+
 
     return (
         <div className="div">
@@ -196,9 +215,11 @@ export default function MigraconDashboard() {
                         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                             {/* Recent Applications */}
                             <div className="bg-white rounded-2xl border border-gray-300 shadow-sm lg:col-span-2">
-                                <div className="p-4 flex justify-between items-center ">
+                                <div className="p-4 flex justify-between items-center">
                                     <h2 className="font-semibold text-lg">Recent Applications</h2>
-                                    <a href="#" className="text-sm text-black hover:underline">View All</a>
+                                    <Link to="/application" className="text-sm text-black hover:underline">
+                                        View All
+                                    </Link>
                                 </div>
                                 <div className="overflow-x-auto">
                                     <table className="min-w-full">
@@ -212,35 +233,26 @@ export default function MigraconDashboard() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td
-                                                    className="px-4 py-3 text-base text-blue-600 cursor-pointer hover:underline"
-                                                    onClick={() => navigate('/agentprofile')}
-                                                >
-                                                    Sarah Johnson
-                                                </td>
-                                                <td className="px-4 py-3 text-sm">Computer Science</td>
-                                                <td className="px-4 py-3 text-sm">University of Toronto</td>
-                                                <td className="px-4 py-3">
-                                                    <span className="px-2 py-1 text-black rounded text-xs font-medium">PENDING</span>
-                                                </td>
-                                                <td className="px-4 py-3 text-sm text-gray-500">2024-01-20</td>
-                                            </tr>
-
-                                            <tr>
-                                                <td
-                                                    className="px-4 py-3 text-base text-blue-600 cursor-pointer hover:underline"
-                                                    onClick={() => navigate('/agentprofile')}
-                                                >
-                                                    Sarah Johnson
-                                                </td>
-                                                <td className="px-4 py-3 text-sm">Business Administration</td>
-                                                <td className="px-4 py-3 text-sm">McGill University</td>
-                                                <td className="px-4 py-3">
-                                                    <span className="px-2 py-1 text-black rounded text-xs font-medium">APPROVED</span>
-                                                </td>
-                                                <td className="px-4 py-3 text-sm text-gray-500">2024-01-14</td>
-                                            </tr>
+                                            {applications.map((app, index) => (
+                                                <tr key={index}>
+                                                    <td
+                                                        className="px-4 py-3 text-base text-blue-600 cursor-pointer hover:underline"
+                                                        onClick={() => navigate(`/studentprofile/${app.studentId}`)}
+                                                    >
+                                                        {app.firstName} {app.lastName}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm">{app.program}</td>
+                                                    <td className="px-4 py-3 text-sm">{app.institute}</td>
+                                                    <td className="px-4 py-3">
+                                                        <span className="px-2 py-1 text-black rounded text-xs font-medium">
+                                                            {app.status}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-500">
+                                                        {new Date(app.createdAt).toLocaleDateString()}
+                                                    </td>
+                                                </tr>
+                                            ))}
                                         </tbody>
                                     </table>
                                 </div>

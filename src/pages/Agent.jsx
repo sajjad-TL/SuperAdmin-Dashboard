@@ -1,9 +1,10 @@
+import { useState, useEffect } from 'react';
 import { FaPlus } from "react-icons/fa";
 import avatar from '../assets/avatar.png';
 import Admin from '../layout/Adminnavbar'
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from "react";
 import axios from "axios";
+import { Link } from 'lucide-react';
 
 export default function Agent() {
 
@@ -29,6 +30,20 @@ const navigate = useNavigate();
      const handleAddAgent = () => {
     navigate('/create-agent');
   };
+
+   useEffect(() => {
+          const fetchApplications = async () => {
+              try {
+                  const response = await fetch("http://localhost:5000/student/latestApplications");
+                  const data = await response.json();
+                  setApplications(data.latestApplications);
+              } catch (error) {
+                  console.error("Failed to fetch applications", error);
+              }
+          };
+  
+          fetchApplications();
+      }, []);
 
     return (
         <div className="agent">
@@ -119,44 +134,48 @@ const navigate = useNavigate();
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                                 {/* Recent Applications */}
                                 <div className="bg-white rounded-2xl border border-gray-300 shadow-sm lg:col-span-2">
-                                    <div className="p-4 flex justify-between items-center ">
-                                        <h2 className="font-semibold text-lg">Recent Applications</h2>
-                                        <a href="#" className="text-sm text-black hover:underline">View All</a>
-                                    </div>
-                                    <div className="overflow-x-auto">
-                                        <table className="min-w-full">
-                                            <thead>
-                                                <tr className="text-xs text-gray-500 uppercase border-b">
-                                                    <th className="px-4 py-3 text-left">Student</th>
-                                                    <th className="px-4 py-3 text-left">Program</th>
-                                                    <th className="px-4 py-3 text-left">School</th>
-                                                    <th className="px-4 py-3 text-left">Status</th>
-                                                    <th className="px-4 py-3 text-left">Date</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td className="px-4 py-3">John Smith</td>
-                                                    <td className="px-4 py-3 text-sm">Computer Science</td>
-                                                    <td className="px-4 py-3 text-sm">University of Toronto</td>
-                                                    <td className="px-4 py-3">
-                                                        <span className="px-2 py-1  text-black rounded text-xs font-medium">PENDING</span>
-                                                    </td>
-                                                    <td className="px-4 py-3 text-sm text-gray-500">2024-01-20</td>
-                                                </tr>
-                                                <tr>
-                                                    <td className="px-4 py-3">Sarah Johnson</td>
-                                                    <td className="px-4 py-3 text-sm">Business Administration</td>
-                                                    <td className="px-4 py-3 text-sm">McGill University</td>
-                                                    <td className="px-4 py-3">
-                                                        <span className="px-2 py-1 text-black rounded text-xs font-medium">APPROVED</span>
-                                                    </td>
-                                                    <td className="px-4 py-3 text-sm text-gray-500">2024-01-14</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                <div className="p-4 flex justify-between items-center">
+                                    <h2 className="font-semibold text-lg">Recent Applications</h2>
+                                    <Link to="/application" className="text-sm text-black hover:underline">
+                                        View All
+                                    </Link>
                                 </div>
+                                <div className="overflow-x-auto">
+                                    <table className="min-w-full">
+                                        <thead>
+                                            <tr className="text-xs text-gray-500 uppercase border-b">
+                                                <th className="px-4 py-3 text-left">Student</th>
+                                                <th className="px-4 py-3 text-left">Program</th>
+                                                <th className="px-4 py-3 text-left">School</th>
+                                                <th className="px-4 py-3 text-left">Status</th>
+                                                <th className="px-4 py-3 text-left">Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {applications.map((app, index) => (
+                                                <tr key={index}>
+                                                    <td
+                                                        className="px-4 py-3 text-base text-blue-600 cursor-pointer hover:underline"
+                                                        onClick={() => navigate(`/studentprofile/${app.studentId}`)}
+                                                    >
+                                                        {app.firstName} {app.lastName}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm">{app.program}</td>
+                                                    <td className="px-4 py-3 text-sm">{app.institute}</td>
+                                                    <td className="px-4 py-3">
+                                                        <span className="px-2 py-1 text-black rounded text-xs font-medium">
+                                                            {app.status}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-500">
+                                                        {new Date(app.createdAt).toLocaleDateString()}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
 
                                 {/* Top Performing Agents */}
                                 <div className="bg-white rounded-2xl border border-gray-300 shadow-sm">
