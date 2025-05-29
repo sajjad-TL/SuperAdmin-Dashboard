@@ -6,7 +6,7 @@ import { Upload, Image, X, File } from 'lucide-react';
 
 export default function StudentProfile() {
   const [student, setStudent] = useState(null);
-    const { studentId } = useParams(); // e.g., URL: /student/12345
+  const { studentId } = useParams(); // e.g., URL: /student/12345
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
   const [applications, setApplications] = useState([]);
@@ -28,7 +28,7 @@ export default function StudentProfile() {
       const data = await response.json();
 
       if (data.success) {
-      console.log(data)
+        console.log(data)
         setStudent(data.student);
         setEditedStudent(data.student);
         setApplications(data.student.applications || []);
@@ -71,7 +71,7 @@ export default function StudentProfile() {
   };
 
 
-useEffect(() => {
+  useEffect(() => {
     const storedFiles = localStorage.getItem('uploadedFiles');
     if (storedFiles) {
       setUploadedFiles(JSON.parse(storedFiles));
@@ -150,9 +150,9 @@ useEffect(() => {
   // Format date
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
@@ -365,192 +365,68 @@ useEffect(() => {
                     <p className="font-medium">{student.gender || 'N/A'}</p>
                   )}
                 </div>
-
-                <div className="sm:col-span-2">
-                  <p className="text-sm text-gray-500">Passport Number</p>
-                  {editMode ? (
-                    <input
-                      type="text"
-                      value={editedStudent.passportNumber || ''}
-                      onChange={(e) => handleInputChange('passportNumber', e.target.value)}
-                      className="border rounded px-2 py-1 font-medium w-full"
-                    />
-                  ) : (
-                    <p className="font-medium">{student.passportNumber || 'N/A'}</p>
-                  )}
-                </div>
               </div>
             </div>
           </div>
 
           {/* Documents */}
-         <div className="">
-      <div className="bg-white p-6 rounded-lg shadow-sm">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800">Documents & Files</h2>
-          <div className="text-sm text-gray-500">
-            Total Files: {uploadedFiles.length}
-          </div>
-        </div>
-
-        {/* Upload Area */}
-        <div 
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-            isDragging 
-              ? 'border-[#2A7B88] bg-blue-50' 
-              : 'border-gray-300 hover:border-[#2A7B88]'
-          }`}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          <div className="flex flex-col items-center space-y-4">
-            <div className="p-4 bg-[#2A7B88] bg-opacity-10 rounded-full">
-              <Upload size={32} className="text-[#2A7B88]" />
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Documents</h2>
+              <button className="bg-[#2A7B88] text-white px-3 py-1 rounded text-sm flex items-center space-x-1 hover:bg-[#1f5d66]">
+                <Upload size={16} />
+                <span>Upload New</span>
+              </button>
             </div>
-            <div>
-              <h3 className="text-lg font-medium text-gray-700 mb-2">
-                Upload Your Files
-              </h3>
-              <p className="text-gray-500 mb-4">
-                Drag and drop files here, or click to browse
-              </p>
-              <p className="text-sm text-gray-400">
-                Supports: PDF, DOC, DOCX, JPG, PNG, GIF (Max 10MB)
-              </p>
-            </div>
-            <label className="bg-[#2A7B88] text-white px-6 py-2 rounded-lg cursor-pointer hover:bg-[#1f5d66] transition-colors flex items-center space-x-2">
-              <Upload size={16} />
-              <span>Choose Files</span>
-              <input 
-                type="file" 
-                multiple 
-                className="hidden" 
-                onChange={handleInputChange}
-                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
-              />
-            </label>
-          </div>
-        </div>
 
-        {/* Uploaded Files Display */}
-        <div className="mt-8">
-          <h3 className="text-lg font-semibold mb-4 flex items-center">
-            <FileText size={20} className="mr-2" />
-            Uploaded Files ({uploadedFiles.length})
-          </h3>
-
-          {uploadedFiles.length > 0 ? (
             <div className="space-y-3">
-              {uploadedFiles.map((file) => (
-                <div key={file.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
-                  <div className="flex items-center space-x-4">
-                    {/* File Icon/Preview */}
-                    <div className="flex-shrink-0">
-                      {file.isImage ? (
-                        file.preview ? (
-                          <img
-                            src={file.preview}
-                            alt={file.name}
-                            className="w-12 h-12 object-cover rounded border"
-                          />
-                        ) : (
-                          <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
-                            <Image size={20} className="text-gray-400" />
-                          </div>
-                        )
-                      ) : (
-                        <div className="w-12 h-12 bg-blue-100 rounded flex items-center justify-center">
-                          <File size={20} className="text-blue-600" />
+              {student.documents && student.documents.length > 0 ? (
+                student.documents.map((doc, index) => (
+                  <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-gray-100 rounded-2xl">
+                    <div className="flex items-center mb-2 sm:mb-0">
+                      <div className="mr-4">
+                        <div className="p-2 rounded">
+                          <FileText size={20} />
                         </div>
-                      )}
-                    </div>
-
-                    {/* File Info */}
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-800 truncate max-w-xs">
-                        {file.name}
-                      </h4>
-                      <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
-                        <span className="flex items-center">
-                          <Calendar size={14} className="mr-1" />
-                          {formatDate(file.uploadDate)}
-                        </span>
-                        <span>{formatFileSize(file.size)}</span>
-                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
-                          {file.status}
-                        </span>
+                      </div>
+                      <div>
+                        <span className="block font-medium text-gray-800">{doc.title}</span>
+                        <span className="text-sm text-gray-500">{formatDate(doc.uploadDate)}</span>
                       </div>
                     </div>
+                    <div className="text-sm font-semibold text-green-600">
+                      {doc.status || 'Uploaded'}
+                    </div>
                   </div>
-
-                  {/* Remove Button */}
-                  <button
-                    onClick={() => removeFile(file.id)}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-full transition-colors"
-                    title="Remove file"
-                  >
-                    <X size={16} />
-                  </button>
+                ))
+              ) : (
+                <div className="text-center py-4 text-gray-500">
+                  No documents uploaded yet
                 </div>
-              ))}
+              )}
             </div>
-          ) : (
-            <div className="text-center py-12 text-gray-500">
-              <div className="flex flex-col items-center space-y-3">
-                <div className="p-4 bg-gray-100 rounded-full">
-                  <FileText size={32} className="text-gray-400" />
-                </div>
-                <p className="text-lg">No files uploaded yet</p>
-                <p className="text-sm">Upload your first document or image above</p>
-              </div>
-            </div>
-          )}
-        </div>
+          </div>
 
-        {/* File Statistics */}
-        {uploadedFiles.length > 0 && (
-          <div className="mt-6 p-4 bg-[#2A7B88] bg-opacity-5 rounded-lg">
-            <div className="flex flex-wrap gap-6 text-sm">
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                <span>Documents: {uploadedFiles.filter(f => !f.isImage).length}</span>
+
+
+
+
+          {/* Agent Information */}
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <h2 className="text-lg font-semibold mb-4">Linked Sub Agent</h2>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center p-4 bg-gray-100 rounded-2xl">
+              <div className="mb-4 sm:mb-0 sm:mr-4">
+                <div className="rounded-full w-12 h-12 bg-[#2A7B88] flex items-center justify-center text-white font-bold">
+                  <User size={20} />
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span>Images: {uploadedFiles.filter(f => f.isImage).length}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                <span>Total Size: {formatFileSize(uploadedFiles.reduce((acc, f) => acc + f.size, 0))}</span>
+              <div>
+                <h3 className="font-medium">Agent ID: {student.agentId || 'Not Assigned'}</h3>
+                <p className="text-sm text-gray-500">Status: {student.status || 'Active'}</p>
+                <p className="text-sm text-gray-500">Referral: {student.referralSource || 'Direct'}</p>
               </div>
             </div>
           </div>
-        )}
-      </div>
-    </div>
-        
-
-          {/* Agent Information */}
-
-<div className="bg-white p-6 rounded-lg shadow-sm">
-  <h2 className="text-lg font-semibold mb-4">Linked Agent</h2>
-  {student ? (
-    <div className="flex items-center space-x-4">
-      <div className="rounded-full w-12 h-12 bg-[#2A7B88] flex items-center justify-center text-white text-lg font-bold">
-        {student.firstName?.[0]}{student.lastName?.[0]}
-      </div>
-      <div>
-        <p className="font-semibold">Agent ID:  {student._id}</p>
-        <p className="text-sm text-gray-500">Status: {student.status}</p>
-        <p className="text-sm text-gray-500">Referral: {student.referralSource || 'N/A'}</p>
-      </div>
-    </div>
-  ) : (
-    <p className="text-gray-500">No agent linked to this student</p>
-  )}
-</div>
 
 
           {/* Applications */}
@@ -583,25 +459,6 @@ useEffect(() => {
                   No applications found
                 </div>
               )}
-            </div>
-          </div>
-
-          {/* Additional Info */}
-          <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-lg font-semibold mb-4">Additional Information</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <p className="text-sm text-gray-500">Country of Interest</p>
-                <p className="font-medium">{student.countryOfInterest || 'N/A'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Service of Interest</p>
-                <p className="font-medium">{student.serviceOfInterest || 'N/A'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Registration Date</p>
-                <p className="font-medium">{formatDate(student.createdAt)}</p>
-              </div>
             </div>
           </div>
         </div>
