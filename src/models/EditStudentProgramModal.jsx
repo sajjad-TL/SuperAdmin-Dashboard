@@ -53,7 +53,7 @@ useEffect(() => {
 
 const handleSave = async () => {
   try {
-    debugger
+    
     const response = await fetch("http://localhost:5000/student/update-student", {
       method: "PATCH",
       headers: {

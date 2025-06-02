@@ -1,26 +1,130 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, User, Phone, Calendar, MapPin, FileText, Edit } from 'lucide-react';
+import { Bell, Phone, Calendar, MapPin, FileText, Edit } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { Upload, Image, X, File } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
+import axios from "axios";
+
 
 export default function StudentProfile() {
-  const [student, setStudent] = useState(null);
-    const { studentId } = useParams(); // e.g., URL: /student/12345
-  const [uploadedFiles, setUploadedFiles] = useState([]);
-  const [isDragging, setIsDragging] = useState(false);
   const [applications, setApplications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [editedStudent, setEditedStudent] = useState({});
+  const { studentId } = useParams();
+  const [student, setStudent] = useState(null);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock student ID - replace with actual studentId from route params or context
+  useEffect(() => {
+    const fetchStudent = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`http://localhost:5000/student/${studentId}`);
+        setStudent(response.data.student || null);
 
-  // Base API URL - replace with your actual backend URL
-  const API_BASE = "http://localhost:5000/student"; // Update this
+        const docs = (response.data.student?.documents || []).map((doc) => {
+          const isImage = /\.(jpg|jpeg|png|gif)$/i.test(doc.filename);
+          return {
+            id: doc._id,
+            name: doc.filename,
+            size: 0,
+            preview: isImage ? `http://localhost:5000/uploads/${doc.filename}` : "",
+            uploadDate: new Date(doc.uploadedAt),
+            status: "Uploaded",
+            isImage,
+          };
+        });
 
-  // Fetch student data
+        setUploadedFiles(docs);
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to fetch student data");
+        setLoading(false);
+      }
+    };
+
+    fetchStudent();
+  }, [studentId]);
+
+  // Handle new file uploads
+  const handleInputChange = async (e) => {
+    const files = Array.from(e.target.files);
+
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("documentType", file.type.startsWith("image") ? "Image" : "Document");
+
+      try {
+        const response = await axios.post(
+          `http://localhost:5000/student/upload-document/${studentId}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        // Get the last uploaded document returned from server
+        const documentData = response.data?.student?.documents?.slice(-1)[0];
+
+        const newFile = {
+          id: documentData?._id || Date.now() + file.name,
+          name: documentData?.filename || file.name,
+          size: file.size,
+          preview: documentData
+            ? /\.(jpg|jpeg|png|gif)$/i.test(documentData.filename)
+              ? `http://localhost:5000/uploads/${documentData.filename}`
+              : ""
+            : "",
+          uploadDate: new Date(),
+          status: "Uploaded",
+          isImage: file.type.startsWith("image"),
+        };
+
+        setUploadedFiles((prev) => [...prev, newFile]);
+      } catch (uploadError) {
+        console.error("Upload failed:", uploadError);
+        alert(`Failed to upload ${file.name}`);
+      }
+    }
+  };
+
+  const formatFileSize = (size) => {
+    if (size === 0) return "0 B";
+    const i = Math.floor(Math.log(size) / Math.log(1024));
+    const sizes = ["B", "KB", "MB", "GB", "TB"];
+    return (size / Math.pow(1024, i)).toFixed(2) + " " + sizes[i];
+  };
+
+const removeFile = async (fileId) => {
+
+  const fileToRemove = uploadedFiles.find(f => f.id === fileId);
+  if (!fileToRemove) return;
+
+  const studentId = fileId; 
+  const filename = fileToRemove.name;
+
+  try {
+    const res = await axios.delete(
+      `http://localhost:5000/students/${studentId}/documents/${filename}`
+    );
+
+    if (res.data.success) {
+      setUploadedFiles(prev => prev.filter(f => f.id !== fileId));
+    } else {
+      console.error("Failed to delete file:", res.data.message);
+    }
+  } catch (error) {
+    console.error("Error deleting file:", error);
+  }
+};
+
+  
+  const API_BASE = "http://localhost:5000/student"; 
+
   const fetchStudent = async () => {
     try {
       setLoading(true);
@@ -28,7 +132,7 @@ export default function StudentProfile() {
       const data = await response.json();
 
       if (data.success) {
-      console.log(data)
+        console.log(data)
         setStudent(data.student);
         setEditedStudent(data.student);
         setApplications(data.student.applications || []);
@@ -42,7 +146,7 @@ export default function StudentProfile() {
     }
   };
 
-  // Update student data
+ 
   const updateStudent = async () => {
     try {
       const response = await fetch(`${API_BASE}/update-student`, {
@@ -70,89 +174,12 @@ export default function StudentProfile() {
     }
   };
 
-
-useEffect(() => {
-    const storedFiles = localStorage.getItem('uploadedFiles');
-    if (storedFiles) {
-      setUploadedFiles(JSON.parse(storedFiles));
-    }
-  }, []);
-
-  // Save files to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem('uploadedFiles', JSON.stringify(uploadedFiles));
-  }, [uploadedFiles]);
-
-  const handleFileUpload = (files) => {
-    const fileArray = Array.from(files);
-
-    fileArray.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const fileData = {
-          id: Date.now() + Math.random(),
-          name: file.name,
-          size: file.size,
-          type: file.type,
-          uploadDate: new Date().toISOString(),
-          status: 'Uploaded',
-          isImage: file.type.startsWith('image/'),
-          preview: file.type.startsWith('image/') ? e.target.result : null,
-        };
-        setUploadedFiles(prev => [...prev, fileData]);
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  // Input change handler
-  const handleInputChange = (e) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      handleFileUpload(files);
-    }
-  };
-
-  // Drag and drop handlers
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const files = e.dataTransfer.files;
-    if (files && files.length > 0) {
-      handleFileUpload(files);
-    }
-  };
-
-  // Remove file handler
-  const removeFile = (fileId) => {
-    setUploadedFiles(prev => prev.filter(file => file.id !== fileId));
-  };
-
-  // Format file size
-  const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
-  // Format date
+ 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
@@ -384,177 +411,122 @@ useEffect(() => {
           </div>
 
           {/* Documents */}
-         <div className="">
-      <div className="bg-white p-6 rounded-lg shadow-sm">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800">Documents & Files</h2>
-          <div className="text-sm text-gray-500">
-            Total Files: {uploadedFiles.length}
-          </div>
-        </div>
-
-        {/* Upload Area */}
-        <div 
-          className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-            isDragging 
-              ? 'border-[#2A7B88] bg-blue-50' 
-              : 'border-gray-300 hover:border-[#2A7B88]'
-          }`}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          <div className="flex flex-col items-center space-y-4">
-            <div className="p-4 bg-[#2A7B88] bg-opacity-10 rounded-full">
-              <Upload size={32} className="text-[#2A7B88]" />
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Documents</h2>
+              <label className="bg-[#2A7B88] text-white px-3 py-1 rounded text-sm flex items-center space-x-1 cursor-pointer hover:bg-[#1f5d66] transition">
+                <Upload size={16} />
+                <span>Upload New</span>
+                <input
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={handleInputChange}
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
+                />
+              </label>
             </div>
-            <div>
-              <h3 className="text-lg font-medium text-gray-700 mb-2">
-                Upload Your Files
-              </h3>
-              <p className="text-gray-500 mb-4">
-                Drag and drop files here, or click to browse
-              </p>
-              <p className="text-sm text-gray-400">
-                Supports: PDF, DOC, DOCX, JPG, PNG, GIF (Max 10MB)
-              </p>
-            </div>
-            <label className="bg-[#2A7B88] text-white px-6 py-2 rounded-lg cursor-pointer hover:bg-[#1f5d66] transition-colors flex items-center space-x-2">
-              <Upload size={16} />
-              <span>Choose Files</span>
-              <input 
-                type="file" 
-                multiple 
-                className="hidden" 
-                onChange={handleInputChange}
-                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
-              />
-            </label>
-          </div>
-        </div>
 
-        {/* Uploaded Files Display */}
-        <div className="mt-8">
-          <h3 className="text-lg font-semibold mb-4 flex items-center">
-            <FileText size={20} className="mr-2" />
-            Uploaded Files ({uploadedFiles.length})
-          </h3>
-
-          {uploadedFiles.length > 0 ? (
+            {/* Uploaded Files */}
             <div className="space-y-3">
-              {uploadedFiles.map((file) => (
-                <div key={file.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
-                  <div className="flex items-center space-x-4">
-                    {/* File Icon/Preview */}
-                    <div className="flex-shrink-0">
-                      {file.isImage ? (
-                        file.preview ? (
+              {uploadedFiles.length > 0 ? (
+                uploadedFiles.map((file) => (
+                  <div
+                    key={file.id}
+                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-gray-100 rounded-2xl"
+                  >
+                    <div className="flex items-center mb-2 sm:mb-0">
+                      <div className="mr-4">
+                        {file.isImage ? (
                           <img
                             src={file.preview}
                             alt={file.name}
-                            className="w-12 h-12 object-cover rounded border"
+                            className="w-10 h-10 object-cover rounded border"
                           />
                         ) : (
-                          <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center">
-                            <Image size={20} className="text-gray-400" />
+                          <div className="p-2 rounded bg-blue-100">
+                            <FileText size={20} className="text-blue-600" />
                           </div>
-                        )
-                      ) : (
-                        <div className="w-12 h-12 bg-blue-100 rounded flex items-center justify-center">
-                          <File size={20} className="text-blue-600" />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* File Info */}
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-800 truncate max-w-xs">
-                        {file.name}
-                      </h4>
-                      <div className="flex items-center space-x-4 text-sm text-gray-500 mt-1">
-                        <span className="flex items-center">
-                          <Calendar size={14} className="mr-1" />
-                          {formatDate(file.uploadDate)}
-                        </span>
-                        <span>{formatFileSize(file.size)}</span>
-                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
-                          {file.status}
+                        )}
+                      </div>
+                      <div>
+                        <span className="block font-medium text-gray-800">{file.name}</span>
+                        <span className="text-sm text-gray-500">{formatDate(file.uploadDate)}</span>
+                        <span className="block text-xs text-gray-400">
+                          {formatFileSize(file.size)}
                         </span>
                       </div>
                     </div>
+                    <div className="flex items-center gap-4 text-sm">
+                      <span className="text-green-700 bg-green-100 px-2 py-1 rounded-full text-xs">
+                        {file.status}
+                      </span>
+                      <button
+                        onClick={() => removeFile(file.id)}
+                        className="text-red-500 hover:text-red-700 p-1 rounded-full"
+                        title="Remove file"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
                   </div>
-
-                  {/* Remove Button */}
-                  <button
-                    onClick={() => removeFile(file.id)}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-full transition-colors"
-                    title="Remove file"
-                  >
-                    <X size={16} />
-                  </button>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <div className="flex flex-col items-center space-y-2">
+                    <div className="p-4 bg-gray-100 rounded-full">
+                      <FileText size={28} className="text-gray-400" />
+                    </div>
+                    <p className="text-sm">No documents uploaded yet</p>
+                    <p className="text-xs text-gray-400">Use the button above to add your files</p>
+                  </div>
                 </div>
-              ))}
+              )}
             </div>
-          ) : (
-            <div className="text-center py-12 text-gray-500">
-              <div className="flex flex-col items-center space-y-3">
-                <div className="p-4 bg-gray-100 rounded-full">
-                  <FileText size={32} className="text-gray-400" />
-                </div>
-                <p className="text-lg">No files uploaded yet</p>
-                <p className="text-sm">Upload your first document or image above</p>
-              </div>
-            </div>
-          )}
-        </div>
 
-        {/* File Statistics */}
-        {uploadedFiles.length > 0 && (
-          <div className="mt-6 p-4 bg-[#2A7B88] bg-opacity-5 rounded-lg">
-            <div className="flex flex-wrap gap-6 text-sm">
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                <span>Documents: {uploadedFiles.filter(f => !f.isImage).length}</span>
+            {/* File Stats */}
+            {uploadedFiles.length > 0 && (
+              <div className="mt-6 p-4 bg-[#2A7B88] bg-opacity-5 rounded-lg text-sm flex flex-wrap gap-6">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  <span>Documents: {uploadedFiles.filter((f) => !f.isImage).length}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span>Images: {uploadedFiles.filter((f) => f.isImage).length}</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <span>Total Size: {formatFileSize(uploadedFiles.reduce((acc, f) => acc + f.size, 0))}</span>
+                </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <span>Images: {uploadedFiles.filter(f => f.isImage).length}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                <span>Total Size: {formatFileSize(uploadedFiles.reduce((acc, f) => acc + f.size, 0))}</span>
-              </div>
-            </div>
+            )}
           </div>
-        )}
-      </div>
-    </div>
-        
+
 
           {/* Agent Information */}
 
-<div className="bg-white p-6 rounded-lg shadow-sm">
-  <h2 className="text-lg font-semibold mb-4">Linked Agent</h2>
-  {student ? (
-    <div className="flex items-center space-x-4">
-      <div className="rounded-full w-12 h-12 bg-[#2A7B88] flex items-center justify-center text-white text-lg font-bold">
-        {student.firstName?.[0]}{student.lastName?.[0]}
-      </div>
-      <div>
-        <p className="font-semibold">Agent ID:  {student._id}</p>
-        <p className="text-sm text-gray-500">Status: {student.status}</p>
-        <p className="text-sm text-gray-500">Referral: {student.referralSource || 'N/A'}</p>
-      </div>
-    </div>
-  ) : (
-    <p className="text-gray-500">No agent linked to this student</p>
-  )}
-</div>
+          <div className="bg-white p-6 rounded-lg shadow-sm mb-5">
+            <h2 className="text-lg font-semibold mb-4">Linked Agent</h2>
+            {student ? (
+              <div className="flex items-center space-x-4">
+                <div className="rounded-full w-12 h-12 bg-[#2A7B88] flex items-center justify-center text-white text-lg font-bold">
+                  {student.firstName?.[0]}{student.lastName?.[0]}
+                </div>
+                <div>
+                  <p className="font-semibold">Agent ID:  {student._id}</p>
+                  <p className="text-sm text-gray-500">Status: {student.status}</p>
+                  <p className="text-sm text-gray-500">Referral: {student.referralSource || 'N/A'}</p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-gray-500">No agent linked to this student</p>
+            )}
+          </div>
 
 
           {/* Applications */}
-          <div className="bg-white p-6 rounded-lg shadow-sm">
+          <div className="bg-white p-6 rounded-lg shadow-sm mb-5">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">Applications ({applications.length})</h2>
               <button className="text-md flex font-semibold items-center text-[#2A7B88] hover:underline">
@@ -586,24 +558,7 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Additional Info */}
-          <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-lg font-semibold mb-4">Additional Information</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <p className="text-sm text-gray-500">Country of Interest</p>
-                <p className="font-medium">{student.countryOfInterest || 'N/A'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Service of Interest</p>
-                <p className="font-medium">{student.serviceOfInterest || 'N/A'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Registration Date</p>
-                <p className="font-medium">{formatDate(student.createdAt)}</p>
-              </div>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>
