@@ -34,29 +34,26 @@ const StudentProgramModal = ({ isOpen, onClose, onStudentAdded }) => {
   };
 
   const [formData, setFormData] = useState(initialFormState);
-  const [selectdAgent, setSelectedAgent] = useState(""); // initialize with an empty string or null
- 
-    
 
 
   useEffect(() => {
 
-  const fetchAgents = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/agent/allagents/getAllAgents");
-      const data = await response.json();
-      console.log(data)
-      if (data.success && data.agents) {
-        setAgents(data.agents);
-      } else {
-        toast.error("Failed to fetch agents");
+    const fetchAgents = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/agent/allagents/getAllAgents");
+        const data = await response.json();
+        console.log(data)
+        if (data.success && data.agents) {
+          setAgents(data.agents);
+        } else {
+          toast.error("Failed to fetch agents");
+        }
+      } catch (error) {
+        toast.error("Error fetching agents");
       }
-    } catch (error) {
-      toast.error("Error fetching agents");
-    }
-  };
+    };
 
-if (isOpen) {
+    if (isOpen) {
       fetchAgents();
     }
 
@@ -82,7 +79,6 @@ if (isOpen) {
       [name]: type === "checkbox" ? checked : value,
     }));
 
-    // Clear validation error when field is updated
     if (validationErrors[name]) {
       setValidationErrors(prev => ({ ...prev, [name]: "" }));
     }
@@ -116,79 +112,79 @@ if (isOpen) {
     return Object.keys(errors).length === 0;
   };
 
-const handleSubmit = async () => {
-  if (!validateForm()) {
-    toast.error("Please fix the errors in the form");
-    return;
-  }
-
-{isSuperAdmin && (
-  <div className="mb-4">
-    <label className="block mb-2 font-medium text-gray-700">Select Agent</label>
-    <select
-      name="agentId"
-      value={formData.agentId || ""}
-      onChange={(e) =>
-        setFormData({ ...formData, agentId: e.target.value })
-      }
-      className="w-full p-2 border border-gray-300 rounded"
-    >
-      <option value="">-- Select Agent --</option>
-      {agents.map((agent) => (
-        <option key={agent._id} value={agent._id}>
-          {agent.firstName} {agent.lastName} ({agent.email})
-        </option>
-      ))}
-    </select>
-  </div>
-)}
-
-
-setIsSubmitting(true);
-console.log("Selected Agent ID:", formData.agentId);
-
-  try {
-    const apiUrl = 'http://localhost:5000/student/add-new';
-
-    const submitData = {
-      ...formData,
-      agentId: isSuperAdmin ? formData.agentId : formData.agentId, // Replace `currentUserAgentId` with actual value from auth
-    };
-
-    console.log('Submitting data:', submitData);
-
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(submitData),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      if (data?.message === "Student already exists") {
-        toast.error("Student with this email already exists.");
-        return;
-      }
-      throw new Error(data?.message || "Failed to add student");
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      toast.error("Please fix the errors in the form");
+      return;
     }
 
-    toast.success("Student added successfully!");
-    if (typeof onStudentAdded === 'function') {
-      onStudentAdded(data);
+    {
+      isSuperAdmin && (
+        <div className="mb-4">
+          <label className="block mb-2 font-medium text-gray-700">Select Agent</label>
+          <select
+            name="agentId"
+            value={formData.agentId || ""}
+            onChange={(e) =>
+              setFormData({ ...formData, agentId: e.target.value })
+            }
+            className="w-full p-2 border border-gray-300 rounded"
+          >
+            <option value="">-- Select Agent --</option>
+            {agents.map((agent) => (
+              <option key={agent._id} value={agent._id}>
+                {agent.firstName} {agent.lastName} ({agent.email})
+              </option>
+            ))}
+          </select>
+        </div>
+      )
     }
 
-    onClose();
-    setFormData(initialFormState);
-  } catch (err) {
-    console.error(err);
-    toast.error(err.message || "Failed to add student!");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
 
+    setIsSubmitting(true);
+    console.log("Selected Agent ID:", formData.agentId);
 
+    try {
+      const apiUrl = 'http://localhost:5000/student/add-new';
+
+      const submitData = {
+        ...formData,
+        agentId: isSuperAdmin ? formData.agentId : formData.agentId, // Replace `currentUserAgentId` with actual value from auth
+      };
+
+      console.log('Submitting data:', submitData);
+
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(submitData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data?.message === "Student already exists") {
+          toast.error("Student with this email already exists.");
+          return;
+        }
+        throw new Error(data?.message || "Failed to add student");
+      }
+
+      toast.success("Student added successfully!");
+      if (typeof onStudentAdded === 'function') {
+        onStudentAdded(data);
+      }
+
+      onClose();
+      setFormData(initialFormState);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || "Failed to add student!");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const renderField = (name, label, type = "text", placeholder = "", options = [], required = false) => {
     const error = validationErrors[name];
