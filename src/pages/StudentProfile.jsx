@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Upload, X } from 'lucide-react';
 import axios from "axios";
+import { FaRegTrashCan } from "react-icons/fa6";
 
 
 export default function StudentProfile() {
@@ -48,49 +49,51 @@ export default function StudentProfile() {
   }, [studentId]);
 
   // Handle new file uploads
-  const handleInputChange = async (e) => {
-    const files = Array.from(e.target.files);
+const handleInputChange = async (e) => {
+  const files = Array.from(e.target.files);
 
-    for (const file of files) {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("documentType", file.type.startsWith("image") ? "Image" : "Document");
+  for (const file of files) {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("documentType", file.type.startsWith("image") ? "Image" : "Document");
 
-      try {
-        const response = await axios.post(
-          `http://localhost:5000/student/upload-document/${studentId}`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+    try {
+      const response = await axios.post(
+        `http://localhost:5000/student/upload-document/${studentId}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
-        // Get the last uploaded document returned from server
-        const documentData = response.data?.student?.documents?.slice(-1)[0];
+      const documentData = response.data?.document;
 
-        const newFile = {
-          id: documentData?._id || Date.now() + file.name,
-          name: documentData?.filename || file.name,
-          size: file.size,
-          preview: documentData
-            ? /\.(jpg|jpeg|png|gif)$/i.test(documentData.filename)
-              ? `http://localhost:5000/uploads/${documentData.filename}`
-              : ""
-            : "",
-          uploadDate: new Date(),
-          status: "Uploaded",
-          isImage: file.type.startsWith("image"),
-        };
-
-        setUploadedFiles((prev) => [...prev, newFile]);
-      } catch (uploadError) {
-        console.error("Upload failed:", uploadError);
-        alert(`Failed to upload ${file.name}`);
+      if (!documentData) {
+        console.error("No document returned from server");
+        continue;
       }
+
+      const isImage = /\.(jpg|jpeg|png|gif)$/i.test(documentData.filename);
+
+      const newFile = {
+        id: documentData._id || Date.now() + file.name,
+        name: documentData.filename,
+        size: file.size,
+        preview: isImage ? `http://localhost:5000/uploads/${documentData.filename}` : "",
+        uploadDate: new Date(),
+        status: "Uploaded",
+        isImage,
+      };
+
+      setUploadedFiles((prev) => [...prev, newFile]);
+    } catch (uploadError) {
+      console.error("Upload failed:", uploadError);
+      alert(`Failed to upload ${file.name}`);
     }
-  };
+  }
+};
 
   const formatFileSize = (size) => {
     if (size === 0) return "0 B";
@@ -100,25 +103,33 @@ export default function StudentProfile() {
   };
 
 const removeFile = async (fileId) => {
-
   const fileToRemove = uploadedFiles.find(f => f.id === fileId);
-  if (!fileToRemove) return;
+  if (!fileToRemove) {
+    console.error("File not found in uploaded files");
+    return;
+  }
 
-  const studentId = fileId; 
+  // Use the correct studentId from useParams, not fileId
   const filename = fileToRemove.name;
 
   try {
+    console.log("Deleting file:", filename, "for student:", studentId);
+    
     const res = await axios.delete(
-      `http://localhost:5000/students/${studentId}/documents/${filename}`
+      `http://localhost:5000/student/students/${studentId}/documents/${filename}`
     );
 
     if (res.data.success) {
+      // Remove file from UI immediately
       setUploadedFiles(prev => prev.filter(f => f.id !== fileId));
+      toast.success("Document deleted successfully");
     } else {
       console.error("Failed to delete file:", res.data.message);
+      toast.error("Failed to delete document");
     }
   } catch (error) {
     console.error("Error deleting file:", error);
+    toast.error("Error deleting document");
   }
 };
 
@@ -466,7 +477,7 @@ const removeFile = async (fileId) => {
                         className="text-red-500 hover:text-red-700 p-1 rounded-full"
                         title="Remove file"
                       >
-                        <X size={16} />
+                        <FaRegTrashCan size={16} />
                       </button>
                     </div>
                   </div>
