@@ -200,9 +200,8 @@ const handleSave = async () => {
                     className="w-full p-2 border rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none"
                   >
                     <option value="">{formData.status}</option>
-                    <option value="admitted">Admitted</option>
-                    <option value="rejected">Rejected</option>
-                    <option value="in-progress">In Progress</option>
+                    <option value="Inactive">In Active</option>
+                    <option value="Pending">Pending</option>
                   </select>
                 </div>
                 <div>

@@ -136,7 +136,8 @@ export default function ApplicationForm({ onClose, refreshApplications }) {
                             <option value="Accepted">Accepted</option>
                             <option value="Rejected">Rejected</option>
                             <option value="Withdrawn">Withdrawn</option>
-                            <option value="not-paid">not paid</option>
+                            <option value="not-paid">Not paid</option>
+                            <option value="Paid">Paid</option>
                         </select>
                     </div>
 
