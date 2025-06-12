@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronLeft, Info } from 'lucide-react';
 import Admin from '../layout/Adminnavbar';
 import axios from 'axios';
-import html2pdf from "html2pdf.js";
+// import { Info } from 'lucide-react';
 
 export default function NewPayment() {
   const [paymentMethod, setPaymentMethod] = useState(null);
@@ -13,7 +13,6 @@ export default function NewPayment() {
   const [selectedAgent, setSelectedAgent] = useState('');
   const [summary, setSummary] = useState(null);
   const [showReceiptModal, setShowReceiptModal] = useState(false);
-   const receiptRef = useRef(null);
 
   useEffect(() => {
 
@@ -97,18 +96,6 @@ const handleSubmit = async () => {
 
     const handleViewReceipt = () => {
     setShowReceiptModal(true);
-  };
-
-  const handleDownloadPDF = () => {
-    const element = receiptRef.current;
-    const opt = {
-      margin: 0.5,
-      filename: `Receipt_${summary?.transactionId || "receipt"}.pdf`,
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
-    };
-    html2pdf().set(opt).from(element).save();
   };
   
 
@@ -323,7 +310,7 @@ const handleSubmit = async () => {
     </div>
 
           {/* Right column - Payment Summary */}
-     <div className="lg:w-80">
+        <div className="lg:w-80">
         <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-lg font-medium text-gray-900 mb-4">Payment Summary</h2>
 
@@ -364,17 +351,22 @@ const handleSubmit = async () => {
               </div>
             </div>
 
-            <div className="mt-4 space-x-2">
-              <button
-                onClick={handleViewReceipt}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
-              >
-                View Receipt
-              </button>
-            </div>
+            {/* View Receipt Button */}
+        {summary && summary.transactionId && (
+  <div className="mt-4 space-x-2">
+    <button
+      onClick={handleViewReceipt}
+      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+    >
+      View Receipt
+    </button>
+  </div>
+)}
+
           </div>
         </div>
 
+        {/* Payment Notice */}
         <div className="bg-blue-50 rounded-lg p-4">
           <div className="flex">
             <Info size={18} className="text-blue-500 mr-2 flex-shrink-0 mt-0.5" />
@@ -388,41 +380,49 @@ const handleSubmit = async () => {
         </div>
       </div>
 
-      {/* Modal for receipt */}
+      {/* Receipt Modal */}
       {showReceiptModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setShowReceiptModal(false)}>
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={() => setShowReceiptModal(false)}
+        >
           <div
-            className="bg-white rounded-lg p-6 w-[500px] max-w-full shadow"
+            className="bg-white rounded-lg p-6 w-96 max-w-full"
             onClick={(e) => e.stopPropagation()}
           >
-            <div ref={receiptRef}>
-              <h3 className="text-xl font-semibold mb-4">Payment Receipt</h3>
-              <div className="space-y-2 text-sm">
-                <p><strong>Transaction ID:</strong> {summary?.transactionId}</p>
-                <p><strong>Date:</strong> {summary ? new Date(summary.paymentDate).toLocaleString() : "N/A"}</p>
-                <p><strong>Status:</strong> {summary?.status}</p>
-                <p><strong>Subtotal:</strong> ${summary?.subtotal?.toFixed(2)}</p>
-                <p><strong>Processing Fee:</strong> ${summary?.processingFee?.toFixed(2)}</p>
-                <p><strong>Total Amount:</strong> ${summary?.amount?.toFixed(2)}</p>
-                <p><strong>Payment Method:</strong> {summary?.method}</p>
-                <p><strong>Agent ID:</strong> {summary?.agentId}</p>
-              </div>
-            </div>
+            <h3 className="text-xl font-semibold mb-4">Payment Receipt</h3>
+            <p>
+              <strong>Transaction ID:</strong> {summary?.transactionId || "N/A"}
+            </p>
+            <p>
+              <strong>Date:</strong>{" "}
+              {summary ? new Date(summary.paymentDate).toLocaleString() : "N/A"}
+            </p>
+            <p>
+              <strong>Status:</strong> {summary?.status || "N/A"}
+            </p>
+            <p>
+              <strong>Subtotal:</strong> ${summary?.subtotal?.toFixed(2) || "0.00"}
+            </p>
+            <p>
+              <strong>Processing Fee:</strong> ${summary?.processingFee?.toFixed(2) || "0.00"}
+            </p>
+            <p>
+              <strong>Total Amount:</strong> ${summary?.amount?.toFixed(2) || "0.00"}
+            </p>
+            <p>
+              <strong>Payment Method:</strong> {summary?.method || "N/A"}
+            </p>
+            <p>
+              <strong>Agent ID:</strong> {summary?.agentId || "N/A"}
+            </p>
 
-            <div className="mt-6 flex justify-end space-x-2">
-              <button
-                onClick={handleDownloadPDF}
-                className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded"
-              >
-                Download PDF
-              </button>
-              <button
-                onClick={() => setShowReceiptModal(false)}
-                className="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded"
-              >
-                Close
-              </button>
-            </div>
+            <button
+              onClick={() => setShowReceiptModal(false)}
+              className="mt-6 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
