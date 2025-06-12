@@ -1,15 +1,15 @@
-import React, { useEffect, useState, useRef, forwardRef  } from "react";
-import { Search, Calendar, SlidersHorizontal, FileDown, Eye, Download, X  } from "lucide-react";
+import React, { useEffect, useState, useRef, forwardRef } from "react";
+import { Search, Calendar, SlidersHorizontal, FileDown, Eye, Download, X } from "lucide-react";
 import TabLayout from "../layout/TabLayout";
 import html2pdf from "html2pdf.js";
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 export default function PaymentHistory() {
- const [transactions, setTransactions] = useState([]);
- const receiptRef = useRef();
- const [currentPage, setCurrentPage] = useState(1);
- const itemsPerPage = 6;
+  const [transactions, setTransactions] = useState([]);
+  const receiptRef = useRef();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
   // Calculate the range of items to show on the current page
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -17,18 +17,18 @@ export default function PaymentHistory() {
   // const currentTransactions = transactions.slice(indexOfFirstItem, indexOfLastItem);
 
   const [searchTerm, setSearchTerm] = useState('');
-const [selectedStatus, setSelectedStatus] = useState('All Payment Status');
-const [selectedMethod, setSelectedMethod] = useState('All Payment Method');
-const [filteredTransactions, setFilteredTransactions] = useState([]);
+  const [selectedStatus, setSelectedStatus] = useState('All Payment Status');
+  const [selectedMethod, setSelectedMethod] = useState('All Payment Method');
+  const [filteredTransactions, setFilteredTransactions] = useState([]);
 
 
   // const totalPages = Math.ceil(transactions.length / itemsPerPage);
 
-    const [selectedRequest, setSelectedRequest] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const uniqueStatuses = [...new Set(transactions.map((t) => t.status))];
-    const uniqueMethods = [...new Set(transactions.map((t) => t.paymentMethod))];
+  const uniqueStatuses = [...new Set(transactions.map((t) => t.status))];
+  const uniqueMethods = [...new Set(transactions.map((t) => t.paymentMethod))];
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedSecondDate, setSelectedSecondDate] = useState(null);
   const [isOpenFirst, setIsOpenFirst] = useState(false);
@@ -36,18 +36,18 @@ const [filteredTransactions, setFilteredTransactions] = useState([]);
   const firstInputRef = useRef(null);
   const secondInputRef = useRef(null);
   const currentTransactions = filteredTransactions.slice(indexOfFirstItem, indexOfLastItem);
-const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
 
-const CustomInput = forwardRef(({ value, onClick, placeholder }, ref) => (
-  <input
-    onClick={onClick}
-    ref={ref}
-    value={value || 'mm/dd/yyyy'}
-    placeholder={value ? '' : placeholder}
-    readOnly
-    className="pl-4 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 w-full"
-  />
-));
+  const CustomInput = forwardRef(({ value, onClick, placeholder }, ref) => (
+    <input
+      onClick={onClick}
+      ref={ref}
+      value={value || 'mm/dd/yyyy'}
+      placeholder={value ? '' : placeholder}
+      readOnly
+      className="pl-4 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 w-full"
+    />
+  ));
   const inputRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   // Handle page change
@@ -57,53 +57,53 @@ const CustomInput = forwardRef(({ value, onClick, placeholder }, ref) => (
   };
 
 
-const handleDownloadPDF = () => {
-  if (receiptRef.current) {
+  const handleDownloadPDF = () => {
+    if (receiptRef.current) {
 
-    const clonedElement = receiptRef.current.cloneNode(true);
-    const style = document.createElement("style");
-    style.innerHTML = `
+      const clonedElement = receiptRef.current.cloneNode(true);
+      const style = document.createElement("style");
+      style.innerHTML = `
       .no-print {
         display: none !important;
       }
     `;
-    clonedElement.appendChild(style);
+      clonedElement.appendChild(style);
 
-    clonedElement.style.overflow = "visible";
-    clonedElement.style.width = "1000px";
-    clonedElement.style.maxWidth = "none";
+      clonedElement.style.overflow = "visible";
+      clonedElement.style.width = "1000px";
+      clonedElement.style.maxWidth = "none";
 
-    document.body.appendChild(clonedElement);
+      document.body.appendChild(clonedElement);
 
-    const opt = {
-      margin: 0.3,
-      filename: 'payment-receipt.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: {
-        scale: 2,
-        scrollX: 0,
-        scrollY: 0,
-        useCORS: true,
-        logging: false
-      },
-      jsPDF: { unit: 'pt', format: 'a4', orientation: 'landscape' }
-    };
+      const opt = {
+        margin: 0.3,
+        filename: 'payment-receipt.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          scrollX: 0,
+          scrollY: 0,
+          useCORS: true,
+          logging: false
+        },
+        jsPDF: { unit: 'pt', format: 'a4', orientation: 'landscape' }
+      };
 
-    html2pdf().set(opt).from(clonedElement).save().then(() => {
+      html2pdf().set(opt).from(clonedElement).save().then(() => {
 
-      document.body.removeChild(clonedElement);
-    });
-  } else {
-    console.log("Receipt ref not found");
-  }
-};
-useEffect(() => {
-  console.log("transactions |", transactions);
-}, [transactions]);
+        document.body.removeChild(clonedElement);
+      });
+    } else {
+      console.log("Receipt ref not found");
+    }
+  };
+  useEffect(() => {
+    console.log("transactions |", transactions);
+  }, [transactions]);
 
 
   useEffect(() => {
-  
+
     const fetchAgentsWithPayments = async () => {
       try {
         const agentsRes = await fetch(`http://localhost:5000/agent/allagents/getAllAgents`);
@@ -118,7 +118,7 @@ useEffect(() => {
 
           if (Array.isArray(payments) && payments.length > 0) {
             payments.forEach((payment) => {
-          console.log(payment,"jiikuiw")
+              console.log(payment, "jiikuiw")
 
               result.push({
                 id: payment._id,
@@ -130,10 +130,10 @@ useEffect(() => {
                 amount: `$${payment.amount}`,
                 paymentMethod: payment.method || "N/A",
                 date: {
-                      full: new Date(payment.createdAt).toLocaleDateString(),
-                      time: new Date(payment.createdAt).toLocaleTimeString(),
-                      raw: payment.createdAt // NEW: For filtering
-                    },
+                  full: new Date(payment.createdAt).toLocaleDateString(),
+                  time: new Date(payment.createdAt).toLocaleTimeString(),
+                  raw: payment.createdAt // NEW: For filtering
+                },
 
 
                 status: payment.status,
@@ -151,47 +151,47 @@ useEffect(() => {
     fetchAgentsWithPayments();
   }, []);
 
-useEffect(() => {
-  let filtered = [...transactions];
+  useEffect(() => {
+    let filtered = [...transactions];
 
-  // Search
-  if (searchTerm.trim() !== '') {
-    filtered = filtered.filter((txn) =>
-      Object.values(txn).some((val) =>
-        String(val).toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    );
-  }
+    // Search
+    if (searchTerm.trim() !== '') {
+      filtered = filtered.filter((txn) =>
+        Object.values(txn).some((val) =>
+          String(val).toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      );
+    }
 
-  // Status
-  if (selectedStatus !== 'All Payment Status') {
-    filtered = filtered.filter((txn) => txn.status === selectedStatus);
-  }
+    // Status
+    if (selectedStatus !== 'All Payment Status') {
+      filtered = filtered.filter((txn) => txn.status === selectedStatus);
+    }
 
-  // Method
-  if (selectedMethod !== 'All Payment Method') {
-    filtered = filtered.filter((txn) => txn.paymentMethod === selectedMethod);
-  }
+    // Method
+    if (selectedMethod !== 'All Payment Method') {
+      filtered = filtered.filter((txn) => txn.paymentMethod === selectedMethod);
+    }
 
-  // Date range
- if (selectedDate && selectedSecondDate) {
-  const start = new Date(selectedDate.setHours(0, 0, 0, 0)).getTime();
-  const end = new Date(selectedSecondDate.setHours(23, 59, 59, 999)).getTime();
+    // Date range
+    if (selectedDate && selectedSecondDate) {
+      const start = new Date(selectedDate.setHours(0, 0, 0, 0)).getTime();
+      const end = new Date(selectedSecondDate.setHours(23, 59, 59, 999)).getTime();
 
-  filtered = filtered.filter((txn) => {
-    const raw = txn?.date?.raw;
-    if (!raw) return false;
+      filtered = filtered.filter((txn) => {
+        const raw = txn?.date?.raw;
+        if (!raw) return false;
 
-    const txnTime = new Date(raw).getTime();
-    return txnTime >= start && txnTime <= end;
-  });
-}
+        const txnTime = new Date(raw).getTime();
+        return txnTime >= start && txnTime <= end;
+      });
+    }
 
 
 
-  setFilteredTransactions(filtered);
-  setCurrentPage(1); // Reset to page 1 on filter
-}, [searchTerm, selectedStatus, selectedMethod, selectedDate, selectedSecondDate, transactions]);
+    setFilteredTransactions(filtered);
+    setCurrentPage(1); // Reset to page 1 on filter
+  }, [searchTerm, selectedStatus, selectedMethod, selectedDate, selectedSecondDate, transactions]);
 
 
   return (
@@ -204,95 +204,95 @@ useEffect(() => {
       <TabLayout />
 
       {/* Filters */}
-      <div  className="flex flex-col md:flex-row gap-3 mb-6">
+      <div className="flex flex-col md:flex-row gap-3 mb-6">
         <div className="relative flex-grow">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <input
             type="text"
             placeholder="Search transactions"
-             value={searchTerm}
-             onChange={(e) => setSearchTerm(e.target.value)}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
           <select
-  value={selectedStatus}
-  onChange={(e) => setSelectedStatus(e.target.value)}
-  className="border border-gray-300 rounded-md px-3 py-2 bg-white"
->
-  <option>All Payment Status</option>
-  {uniqueStatuses.map((status, index) => (
-    <option key={index}>{status}</option>
-  ))}
-</select>
+            value={selectedStatus}
+            onChange={(e) => setSelectedStatus(e.target.value)}
+            className="border border-gray-300 rounded-md px-3 py-2 bg-white"
+          >
+            <option>All Payment Status</option>
+            {uniqueStatuses.map((status, index) => (
+              <option key={index}>{status}</option>
+            ))}
+          </select>
 
-<select
-  value={selectedMethod}
-  onChange={(e) => setSelectedMethod(e.target.value)}
-  className="border border-gray-300 rounded-md px-3 py-2 bg-white"
->
-  <option>All Payment Method</option>
-  {uniqueMethods.map((method, index) => (
-    <option key={index}>{method}</option>
-  ))}
-</select>
+          <select
+            value={selectedMethod}
+            onChange={(e) => setSelectedMethod(e.target.value)}
+            className="border border-gray-300 rounded-md px-3 py-2 bg-white"
+          >
+            <option>All Payment Method</option>
+            {uniqueMethods.map((method, index) => (
+              <option key={index}>{method}</option>
+            ))}
+          </select>
 
-      {/* First Date Picker */}
-      <div className="relative w-[220px]">
-        <DatePicker
-          selected={selectedDate}
-          onChange={(date) => {
-            setSelectedDate(date);
-            setIsOpenFirst(false);
-          }}
-          dateFormat="MM/dd/yyyy"
-          open={isOpenFirst}
-          onClickOutside={() => setIsOpenFirst(false)}
-          customInput={
-            <CustomInput
-              ref={firstInputRef}
-              placeholder="mm/dd/yyyy"
+          {/* First Date Picker */}
+          <div className="relative w-[220px]">
+            <DatePicker
+              selected={selectedDate}
+              onChange={(date) => {
+                setSelectedDate(date);
+                setIsOpenFirst(false);
+              }}
+              dateFormat="MM/dd/yyyy"
+              open={isOpenFirst}
+              onClickOutside={() => setIsOpenFirst(false)}
+              customInput={
+                <CustomInput
+                  ref={firstInputRef}
+                  placeholder="mm/dd/yyyy"
+                />
+              }
             />
-          }
-        />
-        <Calendar
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 cursor-pointer"
-          onClick={() => {
-            setIsOpenFirst(true);
-            setIsOpenSecond(false); // Close other picker
-          }}
-        />
-      </div>
-
-      {/* Second Date Picker */}
-      <div className="relative w-[220px]">
-        <DatePicker
-          selected={selectedSecondDate}
-          onChange={(date) => {
-            setSelectedSecondDate(date);
-            setIsOpenSecond(false);
-          }}
-          dateFormat="MM/dd/yyyy"
-          open={isOpenSecond}
-          onClickOutside={() => setIsOpenSecond(false)}
-          customInput={
-            <CustomInput
-              ref={secondInputRef}
-              placeholder="mm/dd/yyyy"
+            <Calendar
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 cursor-pointer"
+              onClick={() => {
+                setIsOpenFirst(true);
+                setIsOpenSecond(false); // Close other picker
+              }}
             />
-          }
-        />
-        <Calendar
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 cursor-pointer"
-          onClick={() => {
-            setIsOpenSecond(true);
-            setIsOpenFirst(false); // Close other picker
-          }}
-        />
-      </div>
- 
+          </div>
+
+          {/* Second Date Picker */}
+          <div className="relative w-[220px]">
+            <DatePicker
+              selected={selectedSecondDate}
+              onChange={(date) => {
+                setSelectedSecondDate(date);
+                setIsOpenSecond(false);
+              }}
+              dateFormat="MM/dd/yyyy"
+              open={isOpenSecond}
+              onClickOutside={() => setIsOpenSecond(false)}
+              customInput={
+                <CustomInput
+                  ref={secondInputRef}
+                  placeholder="mm/dd/yyyy"
+                />
+              }
+            />
+            <Calendar
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 cursor-pointer"
+              onClick={() => {
+                setIsOpenSecond(true);
+                setIsOpenFirst(false); // Close other picker
+              }}
+            />
+          </div>
+
         </div>
       </div>
 
@@ -313,147 +313,145 @@ useEffect(() => {
         </div>
 
         {/* Table */}
-     <div ref={receiptRef} className="overflow-x-auto">
-        <table className="min-w-full bg-white">
-          <thead>
-            <tr className="text-gray-500 text-sm uppercase">
-              <th className="py-3 px-4 text-left">Transaction ID</th>
-              <th className="py-3 px-4 text-left">Agent</th>
-              <th className="py-3 px-4 text-left">Amount</th>
-              <th className="py-3 px-4 text-left">Payment Method</th>
-              <th className="py-3 px-4 text-left">Date</th>
-              <th className="py-3 px-4 text-left">Status</th>
-              <th className="py-3 px-4 text-center no-print">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {currentTransactions.map(transaction => (
-              <tr key={transaction.id} className="hover:bg-gray-50">
-                <td className="py-4 px-4 text-sm text-gray-900">{transaction.id}</td>
-                <td className="py-4 px-4">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={transaction.agent.avatar}
-                      alt={transaction.agent.name}
-                      className="w-8 h-8 rounded-full"
-                    />
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{transaction.agent.name}</p>
-                      <p className="text-xs text-gray-500">ID: {transaction.agent.agentId}</p>
-                    </div>
-                  </div>
-                </td>
-                <td className="py-4 px-4 text-sm font-medium text-gray-900">{transaction.amount}</td>
-                <td className="py-4 px-4">
-                  <div className="flex items-center gap-2">
-                    {transaction.paymentMethod === "Bank Transfer" ? (
-                      <span className="w-5 h-5 bg-blue-100 text-blue-500 rounded flex items-center justify-center text-xs">🏦</span>
-                    ) : (
-                      <span className="w-5 h-5 bg-blue-100 text-blue-500 rounded flex items-center justify-center text-xs">P</span>
-                    )}
-                    <span className="text-sm text-gray-600">{transaction.paymentMethod}</span>
-                  </div>
-                </td>
-                <td className="py-4 px-4">
-                  <p className="text-sm text-gray-900">{transaction.date.full}</p>
-                  <p className="text-xs text-gray-500">{transaction.date.time}</p>
-                </td>
-                <td className="py-4 px-4">
-                  <span
-                    className={`px-2 py-1 text-xs rounded-full ${
-                      transaction.status === "Completed"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}
-                  >
-                    {transaction.status}
-                  </span>
-                </td>
-                <td className="py-4 px-4 no-print">
-                  <div className="flex justify-center gap-2">
-                     <button
-                                                  className="text-blue-500 hover:text-blue-700"
-                                                  onClick={() => {
-                                                    setSelectedRequest(transaction);
-                                                    setIsModalOpen(true);
-                                                  }}
-                                                >
-                                                  <Eye className="w-5 h-5" />
-                                                </button>
-                    <button onClick={() => handleDownloadPDF(transaction.id)} className="p-1 text-blue-500 hover:text-blue-700">
-                      <Download className="h-5 w-5" />
-                    </button>
-                  </div>
-                </td>
+        <div ref={receiptRef} className="overflow-x-auto">
+          <table className="min-w-full bg-white">
+            <thead>
+              <tr className="text-gray-500 text-sm uppercase">
+                <th className="py-3 px-4 text-left">Transaction ID</th>
+                <th className="py-3 px-4 text-left">Agent</th>
+                <th className="py-3 px-4 text-left">Amount</th>
+                <th className="py-3 px-4 text-left">Payment Method</th>
+                <th className="py-3 px-4 text-left">Date</th>
+                <th className="py-3 px-4 text-left">Status</th>
+                <th className="py-3 px-4 text-center no-print">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-
-         {isModalOpen && selectedRequest && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative">
-                            <button
-                              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-                              onClick={() => setIsModalOpen(false)}
-                            >
-                              <X className="w-5 h-5" />
-                            </button>
-                            <h2 className="text-lg font-semibold mb-4">Payment Request Details</h2>
-                            <div className="space-y-2 text-sm text-gray-700">
-                              <p><strong>Request ID:</strong> #{selectedRequest.transactionId}</p>
-                              <p><strong>Amount:</strong> ${selectedRequest.amount}</p>
-                              <p><strong>Method:</strong> {selectedRequest.paymentMethod}</p>
-                              <p><strong>Date:</strong> {new Date(selectedRequest.date.full).toLocaleDateString()}</p>
-                              <p><strong>Status:</strong> {selectedRequest.status}</p>
-                              <p><strong>Agent ID:</strong> {selectedRequest.agent.agentId}</p> {/* customize this based on your structure */}
-                            </div>
-                          </div>
-                        </div>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {currentTransactions.map(transaction => (
+                <tr key={transaction.id} className="hover:bg-gray-50">
+                  <td className="py-4 px-4 text-sm text-gray-900">{transaction.id}</td>
+                  <td className="py-4 px-4">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={transaction.agent.avatar}
+                        alt={transaction.agent.name}
+                        className="w-8 h-8 rounded-full"
+                      />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{transaction.agent.name}</p>
+                        <p className="text-xs text-gray-500">ID: {transaction.agent.agentId}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-4 text-sm font-medium text-gray-900">{transaction.amount}</td>
+                  <td className="py-4 px-4">
+                    <div className="flex items-center gap-2">
+                      {transaction.paymentMethod === "Bank Transfer" ? (
+                        <span className="w-5 h-5 bg-blue-100 text-blue-500 rounded flex items-center justify-center text-xs">🏦</span>
+                      ) : (
+                        <span className="w-5 h-5 bg-blue-100 text-blue-500 rounded flex items-center justify-center text-xs">P</span>
                       )}
-      </div>
+                      <span className="text-sm text-gray-600">{transaction.paymentMethod}</span>
+                    </div>
+                  </td>
+                  <td className="py-4 px-4">
+                    <p className="text-sm text-gray-900">{transaction.date.full}</p>
+                    <p className="text-xs text-gray-500">{transaction.date.time}</p>
+                  </td>
+                  <td className="py-4 px-4">
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full ${transaction.status === "Completed"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-yellow-100 text-yellow-800"
+                        }`}
+                    >
+                      {transaction.status}
+                    </span>
+                  </td>
+                  <td className="py-4 px-4 no-print">
+                    <div className="flex justify-center gap-2">
+                      <button
+                        className="text-blue-500 hover:text-blue-700"
+                        onClick={() => {
+                          setSelectedRequest(transaction);
+                          setIsModalOpen(true);
+                        }}
+                      >
+                        <Eye className="w-5 h-5" />
+                      </button>
+                      <button onClick={() => handleDownloadPDF(transaction.id)} className="p-1 text-blue-500 hover:text-blue-700">
+                        <Download className="h-5 w-5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
-      {/* Pagination controls */}
-      <div className="flex items-center justify-between text-sm mt-4">
-        <p className="text-gray-600">
-          Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, transactions.length)} of {transactions.length} entries
-        </p>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => goToPage(currentPage - 1)}
-            className="px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50"
-            disabled={currentPage === 1}
-          >
-            Previous
-          </button>
+          {isModalOpen && selectedRequest && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+              <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative">
+                <button
+                  className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <h2 className="text-lg font-semibold mb-4">Payment Request Details</h2>
+                <div className="space-y-2 text-sm text-gray-700">
+                  <p><strong>Request ID:</strong> #{selectedRequest.transactionId}</p>
+                  <p><strong>Amount:</strong> ${selectedRequest.amount}</p>
+                  <p><strong>Method:</strong> {selectedRequest.paymentMethod}</p>
+                  <p><strong>Date:</strong> {new Date(selectedRequest.date.full).toLocaleDateString()}</p>
+                  <p><strong>Status:</strong> {selectedRequest.status}</p>
+                  <p><strong>Agent ID:</strong> {selectedRequest.agent.agentId}</p> {/* customize this based on your structure */}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
-          {[...Array(totalPages)].map((_, idx) => {
-            const pageNum = idx + 1;
-            return (
-              <button
-                key={pageNum}
-                onClick={() => goToPage(pageNum)}
-                className={`px-3 py-1 border rounded-md ${
-                  pageNum === currentPage
-                    ? "border-blue-500 bg-blue-500 text-white"
-                    : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                {pageNum}
-              </button>
-            );
-          })}
+        {/* Pagination controls */}
+        <div className="flex items-center justify-between text-sm mt-4">
+          <p className="text-gray-600">
+            Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, transactions.length)} of {transactions.length} entries
+          </p>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => goToPage(currentPage - 1)}
+              className="px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50"
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
 
-          <button
-            onClick={() => goToPage(currentPage + 1)}
-            className="px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50"
-            disabled={currentPage === totalPages}
-          >
-            Next
-          </button>
+            {[...Array(totalPages)].map((_, idx) => {
+              const pageNum = idx + 1;
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => goToPage(pageNum)}
+                  className={`px-3 py-1 border rounded-md ${pageNum === currentPage
+                      ? "border-blue-500 bg-blue-500 text-white"
+                      : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                    }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+
+            <button
+              onClick={() => goToPage(currentPage + 1)}
+              className="px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50"
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
-    </div>
     </div>
   );
 }
