@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, forwardRef  } from "react";
 import { Search, Calendar, SlidersHorizontal, FileDown, Eye, Download, X  } from "lucide-react";
 import TabLayout from "../layout/TabLayout";
 import html2pdf from "html2pdf.js";
@@ -14,18 +14,42 @@ export default function PaymentHistory() {
   // Calculate the range of items to show on the current page
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentTransactions = transactions.slice(indexOfFirstItem, indexOfLastItem);
+  // const currentTransactions = transactions.slice(indexOfFirstItem, indexOfLastItem);
 
-  const totalPages = Math.ceil(transactions.length / itemsPerPage);
+  const [searchTerm, setSearchTerm] = useState('');
+const [selectedStatus, setSelectedStatus] = useState('All Payment Status');
+const [selectedMethod, setSelectedMethod] = useState('All Payment Method');
+const [filteredTransactions, setFilteredTransactions] = useState([]);
+
+
+  // const totalPages = Math.ceil(transactions.length / itemsPerPage);
 
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const uniqueStatuses = [...new Set(transactions.map((t) => t.status))];
     const uniqueMethods = [...new Set(transactions.map((t) => t.paymentMethod))];
-    
- const [startDate, setStartDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedSecondDate, setSelectedSecondDate] = useState(null);
+  const [isOpenFirst, setIsOpenFirst] = useState(false);
+  const [isOpenSecond, setIsOpenSecond] = useState(false);
+  const firstInputRef = useRef(null);
+  const secondInputRef = useRef(null);
+  const currentTransactions = filteredTransactions.slice(indexOfFirstItem, indexOfLastItem);
+const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+
+const CustomInput = forwardRef(({ value, onClick, placeholder }, ref) => (
+  <input
+    onClick={onClick}
+    ref={ref}
+    value={value || 'mm/dd/yyyy'}
+    placeholder={value ? '' : placeholder}
+    readOnly
+    className="pl-4 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 w-full"
+  />
+));
   const inputRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
   // Handle page change
   const goToPage = (pageNumber) => {
     if (pageNumber < 1 || pageNumber > totalPages) return;
@@ -106,9 +130,12 @@ useEffect(() => {
                 amount: `$${payment.amount}`,
                 paymentMethod: payment.method || "N/A",
                 date: {
-                  full: new Date(payment.createdAt).toLocaleDateString(),
-                  time: new Date(payment.createdAt).toLocaleTimeString(),
-                },
+                      full: new Date(payment.createdAt).toLocaleDateString(),
+                      time: new Date(payment.createdAt).toLocaleTimeString(),
+                      raw: payment.createdAt // NEW: For filtering
+                    },
+
+
                 status: payment.status,
               });
             });
@@ -123,6 +150,49 @@ useEffect(() => {
 
     fetchAgentsWithPayments();
   }, []);
+
+useEffect(() => {
+  let filtered = [...transactions];
+
+  // Search
+  if (searchTerm.trim() !== '') {
+    filtered = filtered.filter((txn) =>
+      Object.values(txn).some((val) =>
+        String(val).toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+  }
+
+  // Status
+  if (selectedStatus !== 'All Payment Status') {
+    filtered = filtered.filter((txn) => txn.status === selectedStatus);
+  }
+
+  // Method
+  if (selectedMethod !== 'All Payment Method') {
+    filtered = filtered.filter((txn) => txn.paymentMethod === selectedMethod);
+  }
+
+  // Date range
+ if (selectedDate && selectedSecondDate) {
+  const start = new Date(selectedDate.setHours(0, 0, 0, 0)).getTime();
+  const end = new Date(selectedSecondDate.setHours(23, 59, 59, 999)).getTime();
+
+  filtered = filtered.filter((txn) => {
+    const raw = txn?.date?.raw;
+    if (!raw) return false;
+
+    const txnTime = new Date(raw).getTime();
+    return txnTime >= start && txnTime <= end;
+  });
+}
+
+
+
+  setFilteredTransactions(filtered);
+  setCurrentPage(1); // Reset to page 1 on filter
+}, [searchTerm, selectedStatus, selectedMethod, selectedDate, selectedSecondDate, transactions]);
+
 
   return (
     <div className="w-full min-h-screen mx-auto bg-gray-50 rounded-lg p-6">
@@ -140,54 +210,89 @@ useEffect(() => {
           <input
             type="text"
             placeholder="Search transactions"
+             value={searchTerm}
+             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
-          <select className="border border-gray-300 rounded-md px-3 py-2 bg-white">
-            <option>All Payment Status</option>
-            {uniqueStatuses.map((status, index) => (
-        <option key={index}>{status}</option>
-      ))}
-          </select>
+          <select
+  value={selectedStatus}
+  onChange={(e) => setSelectedStatus(e.target.value)}
+  className="border border-gray-300 rounded-md px-3 py-2 bg-white"
+>
+  <option>All Payment Status</option>
+  {uniqueStatuses.map((status, index) => (
+    <option key={index}>{status}</option>
+  ))}
+</select>
 
-          <select className="border border-gray-300 rounded-md px-3 py-2 bg-white">
-            <option>All Payment Method</option>
-            {uniqueMethods.map((method, index) => (
-        <option key={index}>{method}</option>
-      ))}
-          </select>
+<select
+  value={selectedMethod}
+  onChange={(e) => setSelectedMethod(e.target.value)}
+  className="border border-gray-300 rounded-md px-3 py-2 bg-white"
+>
+  <option>All Payment Method</option>
+  {uniqueMethods.map((method, index) => (
+    <option key={index}>{method}</option>
+  ))}
+</select>
 
-          <div className="relative w-[220px]">
-      <DatePicker
-        selected={startDate}
-        onChange={(date) => setStartDate(date)}
-        customInput={
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder="mm/dd/yyyy"
-            className="pl-4 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 w-full"
-          />
-        }
-        dateFormat="MM/dd/yyyy"
-        popperPlacement="bottom-start"
-      />
-      <Calendar
-        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 cursor-pointer"
-        onClick={() => inputRef.current?.focus()}
-      />
-    </div>
-
-          <div className="relative">
-            <input
-              type="text"
+      {/* First Date Picker */}
+      <div className="relative w-[220px]">
+        <DatePicker
+          selected={selectedDate}
+          onChange={(date) => {
+            setSelectedDate(date);
+            setIsOpenFirst(false);
+          }}
+          dateFormat="MM/dd/yyyy"
+          open={isOpenFirst}
+          onClickOutside={() => setIsOpenFirst(false)}
+          customInput={
+            <CustomInput
+              ref={firstInputRef}
               placeholder="mm/dd/yyyy"
-              className="pl-4 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
-            <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          </div>
+          }
+        />
+        <Calendar
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 cursor-pointer"
+          onClick={() => {
+            setIsOpenFirst(true);
+            setIsOpenSecond(false); // Close other picker
+          }}
+        />
+      </div>
+
+      {/* Second Date Picker */}
+      <div className="relative w-[220px]">
+        <DatePicker
+          selected={selectedSecondDate}
+          onChange={(date) => {
+            setSelectedSecondDate(date);
+            setIsOpenSecond(false);
+          }}
+          dateFormat="MM/dd/yyyy"
+          open={isOpenSecond}
+          onClickOutside={() => setIsOpenSecond(false)}
+          customInput={
+            <CustomInput
+              ref={secondInputRef}
+              placeholder="mm/dd/yyyy"
+            />
+          }
+        />
+        <Calendar
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 cursor-pointer"
+          onClick={() => {
+            setIsOpenSecond(true);
+            setIsOpenFirst(false); // Close other picker
+          }}
+        />
+      </div>
+ 
         </div>
       </div>
 
