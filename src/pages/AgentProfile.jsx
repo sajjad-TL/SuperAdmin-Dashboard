@@ -1,8 +1,43 @@
-import { Bell, Upload } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
+import moment from 'moment';
+import { Upload } from 'lucide-react';
 import Admin from '../layout/Adminnavbar';
 import { TbEdit } from "react-icons/tb";
 
-export default function StudentProfile() {
+export default function AgentProfile() {
+  const { agentId } = useParams();
+  const [agent, setAgent] = useState(null);
+
+useEffect(() => {
+
+  const fetchAgent = async () => {
+    try {
+      const res = await axios.get(`http://localhost:5000/agent/allagents/getAllAgents`);
+      const agents = res.data.agents;
+      console.log("All agents:", agents);
+      console.log("agentId from URL:", agentId);
+
+      const found = agents.find((a) => a._id === agentId);
+      console.log("Found agent:", found);
+
+      if (found) {
+        setAgent(found);
+      } else {
+        console.warn("Agent not found");
+      }
+    } catch (error) {
+      console.error("Failed to fetch agent:", error);
+    }
+  };
+
+  if (agentId) {
+    fetchAgent();
+  }
+}, [agentId]);
+
+  if (!agent) return <div className="p-10">Loading agent profile...</div>;
 
   return (
     <>
@@ -14,10 +49,9 @@ export default function StudentProfile() {
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
             <div>
               <h1 className="text-xl font-bold text-gray-800">Agent Profile</h1>
-              <p className="text-sm text-gray-500">View and manage Student information</p>
+              <p className="text-sm text-gray-500">View and manage agent information</p>
             </div>
             <div className="flex items-center space-x-4">
-            
               <button className="bg-[#2A7B88] text-white px-[30px] py-2 rounded flex items-center space-x-2">
                 <TbEdit />
                 <span>Edit Profile</span>
@@ -35,27 +69,27 @@ export default function StudentProfile() {
                   <img src="/api/placeholder/100/100" alt="Profile" className="rounded-full w-16 h-16" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg">Sarah Johnson</h3>
-                  <p className="text-gray-500 text-sm">sarah.j@email.com</p>
+                  <h3 className="font-bold text-lg">{agent.firstName} {agent.lastName}</h3>
+                  <p className="text-gray-500 text-sm">{agent.email}</p>
                 </div>
               </div>
               <div className="border-t border-gray-200 pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-gray-500">Phone</p>
-                    <p className="font-medium">+92 333 123 4567</p>
+                    <p className="font-medium">{agent.phone}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Date of Birth</p>
-                    <p className="font-medium">1998-05-15</p>
+                    <p className="text-sm text-gray-500">Joined On</p>
+                    <p className="font-medium">{moment(agent.createdAt).format("YYYY-MM-DD")}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Nationality</p>
-                    <p className="font-medium">Pakistani</p>
+                    <p className="text-sm text-gray-500">Consent Accepted</p>
+                    <p className="font-medium">{agent.consentAccepted ? "Yes" : "No"}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Address</p>
-                    <p className="font-medium">123 Agent Ave, Islamabad, PK</p>
+                    <p className="text-sm text-gray-500">Agent ID</p>
+                    <p className="font-medium">{agent._id}</p>
                   </div>
                 </div>
               </div>
@@ -70,7 +104,6 @@ export default function StudentProfile() {
                   <span>Upload New</span>
                 </button>
               </div>
-
               <div className="space-y-3">
                 {[{
                   title: "Passport",
@@ -85,7 +118,7 @@ export default function StudentProfile() {
                   <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-gray-100 rounded-2xl">
                     <div className="flex items-center mb-2 sm:mb-0">
                       <div className="mr-4">
-                        <div className="p-2 rounded x">
+                        <div className="p-2 rounded">
                           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                             <polyline points="14 2 14 8 20 8"></polyline>
@@ -100,7 +133,7 @@ export default function StudentProfile() {
                         <span className="text-sm text-gray-500">{doc.date}</span>
                       </div>
                     </div>
-                    <div className="text-sm font-semibold ">Verified</div>
+                    <div className="text-sm font-semibold">Verified</div>
                   </div>
                 ))}
               </div>
@@ -129,7 +162,6 @@ export default function StudentProfile() {
                   <span>View All</span>
                 </button>
               </div>
-
               <div className="space-y-3">
                 {[{
                   university: "University of Toronto",
