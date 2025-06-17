@@ -71,7 +71,7 @@ function App() {
             <Route path="loan" element={<Agent />} />
             <Route path="gic" element={<Agent />} />
             <Route path="help" element={<Agent />} />
-            <Route path="agentprofile" element={<AgentProfile />} />
+            <Route path="agentprofile/:agentId" element={<AgentProfile />} />
             <Route path="student" element={<StudentTable />} />
             <Route path="/studentprofile/:studentId" element={<StudentProfile />} />
             <Route path="/settings" element={<AdminSettings />} />
