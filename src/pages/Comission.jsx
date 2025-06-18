@@ -16,7 +16,7 @@ export default function CommissionDashboard() {
     totalCommission: 0,
     pendingPayouts: 0,
     pendingRequestsCount: 0,
-    paidThisMonth: 0,
+    Paid: 0,
     paymentsProcessedCount: 0,
     activeAgents: 0,
     commissionGrowthPercent: 0
@@ -53,6 +53,7 @@ export default function CommissionDashboard() {
       const response = await fetch(`${API_BASE_URL}/dashboard/stats`);
       if (!response.ok) throw new Error('Failed to fetch dashboard stats');
       const data = await response.json();
+      console.log(data,"kdieollsio")
       setDashboardStats(data);
     } catch (err) {
       setError('Failed to load dashboard statistics');
