@@ -1,12 +1,251 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Search, Heart, MapPin } from "lucide-react";
+import { IoAddCircleOutline } from "react-icons/io5";
+
+import { Search, Heart, MapPin, X, GraduationCap, Users, Calendar, Globe } from "lucide-react";
 import Admin from "../layout/Adminnavbar";
 import SchoolProgramModal from "../models/SchoolModal"; // Modal to add school/program
+import ProgramCard from "../components/ProgramCard";
+
+// School Details Modal Component
+const SchoolDetailsModal = ({ school, programs, onClose }) => {
+  if (!school) return null;
+
+  const schoolPrograms = programs.filter(p => p.school?._id === school._id);
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        {/* Modal Header */}
+        <div className="flex justify-between items-center p-6 border-b">
+          <h2 className="text-2xl font-bold text-gray-900">{school.name}</h2>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 rounded-lg"
+          >
+            <X className="h-6 w-6 text-gray-500" />
+          </button>
+        </div>
+
+        {/* Modal Content */}
+        <div className="p-6">
+          {/* School Image */}
+          <div className="mb-6">
+            <img
+              src={school.image ? `http://localhost:5000${school.image}` : "/src/assets/placeholder.png"}
+              alt={school.name}
+              className="w-full h-64 object-cover rounded-lg"
+            />
+          </div>
+
+          {/* School Basic Info */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">School Information</h3>
+
+              <div className="flex items-center space-x-3">
+                <MapPin className="h-5 w-5 text-gray-500" />
+                <div>
+                  <p className="text-sm text-gray-500">Location</p>
+                  <p className="font-medium">{school.city}, {school.country}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <GraduationCap className="h-5 w-5 text-gray-500" />
+                <div>
+                  <p className="text-sm text-gray-500">Type</p>
+                  <p className="font-medium">{school.type || 'N/A'}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <Users className="h-5 w-5 text-gray-500" />
+                <div>
+                  <p className="text-sm text-gray-500">Status</p>
+                  <p className={`font-medium ${school.status === 'Active' ? 'text-green-600' : 'text-red-600'}`}>
+                    {school.status || 'N/A'}
+                  </p>
+                </div>
+              </div>
+
+              {school.establishedYear && (
+                <div className="flex items-center space-x-3">
+                  <Calendar className="h-5 w-5 text-gray-500" />
+                  <div>
+                    <p className="text-sm text-gray-500">Established</p>
+                    <p className="font-medium">{school.establishedYear}</p>
+                  </div>
+                </div>
+              )}
+
+              {school.website && (
+                <div className="flex items-center space-x-3">
+                  <Globe className="h-5 w-5 text-gray-500" />
+                  <div>
+                    <p className="text-sm text-gray-500">Website</p>
+                    <a
+                      href={school.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-blue-600 hover:text-blue-800"
+                    >
+                      {school.website}
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Statistics</h3>
+
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-gray-600">Total Programs</span>
+                  <span className="text-2xl font-bold text-blue-600">{schoolPrograms.length}</span>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-gray-600">Active Applications</span>
+                  <span className="text-2xl font-bold text-green-600">-</span>
+                </div>
+              </div>
+
+              {school.ranking && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-gray-600">Ranking</span>
+                    <span className="text-2xl font-bold text-purple-600">#{school.ranking}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* School Description */}
+          {school.description && (
+            <div className="mb-8">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">About</h3>
+              <p className="text-gray-700 leading-relaxed">{school.description}</p>
+            </div>
+          )}
+
+          {/* School Programs */}
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Available Programs ({schoolPrograms.length})
+            </h3>
+
+            {schoolPrograms.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {schoolPrograms.map((program) => (
+                  <div key={program._id} className="bg-gray-50 p-4 rounded-lg border">
+                    <h4 className="font-semibold text-gray-900 mb-2">{program.name}</h4>
+                    <p className="text-sm text-gray-600 mb-3">{program.description}</p>
+
+                    <div className="space-y-2 text-sm">
+                      {program.duration && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Duration:</span>
+                          <span className="font-medium">{program.duration}</span>
+                        </div>
+                      )}
+
+                      {program.tuitionFee && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Tuition Fee:</span>
+                          <span className="font-medium text-green-600">${program.tuitionFee}</span>
+                        </div>
+                      )}
+
+                      {program.level && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Level:</span>
+                          <span className="font-medium">{program.level}</span>
+                        </div>
+                      )}
+
+                      {program.applicationDeadline && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-500">Deadline:</span>
+                          <span className="font-medium">{new Date(program.applicationDeadline).toLocaleDateString()}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-gray-50 rounded-lg">
+                <GraduationCap className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500">No programs available for this school</p>
+              </div>
+            )}
+          </div>
+
+          {/* Additional Details */}
+          {(school.facilities || school.contactEmail || school.contactPhone) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {school.facilities && (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Facilities</h3>
+                  <div className="space-y-2">
+                    {school.facilities.split(',').map((facility, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                        <span className="text-gray-700">{facility.trim()}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {(school.contactEmail || school.contactPhone) && (
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
+                  <div className="space-y-3">
+                    {school.contactEmail && (
+                      <div>
+                        <p className="text-sm text-gray-500">Email</p>
+                        <a
+                          href={`mailto:${school.contactEmail}`}
+                          className="font-medium text-blue-600 hover:text-blue-800"
+                        >
+                          {school.contactEmail}
+                        </a>
+                      </div>
+                    )}
+
+                    {school.contactPhone && (
+                      <div>
+                        <p className="text-sm text-gray-500">Phone</p>
+                        <a
+                          href={`tel:${school.contactPhone}`}
+                          className="font-medium text-blue-600 hover:text-blue-800"
+                        >
+                          {school.contactPhone}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function SchoolsPrograms() {
   const [currentTab, setCurrentTab] = useState("Schools");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedSchool, setSelectedSchool] = useState(null);
   const [schools, setSchools] = useState([]);
   const [programs, setPrograms] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -55,6 +294,12 @@ export default function SchoolsPrograms() {
     }
   };
 
+  // Handle view details
+  const handleViewDetails = (school) => {
+    setSelectedSchool(school);
+    setIsDetailsModalOpen(true);
+  };
+
   useEffect(() => {
     fetchSchools();
     fetchPrograms();
@@ -86,7 +331,7 @@ export default function SchoolsPrograms() {
               onClick={() => setIsModalOpen(true)}
               className="flex gap-2 items-center px-2 py-2 rounded-md bg-blue-600 text-white"
             >
-              <span className="mr-2">Add New</span>
+              <span className="flex flex-row gap-1 mr-2"><IoAddCircleOutline style={{ fontSize: '1.5rem' }} /> Add School/Program</span>
             </button>
             {isModalOpen && <SchoolProgramModal onClose={() => { setIsModalOpen(false); fetchSchools(); fetchPrograms(); }} />}
           </div>
@@ -108,67 +353,70 @@ export default function SchoolsPrograms() {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap gap-8 mb-6">
-          {/* Country Dropdown */}
-          <select
-            value={selectedCountry}
-            onChange={(e) => {
-              setSelectedCountry(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="pr-40 py-2 border border-gray-300 rounded-md bg-white"
-          >
-            <option value="All">All Countries</option>
-            {countryOptions.map((country, index) => (
-              <option key={index} value={country}>{country}</option>
-            ))}
-          </select>
+       {currentTab === "Schools" && (
+  <div className="flex flex-wrap gap-8 mb-6">
+    {/* Country Dropdown */}
+    <select
+      value={selectedCountry}
+      onChange={(e) => {
+        setSelectedCountry(e.target.value);
+        setCurrentPage(1);
+      }}
+      className="pr-40 py-2 border border-gray-300 rounded-md bg-white"
+    >
+      <option value="All">All Countries</option>
+      {countryOptions.map((country, index) => (
+        <option key={index} value={country}>{country}</option>
+      ))}
+    </select>
 
-          {/* Type Dropdown */}
-          <select
-            value={selectedType}
-            onChange={(e) => {
-              setSelectedType(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="pr-40 py-2 border border-gray-300 rounded-md bg-white"
-          >
-            <option value="All">All Types</option>
-            {typeOptions.map((type, index) => (
-              <option key={index} value={type}>{type}</option>
-            ))}
-          </select>
+    {/* Type Dropdown */}
+    <select
+      value={selectedType}
+      onChange={(e) => {
+        setSelectedType(e.target.value);
+        setCurrentPage(1);
+      }}
+      className="pr-40 py-2 border border-gray-300 rounded-md bg-white"
+    >
+      <option value="All">All Types</option>
+      {typeOptions.map((type, index) => (
+        <option key={index} value={type}>{type}</option>
+      ))}
+    </select>
 
-          {/* Status Dropdown */}
-          <select
-            value={selectedStatus}
-            onChange={(e) => {
-              setSelectedStatus(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="pr-40 py-2 border border-gray-300 rounded-md bg-white"
-          >
-            <option value="All">All Status</option>
-            {statusOptions.map((status, index) => (
-              <option key={index} value={status}>{status}</option>
-            ))}
-          </select>
+    {/* Status Dropdown */}
+    <select
+      value={selectedStatus}
+      onChange={(e) => {
+        setSelectedStatus(e.target.value);
+        setCurrentPage(1);
+      }}
+      className="pr-40 py-2 border border-gray-300 rounded-md bg-white"
+    >
+      <option value="All">All Status</option>
+      {statusOptions.map((status, index) => (
+        <option key={index} value={status}>{status}</option>
+      ))}
+    </select>
 
-          {/* Search Input */}
-          <div className="flex-grow relative">
-            <input
-              type="text"
-              placeholder="Search schools"
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="px-[2.5rem] py-2 border border-gray-300 rounded-md pl-10 w-full"
-            />
-            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-          </div>
-        </div>
+    {/* Search Input */}
+    <div className="flex-grow relative">
+      <input
+        type="text"
+        placeholder="Search schools"
+        value={searchTerm}
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+          setCurrentPage(1);
+        }}
+        className="px-[2.5rem] py-2 border border-gray-300 rounded-md pl-10 w-full"
+      />
+      <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+    </div>
+  </div>
+)}
+
 
         {/* Content Switch */}
         {currentTab === "Schools" ? (
@@ -204,7 +452,10 @@ export default function SchoolsPrograms() {
                         <span className="font-medium text-gray-900">-</span>
                       </div>
                     </div>
-                    <button className="w-full mt-4 py-2 text-blue-600 hover:bg-blue-50 rounded">
+                    <button
+                      className="w-full mt-4 py-2 text-blue-600 hover:bg-blue-50 rounded"
+                      onClick={() => handleViewDetails(school)}
+                    >
                       View Details
                     </button>
                   </div>
@@ -219,11 +470,7 @@ export default function SchoolsPrograms() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
             {programs.map((program) => (
-              <div key={program._id} className="bg-white p-4 border border-gray-200 rounded-lg shadow-sm">
-                <h2 className="text-lg font-bold text-gray-800 mb-1">{program.name}</h2>
-                <p className="text-gray-500 text-sm mb-2">School: {program.school?.name || "N/A"}</p>
-                <p className="text-sm text-gray-600">{program.description}</p>
-              </div>
+              <ProgramCard key={program._id} program={program} />
             ))}
           </div>
         )}
@@ -263,6 +510,18 @@ export default function SchoolsPrograms() {
               </button>
             </div>
           </div>
+        )}
+
+        {/* School Details Modal */}
+        {isDetailsModalOpen && (
+          <SchoolDetailsModal
+            school={selectedSchool}
+            programs={programs}
+            onClose={() => {
+              setIsDetailsModalOpen(false);
+              setSelectedSchool(null);
+            }}
+          />
         )}
       </div>
     </>
