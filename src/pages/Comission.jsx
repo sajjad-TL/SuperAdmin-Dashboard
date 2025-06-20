@@ -10,7 +10,7 @@ export default function CommissionDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+
   // Dashboard stats state
   const [dashboardStats, setDashboardStats] = useState({
     totalCommission: 0,
@@ -21,12 +21,12 @@ export default function CommissionDashboard() {
     activeAgents: 0,
     commissionGrowthPercent: 0
   });
-  
+
   // Agents data state
   const [agents, setAgents] = useState([]);
   const [totalAgents, setTotalAgents] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  
+
   // Filters state
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
@@ -53,7 +53,7 @@ export default function CommissionDashboard() {
       const response = await fetch(`${API_BASE_URL}/dashboard/stats`);
       if (!response.ok) throw new Error('Failed to fetch dashboard stats');
       const data = await response.json();
-      console.log(data,"kdieollsio")
+      console.log(data, "kdieollsio")
       setDashboardStats(data);
     } catch (err) {
       setError('Failed to load dashboard statistics');
@@ -71,10 +71,10 @@ export default function CommissionDashboard() {
         search,
         country
       });
-      
+
       const response = await fetch(`${API_BASE_URL}/agents?${params}`);
       if (!response.ok) throw new Error('Failed to fetch agents');
-      
+
       const data = await response.json();
       setAgents(data.agents);
       setTotalAgents(data.totalAgents);
@@ -94,12 +94,12 @@ export default function CommissionDashboard() {
         type: 'commissions',
         agentId: selectedCountry // You can modify this based on your filter logic
       });
-      
+
       const response = await fetch(`${API_BASE_URL}/export?${params}`);
       if (!response.ok) throw new Error('Failed to export data');
-      
+
       const data = await response.json();
-      
+
       // Convert to CSV and download
       const csvContent = convertToCSV(data.data);
       downloadCSV(csvContent, 'commission_report.csv');
@@ -112,7 +112,7 @@ export default function CommissionDashboard() {
   // Helper function to convert data to CSV
   const convertToCSV = (data) => {
     if (!data || data.length === 0) return '';
-    
+
     const headers = Object.keys(data[0]).join(',');
     const rows = data.map(row => Object.values(row).join(','));
     return [headers, ...rows].join('\n');
@@ -132,10 +132,12 @@ export default function CommissionDashboard() {
   };
 
   // Handle search
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1);
-  };
+const handleSearch = (e) => {
+  const value = e.target.value;
+  setSearchTerm(value); // no `.trim()` here
+  setCurrentPage(1);
+};
+
 
   // Handle country filter
   const handleCountryChange = (e) => {
@@ -162,9 +164,10 @@ export default function CommissionDashboard() {
   }, []);
 
   // Fetch agents when filters change
-  useEffect(() => {
-    fetchAgents(currentPage, searchTerm, selectedCountry);
-  }, [currentPage, searchTerm, selectedCountry]);
+ useEffect(() => {
+  fetchAgents(currentPage, searchTerm, selectedCountry);
+}, [currentPage, searchTerm, selectedCountry]);
+
 
   // Loading state
   if (loading && agents.length === 0) {
@@ -191,7 +194,7 @@ export default function CommissionDashboard() {
           {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
               {error}
-              <button 
+              <button
                 onClick={() => setError(null)}
                 className="float-right text-red-500 hover:text-red-700"
               >
@@ -271,34 +274,44 @@ export default function CommissionDashboard() {
 
           {/* Search and Filter Bar */}
           <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="relative flex-grow">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search size={20} className="text-gray-400" />
+            <div className="flex flex-col md:flex-row items-center gap-3">
+
+              {/* Country Filter */}
+
+
+              {/* Search Input */}
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search size={20} className="text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search agents..."
+                  value={searchTerm}
+                  onChange={handleSearch}
+                  className="pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+
+                <select
+                  value={selectedCountry}
+                  onChange={handleCountryChange}
+                  className="py-2 px-3 ms-2 border border-gray-300 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">All Countries</option>
+                  <option value="Canada">Canada</option>
+                  <option value="UK">UK</option>
+                  <option value="USA">USA</option>
+                  <option value="Australia">Australia</option>
+                </select>
               </div>
-              <input
-                type="text"
-                placeholder="Search agents..."
-                value={searchTerm}
-                onChange={handleSearch}
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
             </div>
             <div>
-              <select 
-                value={selectedCountry}
-                onChange={handleCountryChange}
-                className="block w-full py-2 px-3 border border-gray-300 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">All Countries</option>
-                <option value="Canada">Canada</option>
-                <option value="UK">UK</option>
-                <option value="USA">USA</option>
-                <option value="Australia">Australia</option>
-              </select>
+
             </div>
-            <button 
+
+            <button
               onClick={handleExport}
-              className="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors"
+              className="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors ms-auto"
             >
               <Download size={16} className="mr-2" />
               Export Report
@@ -337,7 +350,7 @@ export default function CommissionDashboard() {
                       <tr key={agent.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <div 
+                            <div
                               onClick={() => handleNavigation(`/agent/${agent.id}`)}
                               className="flex-shrink-0 h-10 w-10 cursor-pointer"
                             >
@@ -366,14 +379,13 @@ export default function CommissionDashboard() {
                           <div className="text-sm text-gray-500">{agent.successful} successful</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            agent.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                          }`}>
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${agent.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            }`}>
                             {agent.status}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <button 
+                          <button
                             onClick={() => handleNavigation(`/agent/${agent.id}`)}
                             className="text-blue-500 hover:text-blue-700 transition-colors"
                           >
@@ -408,11 +420,10 @@ export default function CommissionDashboard() {
                 return (
                   <button
                     key={pageNum}
-                    className={`px-3 py-1 rounded border border-gray-300 transition-colors ${
-                      currentPage === pageNum
+                    className={`px-3 py-1 rounded border border-gray-300 transition-colors ${currentPage === pageNum
                         ? 'bg-blue-500 text-white'
                         : 'bg-white text-gray-700 hover:bg-gray-50'
-                    }`}
+                      }`}
                     onClick={() => handlePageChange(pageNum)}
                   >
                     {pageNum}

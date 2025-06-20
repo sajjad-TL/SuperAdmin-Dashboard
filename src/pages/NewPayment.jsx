@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { ChevronLeft, Info } from 'lucide-react';
 import Admin from '../layout/Adminnavbar';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
 // import { Info } from 'lucide-react';
 
 export default function NewPayment() {
@@ -13,6 +15,8 @@ export default function NewPayment() {
   const [selectedAgent, setSelectedAgent] = useState('');
   const [summary, setSummary] = useState(null);
   const [showReceiptModal, setShowReceiptModal] = useState(false);
+  const navigate = useNavigate();
+
 
   useEffect(() => {
 
@@ -110,10 +114,14 @@ export default function NewPayment() {
               <h1 className="text-xl font-semibold text-gray-900">New Payment Request</h1>
               <p className="text-sm text-gray-500">Create a new payment request for agents</p>
             </div>
-            <button className="flex items-center text-sm text-gray-600 hover:text-gray-900">
-              <ChevronLeft size={16} className="mr-1" />
-              Back to Payments
-            </button>
+            <button
+                onClick={() => navigate('/payment-requests')}
+                className="flex items-center text-sm text-gray-600 hover:text-gray-900"
+              >
+                <ChevronLeft size={16} className="mr-1" />
+                Back to Payments
+              </button>
+
           </div>
 
           {/* Main content */}
@@ -294,7 +302,8 @@ export default function NewPayment() {
               />
 
               <div className="mt-6 flex justify-end">
-                <button className="px-4 py-2 text-gray-700 mr-4 hover:text-gray-900">
+                <button className="px-4 py-2 text-gray-700 mr-4 hover:text-gray-900"
+                onClick={() => navigate('/payment-requests')}>
                   Cancel
                 </button>
                 <button
