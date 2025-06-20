@@ -14,20 +14,18 @@ import Admin from '../layout/Adminnavbar';
 import axios from 'axios';
 
 export default function ReportsDashboard() {
-  const [timeRange] = useState('Last 6 Months');
-  const [reportData, setReportData] = useState(null);
+  const [timeRange, setTimeRange] = useState('6m');
+  const [reportData, setReportData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    fetchReports();
-  }, []);
-
   const fetchReports = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/reports/getReport');
+      const res = await axios.get(`http://localhost:5000/api/reports/getReport?range=${timeRange}`);
       if (res.data && res.data.length > 0) {
-        setReportData(res.data[0]);
+        setReportData(res.data);
+      } else {
+        setReportData([]);
       }
       setLoading(false);
     } catch (err) {
@@ -35,6 +33,11 @@ export default function ReportsDashboard() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    setLoading(true);
+    fetchReports();
+  }, [timeRange]);
 
   const handleCreateReport = async () => {
     try {
@@ -49,9 +52,60 @@ export default function ReportsDashboard() {
     }
   };
 
-  const chartData = [
-    { name: reportData?.month || 'N/A', value: reportData?.chartValue || 0 }
-  ];
+  const handleExportReport = async () => {
+    try {
+      const res = await axios.get(`http://localhost:5000/api/reports/exportExcel?range=${timeRange}`, {
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `report_${timeRange}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      alert('Failed to export report: ' + err.message);
+      console.error(err);
+    }
+  };
+
+  const chartData = reportData?.map(r => ({
+    name: `${r.month} ${r.year}`,
+    value: r.chartValue || 0
+  })) || [];
+
+  const latestReport = reportData?.[reportData.length - 1];
+
+  // ⬇️ Merging data for programs & agents
+  const mergedProgramsMap = new Map();
+  const mergedAgentsMap = new Map();
+
+  reportData.forEach(report => {
+    report.popularPrograms?.forEach(p => {
+      const key = `${p.program}-${p.university}`;
+      if (!mergedProgramsMap.has(key)) {
+        mergedProgramsMap.set(key, { ...p });
+      } else {
+        mergedProgramsMap.get(key).applications += p.applications;
+      }
+    });
+
+    report.topAgents?.forEach(a => {
+      const key = a.name;
+      if (!mergedAgentsMap.has(key)) {
+        mergedAgentsMap.set(key, { ...a });
+      } else {
+        const existing = mergedAgentsMap.get(key);
+        existing.applications += a.applications;
+        existing.successRate = Math.round((existing.successRate + a.successRate) / 2);
+      }
+    });
+  });
+
+  const mergedPrograms = Array.from(mergedProgramsMap.values());
+  const mergedAgents = Array.from(mergedAgentsMap.values());
 
   return (
     <>
@@ -64,53 +118,33 @@ export default function ReportsDashboard() {
               <p className="text-sm text-gray-600">Comprehensive insights and analysis</p>
             </div>
             <div className="flex mt-4 md:mt-0 space-x-2">
-              <button className="flex items-center px-3 py-2 text-sm border border-gray-300 rounded shadow-sm bg-white hover:bg-gray-50">
+              <button
+                onClick={handleExportReport}
+                className="flex items-center px-3 py-2 text-sm border border-gray-300 rounded shadow-sm bg-white hover:bg-gray-50"
+              >
                 <Download size={16} className="mr-2" />
                 Export Reports
               </button>
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="flex items-center px-3 py-2 text-sm text-white bg-blue-600 rounded shadow-sm hover:bg-blue-700"
-              >
-                <PlusCircle size={16} className="mr-2" />
-                Create Report
-              </button>
+            <button
+  onClick={handleCreateReport}
+  className="flex items-center px-3 py-2 text-sm text-white bg-blue-600 rounded shadow-sm hover:bg-blue-700"
+>
+  <PlusCircle size={16} className="mr-2" />
+  Create Report
+</button>
+
             </div>
           </div>
 
-          {isModalOpen && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg relative">
-                <button
-                  className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-                  onClick={() => setIsModalOpen(false)}
-                >
-                  <X size={20} />
-                </button>
-                <h2 className="text-xl font-semibold mb-4">Generate Monthly Report</h2>
-                <p className="text-sm text-gray-500 mb-4">
-                  This will automatically generate the latest report based on current data.
-                </p>
-                <div className="flex justify-end gap-2 mt-4">
-                  <button
-                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded"
-                    onClick={() => setIsModalOpen(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                    onClick={handleCreateReport}
-                  >
-                    Generate
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {!loading && reportData ? (
-            <ReportContent timeRange={timeRange} chartData={chartData} reportData={reportData} />
+          {!loading && latestReport ? (
+            <ReportContent
+              chartData={chartData}
+              reportData={latestReport}
+              timeRange={timeRange}
+              setTimeRange={setTimeRange}
+              mergedPrograms={mergedPrograms}
+              mergedAgents={mergedAgents}
+            />
           ) : (
             <p className="text-center text-gray-500 mt-10">Loading report...</p>
           )}
@@ -120,7 +154,7 @@ export default function ReportsDashboard() {
   );
 }
 
-function ReportContent({ timeRange, chartData, reportData }) {
+function ReportContent({ chartData, reportData, timeRange, setTimeRange, mergedPrograms, mergedAgents }) {
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -137,14 +171,19 @@ function ReportContent({ timeRange, chartData, reportData }) {
               <h2 className="font-medium text-gray-900">Applications Trend</h2>
               <p className="text-xs text-gray-500">Monthly application statistics</p>
             </div>
-            <button className="inline-flex items-center text-xs border px-2 py-1 rounded">
-              {timeRange}
-              <ChevronDown size={14} className="ml-1" />
-            </button>
+            <select
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value)}
+              className="text-xs border px-2 py-1 rounded"
+            >
+              <option value="1m">Last 1 Month</option>
+              <option value="3m">Last 3 Months</option>
+              <option value="6m">Last 6 Months</option>
+            </select>
           </div>
           <div className="h-64 mt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData}>
+              <BarChart data={chartData} barSize={40} barCategoryGap="20%">
                 <XAxis dataKey="name" />
                 <Bar dataKey="value" fill="#3B82F6" radius={[4, 4, 0, 0]} />
               </BarChart>
@@ -168,13 +207,14 @@ function ReportContent({ timeRange, chartData, reportData }) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ProgramList title="Popular Programs" data={reportData.popularPrograms} />
-        <AgentList title="Top Performing Agents" data={reportData.topAgents} />
+        <ProgramList title="Popular Programs" data={mergedPrograms} />
+        <AgentList title="Top Performing Agents" data={mergedAgents} />
       </div>
     </>
   );
 }
 
+// Reusable components (unchanged)
 const MetricCard = ({ title, value, change, isPositive, icon }) => (
   <div className="bg-white rounded-lg shadow p-4">
     <div className="flex justify-between items-start mb-2">
