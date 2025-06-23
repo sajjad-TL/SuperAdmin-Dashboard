@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
-import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts';
 import {
-  ChevronDown,
+  BarChart, Bar, XAxis, ResponsiveContainer,
+  Tooltip, CartesianGrid
+} from 'recharts';
+import {
   Download,
   PlusCircle,
   Users,
   DollarSign,
   TrendingUp,
   Award,
-  X
 } from 'lucide-react';
 import Admin from '../layout/Adminnavbar';
 import axios from 'axios';
@@ -17,19 +18,14 @@ export default function ReportsDashboard() {
   const [timeRange, setTimeRange] = useState('6m');
   const [reportData, setReportData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchReports = async () => {
     try {
       const res = await axios.get(`http://localhost:5000/api/reports/getReport?range=${timeRange}`);
-      if (res.data && res.data.length > 0) {
-        setReportData(res.data);
-      } else {
-        setReportData([]);
-      }
-      setLoading(false);
+      setReportData(res.data || []);
     } catch (err) {
       console.error('Error fetching report:', err);
+    } finally {
       setLoading(false);
     }
   };
@@ -44,7 +40,6 @@ export default function ReportsDashboard() {
       const res = await axios.post('http://localhost:5000/api/reports/createReport');
       if (res.status === 201) {
         alert('Report created successfully');
-        setIsModalOpen(false);
         fetchReports();
       }
     } catch (error) {
@@ -67,18 +62,20 @@ export default function ReportsDashboard() {
       link.remove();
     } catch (err) {
       alert('Failed to export report: ' + err.message);
-      console.error(err);
     }
   };
 
-  const chartData = reportData?.map(r => ({
-    name: `${r.month} ${r.year}`,
-    value: r.chartValue || 0
-  })) || [];
+  const chartData = Array.isArray(reportData)
+    ? reportData
+        .filter(r => r?.chartValue !== undefined)
+        .map(r => ({
+          name: `${r.month} ${r.year}`,
+          value: Number(r.chartValue) || 0,
+        }))
+    : [];
 
-  const latestReport = reportData?.[reportData.length - 1];
+  const latestReport = reportData?.[reportData.length - 1] || {};
 
-  // ⬇️ Merging data for programs & agents
   const mergedProgramsMap = new Map();
   const mergedAgentsMap = new Map();
 
@@ -125,18 +122,17 @@ export default function ReportsDashboard() {
                 <Download size={16} className="mr-2" />
                 Export Reports
               </button>
-            <button
-  onClick={handleCreateReport}
-  className="flex items-center px-3 py-2 text-sm text-white bg-blue-600 rounded shadow-sm hover:bg-blue-700"
->
-  <PlusCircle size={16} className="mr-2" />
-  Create Report
-</button>
-
+              <button
+                onClick={handleCreateReport}
+                className="flex items-center px-3 py-2 text-sm text-white bg-blue-600 rounded shadow-sm hover:bg-blue-700"
+              >
+                <PlusCircle size={16} className="mr-2" />
+                Create Report
+              </button>
             </div>
           </div>
 
-          {!loading && latestReport ? (
+          {!loading && reportData.length > 0 ? (
             <ReportContent
               chartData={chartData}
               reportData={latestReport}
@@ -146,7 +142,9 @@ export default function ReportsDashboard() {
               mergedAgents={mergedAgents}
             />
           ) : (
-            <p className="text-center text-gray-500 mt-10">Loading report...</p>
+            <p className="text-center text-gray-500 mt-10">
+              {loading ? 'Loading report...' : 'No report data available'}
+            </p>
           )}
         </div>
       </div>
@@ -181,14 +179,35 @@ function ReportContent({ chartData, reportData, timeRange, setTimeRange, mergedP
               <option value="6m">Last 6 Months</option>
             </select>
           </div>
+
           <div className="h-64 mt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} barSize={40} barCategoryGap="20%">
-                <XAxis dataKey="name" />
-                <Bar dataKey="value" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-              </BarChart>
+              {chartData.length === 0 ? (
+                <div className="flex items-center justify-center text-gray-500 h-full">No data available</div>
+              ) : chartData.length === 1 && timeRange === '1m' ? (
+                <div className="flex flex-col items-center justify-center text-center text-gray-700 h-full px-4">
+                  <h3 className="text-lg font-semibold mb-2">1-Month Summary</h3>
+                  <p>
+                    This month you had <strong>{reportData.monthlyApplications}</strong> applications, generated <strong>${reportData.monthlyRevenue}</strong> in revenue, and maintained a success rate of <strong>{reportData.successRate}%</strong>.
+                  </p>
+                </div>
+              ) : (
+                <BarChart data={chartData} barSize={40} barCategoryGap="20%">
+                  <defs>
+                    <linearGradient id="blueGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#3B82F6" stopOpacity={1} />
+                      <stop offset="100%" stopColor="#60A5FA" stopOpacity={0.8} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="url(#blueGradient)" radius={[4, 4, 0, 0]} animationDuration={1000} />
+                </BarChart>
+              )}
             </ResponsiveContainer>
           </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 pt-4 border-t border-gray-100">
             <Stat title="Total Applications" value={reportData.totalApplications} />
             <Stat title="Approval Rate" value={`${reportData.approvalRate}%`} />
@@ -214,7 +233,7 @@ function ReportContent({ chartData, reportData, timeRange, setTimeRange, mergedP
   );
 }
 
-// Reusable components (unchanged)
+// Reusable components
 const MetricCard = ({ title, value, change, isPositive, icon }) => (
   <div className="bg-white rounded-lg shadow p-4">
     <div className="flex justify-between items-start mb-2">

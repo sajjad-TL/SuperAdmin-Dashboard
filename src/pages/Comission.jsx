@@ -3,6 +3,7 @@ import { Search, Eye, Clock, CheckCircle, Users, Download, Plus, Filter } from '
 
 import Admin from '../layout/Adminnavbar';
 import TabLayout from '../layout/TabLayout';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 
 export default function CommissionDashboard() {
@@ -31,6 +32,8 @@ export default function CommissionDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
   const [itemsPerPage] = useState(10);
+//  const { parsePhoneNumberFromString } = require('libphonenumber-js');
+
 
   // Navigation handler
   const handleNavigation = (path) => {
@@ -87,7 +90,6 @@ export default function CommissionDashboard() {
     }
   };
 
-  // Export data
   const handleExport = async () => {
     try {
       const params = new URLSearchParams({
@@ -100,7 +102,6 @@ export default function CommissionDashboard() {
 
       const data = await response.json();
 
-      // Convert to CSV and download
       const csvContent = convertToCSV(data.data);
       downloadCSV(csvContent, 'commission_report.csv');
     } catch (err) {
@@ -109,7 +110,6 @@ export default function CommissionDashboard() {
     }
   };
 
-  // Helper function to convert data to CSV
   const convertToCSV = (data) => {
     if (!data || data.length === 0) return '';
 
@@ -118,7 +118,6 @@ export default function CommissionDashboard() {
     return [headers, ...rows].join('\n');
   };
 
-  // Helper function to download CSV
   const downloadCSV = (content, filename) => {
     const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -145,7 +144,6 @@ const handleSearch = (e) => {
     setCurrentPage(1);
   };
 
-  // Handle page change
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
@@ -158,15 +156,40 @@ const handleSearch = (e) => {
     }).format(amount);
   };
 
-  // Initialize data on component mount
   useEffect(() => {
     fetchDashboardStats();
   }, []);
 
-  // Fetch agents when filters change
  useEffect(() => {
   fetchAgents(currentPage, searchTerm, selectedCountry);
 }, [currentPage, searchTerm, selectedCountry]);
+
+const getCountryFromPhone = (phoneNumber) => {
+  if (!phoneNumber) return 'Not Specified';
+
+  try {
+    const cleaned = phoneNumber.replace(/\s+/g, ''); // Remove spaces
+    const phone = parsePhoneNumberFromString(cleaned);
+
+    if (phone && phone.country) {
+      const countryMap = {
+        PK: 'Pakistan',
+        US: 'USA',
+        CA: 'Canada',
+        GB: 'UK',
+        AU: 'Australia',
+        IN: 'India'
+      };
+
+      return countryMap[phone.country] || phone.country;
+    }
+
+    return 'Not Specified';
+  } catch (error) {
+    console.error('Phone parse error:', phoneNumber, error.message);
+    return 'Not Specified';
+  }
+};
 
 
   // Loading state
@@ -347,6 +370,8 @@ const handleSearch = (e) => {
                     </tr>
                   ) : (
                     agents.map(agent => (
+                      
+                      
                       <tr key={agent.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
@@ -360,7 +385,14 @@ const handleSearch = (e) => {
                             </div>
                             <div className="ml-4">
                               <div className="text-sm font-medium text-gray-900">{agent.name}</div>
-                              <div className="text-sm text-gray-500">{agent.country}</div>
+                              <div className="text-sm text-gray-500">
+                                  {agent.country && agent.country.toLowerCase() !== 'not specified'
+    ? agent.country
+    : getCountryFromPhone(agent.phone)}
+
+                                  
+                              </div>
+
                             </div>
                           </div>
                         </td>
