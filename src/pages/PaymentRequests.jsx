@@ -41,51 +41,52 @@ export default function PaymentRequestsDashboard() {
   };
 
   const filteredRequests = paymentRequests.filter(request => {
-  const query = searchQuery.toLowerCase();
-  const formattedDate = new Date(request.createdAt).toLocaleDateString().toLowerCase();
-  const amount = request.amount?.toString().toLowerCase();
+    const query = searchQuery.toLowerCase();
+    const formattedDate = new Date(request.createdAt).toLocaleDateString().toLowerCase();
+    const amount = request.amount?.toString().toLowerCase();
 
-  const matchesSearch = 
-    request._id?.toLowerCase().includes(query) ||
-    request.status?.toLowerCase().includes(query) ||
-    request.method?.toLowerCase().includes(query) ||
-    request.agentId?.toLowerCase().includes(query) ||
-    formattedDate.includes(query) ||
-    amount.includes(query);
+    const matchesSearch =
+      request._id?.toLowerCase().includes(query) ||
+      request.status?.toLowerCase().includes(query) ||
+      request.method?.toLowerCase().includes(query) ||
+      request.agentId?.toLowerCase().includes(query) ||
+      formattedDate.includes(query) ||
+      amount.includes(query);
 
-  const matchesStatus = statusFilter === 'All' || request.status === statusFilter;
+    const matchesStatus = statusFilter === 'All' || request.status === statusFilter;
 
-  return matchesSearch && matchesStatus;
-});
+    return matchesSearch && matchesStatus;
+  });
 
 
-const handleApprove = async (paymentId) => {
-  try {
-    const res = await axios.patch(`http://localhost:5000/payment/update/${paymentId}`, {
-      status: 'Completed',
-    });
-    // Optimistically update UI
-    setPaymentRequests(prev =>
-      prev.map(p => p._id === paymentId ? { ...p, status: 'Completed' } : p)
-    );
-  } catch (error) {
-    console.error('Error updating payment:', error);
-    alert('Failed to approve payment');
-  }
-};
+  const handleApprove = async (paymentId) => {
+    try {
+      const res = await axios.patch(`http://localhost:5000/payment/update/${paymentId}`, {
+        status: 'Completed',
+      });
+      setPaymentRequests(prev =>
+        prev.map(p => p._id === paymentId ? { ...p, status: 'Completed' } : p)
+      );
+    } catch (error) {
+      console.error('Error updating payment:', error);
+      alert('Failed to approve payment');
+    }
+  };
 
-const handleDelete = async (paymentId) => {
-  const confirmDelete = window.confirm('Are you sure you want to delete this payment?');
-  if (!confirmDelete) return;
 
-  try {
-    await axios.delete(`http://localhost:5000/payment/delete/${paymentId}`);
-    setPaymentRequests(prev => prev.filter(p => p._id !== paymentId));
-  } catch (error) {
-    console.error('Error deleting payment:', error);
-    alert('Failed to delete payment');
-  }
-};
+  const handleDelete = async (paymentId) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this payment?');
+    if (!confirmDelete) return;
+
+    try {
+      await axios.delete(`http://localhost:5000/payment/delete/${paymentId}`);
+      setPaymentRequests(prev => prev.filter(p => p._id !== paymentId));
+    } catch (error) {
+      console.error('Error deleting payment:', error);
+      alert('Failed to delete payment');
+    }
+  };
+
 
   return (
     <>
@@ -151,43 +152,43 @@ const handleDelete = async (paymentId) => {
 
           {/* Table */}
           <div className="bg-white rounded-lg shadow overflow-hidden">
-           <div className="p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-  <div className="flex gap-2 w-full md:w-auto">
-    
-    <input
-      type="text"
-      placeholder="Search requests..."
-      className="pl-3 pr-4 py-2 border border-gray-300 rounded-md w-full md:w-64"
-      value={searchQuery}
-      onChange={(e) => setSearchQuery(e.target.value)}
-    />
+            <div className="p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="flex gap-2 w-full md:w-auto">
 
-    <select
-      className="border border-gray-300 text-sm rounded-md px-3 py-2"
-      value={statusFilter}
-      onChange={(e) => setStatusFilter(e.target.value)}
-    >
-      {uniqueStatuses.map(status => (
-        <option key={status} value={status}>
-          {status === 'All' ? 'All Status' : status}
-        </option>
-      ))}
-    </select>
-  </div>
+                <input
+                  type="text"
+                  placeholder="Search requests..."
+                  className="pl-3 pr-4 py-2 border border-gray-300 rounded-md w-full md:w-64"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
 
-  <div className="flex gap-2">
-    <button className="flex items-center gap-1 px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50">
-      <Filter className="h-4 w-4" />
-      <span>Filter</span>
-    </button>
-    <button
-      onClick={handleRedirect}
-      className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-    >
-      + New Payment
-    </button>
-  </div>
-</div>
+                <select
+                  className="border border-gray-300 text-sm rounded-md px-3 py-2"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  {uniqueStatuses.map(status => (
+                    <option key={status} value={status}>
+                      {status === 'All' ? 'All Status' : status}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex gap-2">
+                <button className="flex items-center gap-1 px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50">
+                  <Filter className="h-4 w-4" />
+                  <span>Filter</span>
+                </button>
+                <button
+                  onClick={handleRedirect}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                >
+                  + New Payment
+                </button>
+              </div>
+            </div>
 
 
             <div className="overflow-x-auto">
@@ -246,18 +247,18 @@ const handleDelete = async (paymentId) => {
                             </button>
 
                             <button
-                                className="text-green-500 hover:text-green-700"
-                                onClick={() => handleApprove(request._id)}
-                              >
-                                <CheckCircle className="w-5 h-5" />
-                              </button>
+                              className="text-green-500 hover:text-green-700"
+                              onClick={() => handleApprove(request._id)}
+                            >
+                              <CheckCircle className="w-5 h-5" />
+                            </button>
 
-                              <button
-                                className="text-red-500 hover:text-red-700"
-                                onClick={() => handleDelete(request._id)}
-                              >
-                                <X className="w-5 h-5" />
-                              </button>
+                            <button
+                              className="text-red-500 hover:text-red-700"
+                              onClick={() => handleDelete(request._id)}
+                            >
+                              <X className="w-5 h-5" />
+                            </button>
 
                           </div>
                         </td>
