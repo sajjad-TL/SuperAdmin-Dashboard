@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, Upload } from "lucide-react";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 
 export default function EditStudentProgramModal({ onClose, student, onUpdate }) {
   const [activeTab, setActiveTab] = useState("student");
@@ -8,40 +8,34 @@ export default function EditStudentProgramModal({ onClose, student, onUpdate }) 
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
-    program: "",
-    university: "",
     status: "",
     payment: "",
   });
 
-  // Update form data when student or selected application changes
   useEffect(() => {
     if (student) {
-      const defaultAppId = student.applications?.[0]?._id || "";
+      const defaultAppId = student.applications?.[0]?.applicationId || "0";
       setSelectedApplicationId((prev) => prev || defaultAppId);
     }
   }, [student]);
 
-useEffect(() => {
-  if (student) {
-    const defaultAppId = student.applications?.[0]?._id || "";
-    setSelectedApplicationId((prev) => prev || defaultAppId);
+  useEffect(() => {
+    if (student) {
+      const selectedApp =
+        student.applications?.find(
+          (app) =>
+            app.applicationId === selectedApplicationId ||
+            (!app.applicationId && selectedApplicationId === "0")
+        ) || student.applications?.[0];
 
-    const selectedApp = student.applications?.find(
-      (app) => app._id === (selectedApplicationId || defaultAppId)
-    );
-
-    setFormData({
-      firstName: student.firstName || "",
-      lastName: student.lastName || "",
-      program: selectedApp?.program || "",
-      university: selectedApp?.institute || "",
-      status: student.status?.toLowerCase() || "",
-      payment: student.payment?.toLowerCase() || "",
-    });
-  }
-}, [student, selectedApplicationId]);
-
+      setFormData({
+        firstName: student.firstName || "",
+        lastName: student.lastName || "",
+        status: student.status || "",
+        payment: selectedApp?.status || "",
+      });
+    }
+  }, [student, selectedApplicationId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -51,54 +45,45 @@ useEffect(() => {
     }));
   };
 
-const handleSave = async () => {
-  try {
-    
-    const response = await fetch("http://localhost:5000/student/update-student", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        studentId: student._id,
-        applicationId: selectedApplicationId,
-        applications: {
-          program: formData.program,
-          institute: formData.university,
+  const handleSave = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/student/update-student", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
         },
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        status: formData.status,
-        payment: formData.payment,
-      }),
-    });
+        body: JSON.stringify({
+          studentId: student._id,
+          applicationId: selectedApplicationId,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          status: formData.status,
+          payment: formData.payment,
+        }),
+      });
 
-    const result = await response.json();
-    console.log(result,"jhijkijwo")
+      const result = await response.json();
+      console.log(result);
 
-    if (response.ok) {
-      toast.success("Student program updated successfully!");
-      onUpdate(); // Notify parent to refresh data
-      onClose();
-    } else {
-      toast.error(result.message || "Failed to update student program.");
+      if (response.ok) {
+        toast.success("Student program updated successfully!");
+        onUpdate();
+        onClose();
+      } else {
+        toast.error(result.message || "Failed to update student program.");
+      }
+    } catch (error) {
+      console.error("Error updating student:", error);
+      toast.error("Something went wrong.");
     }
-  } catch (error) {
-    console.error("Error updating student:", error);
-    toast.error("Something went wrong.");
-  }
-};
-
+  };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl h-[70vh] flex flex-col mx-4 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl h-[60vh] flex flex-col mx-4 overflow-hidden">
         <div className="flex justify-between items-center px-6 py-4 border-b">
           <h2 className="text-2xl font-semibold text-gray-800">Edit Student Program</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-red-500 transition"
-          >
+          <button onClick={onClose} className="text-gray-500 hover:text-red-500 transition">
             <X size={24} />
           </button>
         </div>
@@ -131,8 +116,11 @@ const handleSave = async () => {
                     onChange={(e) => setSelectedApplicationId(e.target.value)}
                     className="w-full p-2 border rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none"
                   >
-                    {student.applications.map((app) => (
-                      <option key={app._id} value={app._id}>
+                    {student.applications.map((app, index) => (
+                      <option
+                        key={app.applicationId || index}
+                        value={app.applicationId || "0"}
+                      >
                         {app.program} - {app.institute}
                       </option>
                     ))}
@@ -169,29 +157,6 @@ const handleSave = async () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm text-gray-600 mb-1 block">Program</label>
-                  <input
-                    name="program"
-                    type="text"
-                    value={formData.program}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-gray-600 mb-1 block">University</label>
-                  <input
-                    name="university"
-                    type="text"
-                    value={formData.university}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
                   <label className="text-sm text-gray-600 mb-1 block">Status</label>
                   <select
                     name="status"
@@ -199,9 +164,14 @@ const handleSave = async () => {
                     onChange={handleChange}
                     className="w-full p-2 border rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none"
                   >
-                    <option value="">{formData.status}</option>
-                    <option value="Inactive">In Active</option>
+                    <option value="">Select Status</option>
                     <option value="Pending">Pending</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="On Hold">On Hold</option>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
                   </select>
                 </div>
                 <div>
@@ -213,10 +183,10 @@ const handleSave = async () => {
                     className="w-full p-2 border rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none"
                   >
                     <option value="">Select Payment Status</option>
-                    <option value="paid">Paid</option>
-                    <option value="unpaid">Unpaid</option>
-                    <option value="under_verification">Under Verification</option>
-                    <option value="pending">Pending</option>
+                    <option value="Paid">Paid</option>
+                    <option value="Unpaid">Unpaid</option>
+                    <option value="Under Verification">Under Verification</option>
+                    <option value="Pending">Pending</option>
                   </select>
                 </div>
               </div>

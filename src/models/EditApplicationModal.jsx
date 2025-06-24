@@ -157,6 +157,7 @@ export default function EditApplication({
                             <option value="Rejected">Rejected</option>
                             <option value="Withdrawn">Withdrawn</option>
                             <option value="not-paid">Not Paid</option>
+                            <option value="Paid">Paid</option>
                         </select>
                     </div>
 

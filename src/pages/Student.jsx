@@ -26,7 +26,7 @@ export default function StudentTable() {
         program: s.applications?.map(app => app.program).join(', ') || "No Program",
         university: s.applications?.map(app => app.institute).join(', ') || "No Institute",
         status: s.status || "N/A",
-        payment: s.paymentStatus || "No Payment",
+        payment: s.applications?.[s.applications.length - 1]?.status || "No Payment",
         avatar: `https://i.pravatar.cc/40?u=${s._id}`,
         applications: s.applications || [],
       }));
