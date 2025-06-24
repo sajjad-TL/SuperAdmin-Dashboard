@@ -96,7 +96,6 @@ export default function Agent() {
         fetchApplications();
     }, []);
     useEffect(() => {
-        console.log(agent, "jsiodfi")
 
     }, [agent]);
 
@@ -223,7 +222,7 @@ export default function Agent() {
                                             </thead>
                                             <tbody>
                                                 {topAgents.slice(0, 5).map((agent, index) => (
-                                                    <tr key={index}>
+                                                    <tr key={agent._id || agent.agentId || index}>
                                                         <td
                                                             className="px-4 py-3 text-base text-blue-600 cursor-pointer hover:underline"
                                                             onClick={() => navigate(`/agentprofile/${agent.agentId}`)}
@@ -260,7 +259,7 @@ export default function Agent() {
                                             </div>
                                         ) : topAgents.length > 0 ? (
                                             topAgents.slice(0, 5).map((agent) => (
-                                                <div key={agent._id} className="bg-gray-100 p-3 rounded-lg border border-gray-300">
+                                                <div key={agent._id || agent.agentId || agent.email || index} className="bg-gray-100 p-3 rounded-lg border border-gray-300">
                                                     <div className='flex flex-row'>
                                                         <div className="flex items-center mb-3">
                                                             <div className="h-10 w-10 bg-gray-300 rounded-full mr-3 overflow-hidden">
