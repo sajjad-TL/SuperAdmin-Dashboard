@@ -26,6 +26,7 @@ import PaymentHistory from './pages/PaymentHistory';
 import PaymentProfile from './pages/PaymentProfile';
 import NewPayment from './pages/NewPayment';
 import Register from './pages/auth/Register'
+import University from './pages/University';
 
 function App() {
   return (
@@ -61,7 +62,7 @@ function App() {
             <Route path="admin" element={<AdminPanel />} />
             <Route path="agent" element={<Agent />} />
             <Route path="students" element={<Agent />} />
-            <Route path="universities" element={<Agent />} />
+            <Route path="universities" element={<University />} />
             <Route path="application" element={<Application />} />
             <Route path="tasks" element={<Agent />} />
             <Route path="trainhub" element={<Trainhub />} />
