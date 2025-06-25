@@ -5,7 +5,6 @@ import { X, Upload } from "lucide-react";
 export default function SchoolProgramModal({ onClose }) {
   const [activeTab, setActiveTab] = useState("school");
 
-  // Form state
   const [schoolName, setSchoolName] = useState("");
   const [type, setType] = useState("University");
   const [country, setCountry] = useState("Canada");
@@ -13,8 +12,6 @@ export default function SchoolProgramModal({ onClose }) {
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
 
-
-  // Program State
   const [programName, setProgramName] = useState("");
   const [level, setLevel] = useState("Bachelor");
   const [field, setField] = useState("");
@@ -27,13 +24,13 @@ export default function SchoolProgramModal({ onClose }) {
 
   const [schoolsList, setSchoolsList] = useState([]);
 
- useEffect(() => {
-  if (activeTab === "program") {
-    axios.get("http://localhost:5000/api/schools/all")
-      .then(res => setSchoolsList(res.data.schools))
-      .catch(err => console.error("Failed to load schools", err));
-  }
-}, [activeTab]);
+  useEffect(() => {
+    if (activeTab === "program") {
+      axios.get("http://localhost:5000/api/schools/all")
+        .then(res => setSchoolsList(res.data.schools))
+        .catch(err => console.error("Failed to load schools", err));
+    }
+  }, [activeTab]);
 
 
   const handleSubmitSchool = async () => {
@@ -41,8 +38,8 @@ export default function SchoolProgramModal({ onClose }) {
       const formData = new FormData();
       formData.append("name", schoolName);
       formData.append("type", type);
-      formData.append("country", country); // Fixed here
-      formData.append("city", city);       // Fixed here
+      formData.append("country", country);
+      formData.append("city", city);
       formData.append("description", description);
       if (image) {
         formData.append("image", image);
@@ -55,7 +52,7 @@ export default function SchoolProgramModal({ onClose }) {
       });
 
       console.log("School created:", response.data);
-      onClose(); // close modal and refresh
+      onClose();
     } catch (error) {
       console.error("Failed to create school:", error.response?.data || error.message);
       alert("Error creating school.");
@@ -64,26 +61,26 @@ export default function SchoolProgramModal({ onClose }) {
 
 
 
-const handleSubmitProgram = async () => {
-  try {
-    const payload = {
-      name: programName,
-      level,
-      field,
-      duration,
-      tuitionFee,
-      intakeMonths,
-      description: programDescription,
-      school: selectedSchool
-    };
-    const res = await axios.post("http://localhost:5000/api/programs/create", payload);
-    alert(`✅ Program "${res.data.program.name}" created successfully!`);
-    onClose();
-  } catch (error) {
-    console.error("Program error:", error.response?.data || error.message);
-    alert("❌ Error creating program.");
-  }
-};
+  const handleSubmitProgram = async () => {
+    try {
+      const payload = {
+        name: programName,
+        level,
+        field,
+        duration,
+        tuitionFee,
+        intakeMonths,
+        description: programDescription,
+        school: selectedSchool
+      };
+      const res = await axios.post("http://localhost:5000/api/programs/create", payload);
+      alert(`✅ Program "${res.data.program.name}" created successfully!`);
+      onClose();
+    } catch (error) {
+      console.error("Program error:", error.response?.data || error.message);
+      alert("❌ Error creating program.");
+    }
+  };
 
 
   const toggleIntakeMonth = (month) => {

@@ -37,26 +37,21 @@ export default function CommissionDashboard() {
 
   // Navigation handler
   const handleNavigation = (path) => {
-    console.log('Navigate to:', path);
-    // Replace with your navigation logic
+  
   };
-
-  // Base API URL - adjust according to your backend
-  const API_BASE_URL = 'http://localhost:5000/api/commission'; // Change this to your backend URL
-
+  const API_BASE_URL = 'http://localhost:5000/api/commission'; 
   const tabs = [
     { label: 'Agent Commissions', path: '/commission' },
     { label: 'Payment Requests', path: '/payment-requests' },
     { label: 'Payment History', path: '/payment-history' },
   ];
 
-  // Fetch dashboard statistics
   const fetchDashboardStats = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/dashboard/stats`);
       if (!response.ok) throw new Error('Failed to fetch dashboard stats');
       const data = await response.json();
-      console.log(data, "kdieollsio")
+      
       setDashboardStats(data);
     } catch (err) {
       setError('Failed to load dashboard statistics');
@@ -84,7 +79,7 @@ export default function CommissionDashboard() {
       setTotalPages(data.totalPages);
     } catch (err) {
       setError('Failed to load agents data');
-      console.error('Agents fetch error:', err);
+
     } finally {
       setLoading(false);
     }
