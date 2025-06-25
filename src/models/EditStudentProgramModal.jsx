@@ -46,6 +46,13 @@ export default function EditStudentProgramModal({ onClose, student, onUpdate }) 
     }));
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfileImage(file);
+    }
+  };
+
 const handleSave = async () => {
   try {
     // 1. First update profile image if selected
