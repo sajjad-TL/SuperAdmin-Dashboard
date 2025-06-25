@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 export default function EditStudentProgramModal({ onClose, student, onUpdate }) {
   const [activeTab, setActiveTab] = useState("student");
   const [selectedApplicationId, setSelectedApplicationId] = useState("");
+  const [profileImage, setProfileImage] = useState(null);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -13,6 +14,12 @@ export default function EditStudentProgramModal({ onClose, student, onUpdate }) 
     status: "",
     payment: "",
   });
+const handleFileChange = (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    setProfileImage(file);
+  }
+};
 
   // Update form data when student or selected application changes
   useEffect(() => {
@@ -53,7 +60,24 @@ useEffect(() => {
 
 const handleSave = async () => {
   try {
-    
+    // 1. First update profile image if selected
+    if (profileImage) {
+      const imageFormData = new FormData();
+      imageFormData.append("profileImage", profileImage);
+
+      const imageRes = await fetch(`http://localhost:5000/student/update-profile-image/${student._id}`, {
+        method: "PATCH",
+        body: imageFormData,
+      });
+
+      const imgResult = await imageRes.json();
+      if (!imageRes.ok) {
+        toast.error(imgResult.message || "Image upload failed.");
+        return;
+      }
+    }
+
+    // 2. Then update student data
     const response = await fetch("http://localhost:5000/student/update-student", {
       method: "PATCH",
       headers: {
@@ -74,20 +98,20 @@ const handleSave = async () => {
     });
 
     const result = await response.json();
-    console.log(result,"jhijkijwo")
 
     if (response.ok) {
-      toast.success("Student program updated successfully!");
-      onUpdate(); // Notify parent to refresh data
+      toast.success("Student updated successfully!");
+      onUpdate(); // Notify parent
       onClose();
     } else {
-      toast.error(result.message || "Failed to update student program.");
+      toast.error(result.message || "Failed to update student.");
     }
   } catch (error) {
-    console.error("Error updating student:", error);
+    console.error("Update error:", error);
     toast.error("Something went wrong.");
   }
 };
+
 
 
   return (
@@ -223,19 +247,31 @@ const handleSave = async () => {
             </form>
           )}
 
-          {activeTab === "media" && (
-            <div className="flex flex-col items-center justify-center text-center py-12 border border-dashed rounded-lg bg-gray-50">
-              <div className="bg-blue-100 p-4 rounded-full mb-4">
-                <Upload className="text-blue-500" size={28} />
-              </div>
-              <p className="text-gray-500 mb-2">
-                Drag & drop or click to upload documents/images
-              </p>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-                Choose Files
-              </button>
-            </div>
-          )}
+        {activeTab === "media" && (
+  <div className="flex flex-col items-center justify-center text-center py-10 px-4 border border-dashed rounded-lg bg-gray-50">
+    <div className="bg-blue-100 p-4 rounded-full mb-4">
+      <Upload className="text-blue-500" size={28} />
+    </div>
+    <p className="text-gray-500 mb-2">
+      Drag & drop or click to upload profile image
+    </p>
+    <label className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+      Choose Image
+      <input
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+    </label>
+    {profileImage && (
+      <p className="mt-3 text-sm text-green-600">
+        Selected: {profileImage.name}
+      </p>
+    )}
+  </div>
+)}
+
         </div>
 
         <div className="flex justify-end space-x-2 border-t p-4 bg-gray-50">

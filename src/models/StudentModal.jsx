@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import { X } from "lucide-react";
+import { X, Upload, User, Camera } from "lucide-react";
 import { UserContext } from "../context/userContext";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -10,8 +10,10 @@ const StudentProgramModal = ({ isOpen, onClose, onStudentAdded }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
   const { user } = useContext(UserContext);
-  const [agents, setAgents] = useState([]);  // New state for agents list
-  const isSuperAdmin = user?.role === 'superadmin'; // Make sure this matches your role naming
+  const [agents, setAgents] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const isSuperAdmin = user?.role === 'superadmin';
 
   const initialFormState = {
     firstName: "",
@@ -30,50 +32,71 @@ const StudentProgramModal = ({ isOpen, onClose, onStudentAdded }) => {
     serviceOfInterest: "",
     conditionsAccepted: false,
     agentId: ""
-
   };
 
   const [formData, setFormData] = useState(initialFormState);
   const [selectdAgent, setSelectedAgent] = useState(""); // initialize with an empty string or null
- 
-    
 
 
   useEffect(() => {
-
-  const fetchAgents = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/agent/allagents/getAllAgents");
-      const data = await response.json();
-      console.log(data)
-      if (data.success && data.agents) {
-        setAgents(data.agents);
-      } else {
-        toast.error("Failed to fetch agents");
+    const fetchAgents = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/agent/allagents/getAllAgents");
+        const data = await response.json();
+        if (data.success && data.agents) {
+          setAgents(data.agents);
+        } else {
+          toast.error("Failed to fetch agents");
+        }
+      } catch (error) {
+        toast.error("Error fetching agents");
       }
-    } catch (error) {
-      toast.error("Error fetching agents");
-    }
-  };
+    };
 
-if (isOpen) {
+    if (isOpen) {
       fetchAgents();
     }
 
     if (!isOpen) {
-
       const timeout = setTimeout(() => {
         setShouldRender(false);
       }, 300);
-
       return () => clearTimeout(timeout);
-
     } else {
       setShouldRender(true);
     }
   }, [isOpen]);
 
   if (!shouldRender) return null;
+
+  const handleImageSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast.error("Image size should be less than 5MB");
+        return;
+      }
+
+      if (!file.type.startsWith('image/')) {
+        toast.error("Please select a valid image file");
+        return;
+      }
+
+      setSelectedImage(file);
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -82,7 +105,6 @@ if (isOpen) {
       [name]: type === "checkbox" ? checked : value,
     }));
 
-    // Clear validation error when field is updated
     if (validationErrors[name]) {
       setValidationErrors(prev => ({ ...prev, [name]: "" }));
     }
@@ -98,12 +120,10 @@ if (isOpen) {
       }
     });
 
-    // Email validation
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       errors.email = "Please enter a valid email address";
     }
 
-    // Phone validation
     if (formData.phoneNumber && !/^\d+$/.test(formData.phoneNumber)) {
       errors.phoneNumber = "Phone number should contain only digits";
     }
@@ -116,79 +136,63 @@ if (isOpen) {
     return Object.keys(errors).length === 0;
   };
 
-const handleSubmit = async () => {
-  if (!validateForm()) {
-    toast.error("Please fix the errors in the form");
-    return;
-  }
-
-{isSuperAdmin && (
-  <div className="mb-4">
-    <label className="block mb-2 font-medium text-gray-700">Select Agent</label>
-    <select
-      name="agentId"
-      value={formData.agentId || ""}
-      onChange={(e) =>
-        setFormData({ ...formData, agentId: e.target.value })
-      }
-      className="w-full p-2 border border-gray-300 rounded"
-    >
-      <option value="">-- Select Agent --</option>
-      {agents.map((agent) => (
-        <option key={agent._id} value={agent._id}>
-          {agent.firstName} {agent.lastName} ({agent.email})
-        </option>
-      ))}
-    </select>
-  </div>
-)}
-
-
-setIsSubmitting(true);
-console.log("Selected Agent ID:", formData.agentId);
-
-  try {
-    const apiUrl = 'http://localhost:5000/student/add-new';
-
-    const submitData = {
-      ...formData,
-      agentId: isSuperAdmin ? formData.agentId : formData.agentId, // Replace `currentUserAgentId` with actual value from auth
-    };
-
-    console.log('Submitting data:', submitData);
-
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(submitData),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      if (data?.message === "Student already exists") {
-        toast.error("Student with this email already exists.");
-        return;
-      }
-      throw new Error(data?.message || "Failed to add student");
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      toast.error("Please fix the errors in the form");
+      return;
     }
 
-    toast.success("Student added successfully!");
-    if (typeof onStudentAdded === 'function') {
-      onStudentAdded(data);
+    setIsSubmitting(true);
+
+    try {
+      const formDataToSend = new FormData();
+
+      // Append all form fields
+      Object.keys(formData).forEach(key => {
+        formDataToSend.append(key, formData[key]);
+      });
+
+      // Add agent ID for superadmin
+      if (isSuperAdmin && formData.agentId) {
+        formDataToSend.set('agentId', formData.agentId);
+      }
+
+      // Append image if selected
+      if (selectedImage) {
+        formDataToSend.append('profileImage', selectedImage);
+      }
+
+      const response = await fetch('http://localhost:5000/student/add-new', {
+        method: "POST",
+        body: formDataToSend,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data?.message === "Student already exists") {
+          toast.error("Student with this email already exists.");
+          return;
+        }
+        throw new Error(data?.message || "Failed to add student");
+      }
+
+      toast.success("Student added successfully!");
+      if (typeof onStudentAdded === 'function') {
+        onStudentAdded(data);
+      }
+
+      onClose();
+      setFormData(initialFormState);
+      setSelectedImage(null);
+      setImagePreview(null);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || "Failed to add student!");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    onClose();
-    setFormData(initialFormState);
-  } catch (err) {
-    console.error(err);
-    toast.error(err.message || "Failed to add student!");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
-
+  };
 
   const renderField = (name, label, type = "text", placeholder = "", options = [], required = false) => {
     const error = validationErrors[name];
@@ -203,8 +207,7 @@ console.log("Selected Agent ID:", formData.agentId);
             name={name}
             value={formData[name]}
             onChange={handleChange}
-            className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-blue-50 ${error ? "border-red-500" : ""
-              }`}
+            className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-blue-50 ${error ? "border-red-500" : ""}`}
           >
             <option value="">{`Please choose ${label.toLowerCase()}`}</option>
             {options.map((option) => (
@@ -274,8 +277,7 @@ console.log("Selected Agent ID:", formData.agentId);
           value={formData[name]}
           onChange={handleChange}
           placeholder={placeholder}
-          className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${error ? "border-red-500" : ""
-            }`}
+          className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${error ? "border-red-500" : ""}`}
           onInput={name === "phoneNumber" ? (e) => {
             e.target.value = e.target.value.replace(/[^0-9]/g, '');
           } : undefined}
@@ -298,33 +300,18 @@ console.log("Selected Agent ID:", formData.agentId);
 
         {/* Tabs */}
         <div className="flex px-6 pt-4 border-b">
-          <button
-            className={`pb-3 mr-6 font-medium transition ${activeTab === "personal"
-              ? "text-blue-600 border-b-2 border-blue-600"
-              : "text-gray-500 hover:text-gray-800"
-              }`}
-            onClick={() => setActiveTab("personal")}
-          >
-            Personal Info
-          </button>
-          <button
-            className={`pb-3 mr-6 font-medium transition ${activeTab === "contact"
-              ? "text-blue-600 border-b-2 border-blue-600"
-              : "text-gray-500 hover:text-gray-800"
-              }`}
-            onClick={() => setActiveTab("contact")}
-          >
-            Contact Info
-          </button>
-          <button
-            className={`pb-3 font-medium transition ${activeTab === "additional"
-              ? "text-blue-600 border-b-2 border-blue-600"
-              : "text-gray-500 hover:text-gray-800"
-              }`}
-            onClick={() => setActiveTab("additional")}
-          >
-            Additional Info
-          </button>
+          {["personal", "contact", "additional", "image"].map((tab) => (
+            <button
+              key={tab}
+              className={`pb-3 mr-6 font-medium transition capitalize ${activeTab === tab
+                  ? "text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-500 hover:text-gray-800"
+                }`}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab === "image" ? "Profile Image" : tab.replace(/([A-Z])/g, ' $1')}
+            </button>
+          ))}
         </div>
 
         {/* Modal Body */}
@@ -381,7 +368,7 @@ console.log("Selected Agent ID:", formData.agentId);
               ])}
               {renderField("countryOfInterest", "Country of Interest", "text", "Enter country of interest")}
               {renderField("serviceOfInterest", "Services of Interest", "text", "Enter services of interest")}
-              {/* NEW Dropdown for agents */}
+
               {renderField("agentId", "Assign Agent", "select", "", agents.map(agent => ({
                 value: agent._id,
                 label: `${agent.firstName} ${agent.lastName}`
@@ -391,6 +378,60 @@ console.log("Selected Agent ID:", formData.agentId);
               <p className="text-sm mt-4">
                 <span className="text-red-500">*</span> Required information.
               </p>
+            </div>
+          )}
+
+          {/* Image Upload Tab */}
+          {activeTab === "image" && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h3 className="text-lg font-medium text-gray-800 mb-4">Profile Image</h3>
+
+                {/* Image Preview */}
+                <div className="mb-6 flex justify-center">
+                  <div className="relative">
+                    {imagePreview ? (
+                      <div className="relative">
+                        <img
+                          src={imagePreview}
+                          alt="Profile Preview"
+                          className="w-32 h-32 rounded-full object-cover border-4 border-gray-200"
+                        />
+                        <button
+                          onClick={removeImage}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-32 h-32 rounded-full bg-gray-100 border-4 border-gray-200 flex items-center justify-center">
+                        <User size={48} className="text-gray-400" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Upload Button */}
+                <div className="space-y-4">
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageSelect}
+                      className="hidden"
+                    />
+                    <div className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                      <Camera className="mr-2" size={16} />
+                      {selectedImage ? 'Change Image' : 'Upload Image'}
+                    </div>
+                  </label>
+
+                  <p className="text-xs text-gray-500">
+                    Upload a profile image (Max: 5MB, Formats: JPG, PNG, GIF)
+                  </p>
+                </div>
+              </div>
             </div>
           )}
         </div>

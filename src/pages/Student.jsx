@@ -18,18 +18,26 @@ export default function StudentTable() {
       const res = await fetch("http://localhost:5000/student/getAllStudents");
       const data = await res.json();
 
-      const normalized = (data?.students || []).map(s => ({
-        _id: s._id,
-        firstName: s.firstName || "N/A",
-        lastName: s.lastName || "N/A",
-        email: s.email,
-        program: s.applications?.map(app => app.program).join(', ') || "No Program",
-        university: s.applications?.map(app => app.institute).join(', ') || "No Institute",
-        status: s.status || "N/A",
-        payment: s.paymentStatus || "No Payment",
-        avatar: `https://i.pravatar.cc/40?u=${s._id}`,
-        applications: s.applications || [],
-      }));
+      const normalized = (data?.students || []).map(s => {
+        const hasUploadedImage = s.profileImage && s.profileImage.filename;
+        const profileImageUrl = hasUploadedImage
+          ? `http://localhost:5000/uploads/${s.profileImage.filename}` // Adjust path if needed
+          : null;
+
+        return {
+          _id: s._id,
+          firstName: s.firstName || "N/A",
+          lastName: s.lastName || "",
+          email: s.email,
+          program: s.applications?.map(app => app.program).join(', ') || "No Program",
+          university: s.applications?.map(app => app.institute).join(', ') || "No Institute",
+          status: s.status || "N/A",
+          payment: s.paymentStatus || "No Payment",
+          avatar: profileImageUrl, // use uploaded image if exists
+          initials: s.firstName?.charAt(0).toUpperCase() || "U", // fallback
+          applications: s.applications || [],
+        };
+      });
 
       setStudents(normalized);
     } catch (error) {
@@ -125,11 +133,18 @@ export default function StudentTable() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <Link to={`/studentprofile/${student._id}`}> {/* Dynamic student ID */}
-                        <img
-                          src={student.avatar || "/default-avatar.png"}
-                          alt="Avatar"
-                          className="h-8 w-8 rounded-full"
-                        />
+                        {student.avatar ? (
+                          <img
+                            src={student.avatar}
+                            alt="Avatar"
+                            className="h-8 w-8 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center text-xs font-semibold text-white">
+                            {student.initials}
+                          </div>
+                        )}
+
                       </Link>
                       <div>
                         <div className="font-medium">{student.firstName} {student.lastName}</div>
