@@ -6,7 +6,7 @@ import {
   FaUserPlus,
   FaSignInAlt,
 } from "react-icons/fa";
-import { Trash2 } from "lucide-react";
+import { Trash2, X } from "lucide-react";
 import Admin from "../layout/Adminnavbar";
 import { useSocket } from "../context/SocketContext";
 
@@ -19,7 +19,7 @@ const iconMap = {
 };
 
 const NotificationPage = () => {
-  const { notifications, markAllAsRead } = useSocket();
+  const { notifications, markAllAsRead, deleteNotification } = useSocket();
 
   useEffect(() => {
     markAllAsRead(); // reset badge count
@@ -51,6 +51,13 @@ const NotificationPage = () => {
                     <p className="text-gray-800 font-medium">{n.message}</p>
                     <span className="text-xs text-gray-500">{n.time}</span>
                   </div>
+                  <button
+                    onClick={() => deleteNotification(n.id)}
+                    className="text-gray-400 hover:text-red-500 transition"
+                    title="Delete notification"
+                  >
+                    <X size={16} />
+                  </button>
                 </li>
               ))
             )}
