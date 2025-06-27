@@ -3,16 +3,11 @@ import { useState, useRef, useEffect } from "react";
 import avatar from '../assets/avatar.png';
 import { useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
-import { logout } from '../utils/auth'; // Import the proper logout function
+import { logout } from '../utils/auth';
+import { useSocket } from '../context/SocketContext';
 
 const Admin = () => {
-  const notifications = [
-    { id: 1, message: "New student registered" },
-    { id: 2, message: "Payment confirmed" },
-    { id: 3, message: "Profile updated" },
-  ];
-
-  const unreadCount = notifications.length;
+  const { unreadCount } = useSocket();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef();
@@ -28,17 +23,14 @@ const Admin = () => {
   }, []);
 
   const handleLogout = () => {
-    // Using the proper logout function from auth utils
     logout();
     toast.success("Logged out successfully!");
-    // No need to navigate manually as logout() handles it
   };
 
   return (
     <div className="container-fluid">
       <header className="w-full bg-white shadow-sm border-b px-10 py-2 z-50">
         <div className="flex justify-between items-center">
-
           <div className="items-center space-x-4 ms-auto hidden sm:flex" ref={dropdownRef}>
             <div className="relative">
               <button
@@ -55,10 +47,7 @@ const Admin = () => {
             </div>
 
             <div className="relative">
-              <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="focus:outline-none"
-              >
+              <button onClick={() => setIsOpen(!isOpen)} className="focus:outline-none">
                 <img
                   src={avatar}
                   alt="User Avatar"
@@ -74,7 +63,7 @@ const Admin = () => {
                         className="w-full text-left px-4 py-2 hover:bg-gray-100"
                         onClick={() => {
                           navigate("/settings");
-                          setIsOpen(false); // Close dropdown after click
+                          setIsOpen(false);
                         }}
                       >
                         Profile
