@@ -2,7 +2,6 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
 const SocketContext = createContext();
-
 export const useSocket = () => useContext(SocketContext);
 
 export const SocketProvider = ({ children }) => {
@@ -31,7 +30,7 @@ export const SocketProvider = ({ children }) => {
       });
 
       const newNotification = {
-        id: Date.now(),
+        id: Date.now(), // frontend generated ID
         message: data.message,
         type: data.type,
         time,
@@ -60,9 +59,21 @@ export const SocketProvider = ({ children }) => {
     localStorage.setItem("unreadCount", "0");
   };
 
+  const deleteNotification = (id) => {
+    const updated = notifications.filter((n) => n.id !== id);
+    setNotifications(updated);
+    localStorage.setItem("notifications", JSON.stringify(updated));
+  };
+
   return (
     <SocketContext.Provider
-      value={{ socket, notifications, unreadCount, markAllAsRead }}
+      value={{
+        socket,
+        notifications,
+        unreadCount,
+        markAllAsRead,
+        deleteNotification,
+      }}
     >
       {children}
     </SocketContext.Provider>
