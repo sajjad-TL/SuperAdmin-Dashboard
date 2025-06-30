@@ -11,7 +11,7 @@ export default function StudentTable() {
   const [students, setStudents] = useState([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editStudent, setEditStudent] = useState(null);
-  const { user } = useContext(UserContext);
+
 
   const fetchStudents = async () => {
     try {
@@ -144,7 +144,6 @@ export default function StudentTable() {
                             {student.initials}
                           </div>
                         )}
-
                       </Link>
                       <div>
                         <div className="font-medium">{student.firstName} {student.lastName}</div>

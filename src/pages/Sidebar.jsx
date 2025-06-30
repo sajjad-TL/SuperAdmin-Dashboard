@@ -248,8 +248,8 @@ export default function Sidebar() {
 
                     <div
                         className={`flex flex-row items-center gap-2 p-2 rounded font-semibold mb-1 cursor-pointer mt-10 ${location.pathname === "/settings"
-                                ? "bg-[#D8E2FC] text-[#1A726C] font-semibold "
-                                : "hover:bg-gray-100"
+                            ? "bg-[#D8E2FC] text-[#1A726C] font-semibold "
+                            : "hover:bg-gray-100"
                             }`}
                         onClick={() => {
                             navigate("/settings");

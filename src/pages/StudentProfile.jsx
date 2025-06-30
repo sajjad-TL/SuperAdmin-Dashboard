@@ -21,79 +21,83 @@ export default function StudentProfile() {
     const fetchStudent = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://localhost:5000/student/${studentId}`);
-        setStudent(response.data.student || null);
+        const response = await fetch(`${API_BASE}/${studentId}`);
+        const data = await response.json();
 
-        const docs = (response.data.student?.documents || []).map((doc) => {
-          const isImage = /\.(jpg|jpeg|png|gif)$/i.test(doc.filename);
-          return {
-            id: doc._id,
-            name: doc.filename,
-            size: 0,
-            preview: isImage ? `http://localhost:5000/uploads/${doc.filename}` : "",
-            uploadDate: new Date(doc.uploadedAt),
-            status: "Uploaded",
-            isImage,
-          };
-        });
+        if (data.success) {
+          const s = data.student;
 
-        setUploadedFiles(docs);
-        setLoading(false);
+          const hasUploadedImage = s.profileImage && s.profileImage.filename;
+          const profileImageUrl = hasUploadedImage
+            ? `http://localhost:5000/uploads/${s.profileImage.filename}`
+            : null;
+
+          setStudent({
+            ...s,
+            avatar: profileImageUrl,
+          });
+          setEditedStudent(s);
+          setApplications(s.applications || []);
+        } else {
+          setError(data.message || 'Failed to fetch student data');
+        }
       } catch (err) {
-        setError("Failed to fetch student data");
+        setError('Network error: ' + err.message);
+      } finally {
         setLoading(false);
       }
     };
+
 
     fetchStudent();
   }, [studentId]);
 
   // Handle new file uploads
-const handleInputChange = async (e) => {
-  const files = Array.from(e.target.files);
+  const handleInputChange = async (e) => {
+    const files = Array.from(e.target.files);
 
-  for (const file of files) {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("documentType", file.type.startsWith("image") ? "Image" : "Document");
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("documentType", file.type.startsWith("image") ? "Image" : "Document");
 
-    try {
-      const response = await axios.post(
-        `http://localhost:5000/student/upload-document/${studentId}`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+      try {
+        const response = await axios.post(
+          `http://localhost:5000/student/upload-document/${studentId}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        const documentData = response.data?.document;
+
+        if (!documentData) {
+          console.error("No document returned from server");
+          continue;
         }
-      );
 
-      const documentData = response.data?.document;
+        const isImage = /\.(jpg|jpeg|png|gif)$/i.test(documentData.filename);
 
-      if (!documentData) {
-        console.error("No document returned from server");
-        continue;
+        const newFile = {
+          id: documentData._id || Date.now() + file.name,
+          name: documentData.filename,
+          size: file.size,
+          preview: isImage ? `http://localhost:5000/uploads/${documentData.filename}` : "",
+          uploadDate: new Date(),
+          status: "Uploaded",
+          isImage,
+        };
+
+        setUploadedFiles((prev) => [...prev, newFile]);
+      } catch (uploadError) {
+        console.error("Upload failed:", uploadError);
+        alert(`Failed to upload ${file.name}`);
       }
-
-      const isImage = /\.(jpg|jpeg|png|gif)$/i.test(documentData.filename);
-
-      const newFile = {
-        id: documentData._id || Date.now() + file.name,
-        name: documentData.filename,
-        size: file.size,
-        preview: isImage ? `http://localhost:5000/uploads/${documentData.filename}` : "",
-        uploadDate: new Date(),
-        status: "Uploaded",
-        isImage,
-      };
-
-      setUploadedFiles((prev) => [...prev, newFile]);
-    } catch (uploadError) {
-      console.error("Upload failed:", uploadError);
-      alert(`Failed to upload ${file.name}`);
     }
-  }
-};
+  };
 
   const formatFileSize = (size) => {
     if (size === 0) return "0 B";
@@ -102,62 +106,42 @@ const handleInputChange = async (e) => {
     return (size / Math.pow(1024, i)).toFixed(2) + " " + sizes[i];
   };
 
-const removeFile = async (fileId) => {
-  const fileToRemove = uploadedFiles.find(f => f.id === fileId);
-  if (!fileToRemove) {
-    console.error("File not found in uploaded files");
-    return;
-  }
-
-  // Use the correct studentId from useParams, not fileId
-  const filename = fileToRemove.name;
-
-  try {
-    console.log("Deleting file:", filename, "for student:", studentId);
-    
-    const res = await axios.delete(
-      `http://localhost:5000/student/students/${studentId}/documents/${filename}`
-    );
-
-    if (res.data.success) {
-      // Remove file from UI immediately
-      setUploadedFiles(prev => prev.filter(f => f.id !== fileId));
-      toast.success("Document deleted successfully");
-    } else {
-      console.error("Failed to delete file:", res.data.message);
-      toast.error("Failed to delete document");
+  const removeFile = async (fileId) => {
+    const fileToRemove = uploadedFiles.find(f => f.id === fileId);
+    if (!fileToRemove) {
+      console.error("File not found in uploaded files");
+      return;
     }
-  } catch (error) {
-    console.error("Error deleting file:", error);
-    toast.error("Error deleting document");
-  }
-};
 
-  
-  const API_BASE = "http://localhost:5000/student"; 
+    // Use the correct studentId from useParams, not fileId
+    const filename = fileToRemove.name;
 
-  const fetchStudent = async () => {
     try {
-      setLoading(true);
-      const response = await fetch(`${API_BASE}/${studentId}`);
-      const data = await response.json();
+      console.log("Deleting file:", filename, "for student:", studentId);
 
-      if (data.success) {
-        console.log(data)
-        setStudent(data.student);
-        setEditedStudent(data.student);
-        setApplications(data.student.applications || []);
+      const res = await axios.delete(
+        `http://localhost:5000/student/students/${studentId}/documents/${filename}`
+      );
+
+      if (res.data.success) {
+        // Remove file from UI immediately
+        setUploadedFiles(prev => prev.filter(f => f.id !== fileId));
+        toast.success("Document deleted successfully");
       } else {
-        setError(data.message || 'Failed to fetch student data');
+        console.error("Failed to delete file:", res.data.message);
+        toast.error("Failed to delete document");
       }
-    } catch (err) {
-      setError('Network error: ' + err.message);
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      toast.error("Error deleting document");
     }
   };
 
- 
+
+  const API_BASE = "http://localhost:5000/student";
+
+
+
   const updateStudent = async () => {
     try {
       const response = await fetch(`${API_BASE}/update-student`, {
@@ -185,7 +169,7 @@ const removeFile = async (fileId) => {
     }
   };
 
- 
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -213,9 +197,7 @@ const removeFile = async (fileId) => {
     }
   };
 
-  useEffect(() => {
-    fetchStudent();
-  }, []);
+
 
   if (loading) {
     return (
@@ -294,9 +276,17 @@ const removeFile = async (fileId) => {
             <h2 className="text-lg font-semibold mb-4">Personal Information</h2>
             <div className="flex flex-col sm:flex-row items-start sm:items-center mb-6">
               <div className="mb-4 sm:mb-0 sm:mr-4">
-                <div className="rounded-full w-16 h-16 bg-[#2A7B88] flex items-center justify-center text-white text-xl font-bold">
-                  {student.firstName?.[0]}{student.lastName?.[0]}
-                </div>
+                {student.avatar ? (
+                  <img
+                    src={student.avatar}
+                    alt="Student Avatar"
+                    className="h-12 w-12 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="rounded-full w-12 h-12 bg-[#2A7B88] flex items-center justify-center text-white text-lg font-bold">
+                    {student.firstName?.[0]}{student.lastName?.[0]}
+                  </div>
+                )}
               </div>
               <div className="flex-1">
                 {editMode ? (
@@ -521,9 +511,26 @@ const removeFile = async (fileId) => {
             <h2 className="text-lg font-semibold mb-4">Linked Agent</h2>
             {student ? (
               <div className="flex items-center space-x-4">
-                <div className="rounded-full w-12 h-12 bg-[#2A7B88] flex items-center justify-center text-white text-lg font-bold">
-                  {student.firstName?.[0]}{student.lastName?.[0]}
+                <div className="flex items-center gap-4 mb-6">
+                  {student.avatar ? (
+                    <img
+                      src={student.avatar}
+                      alt="Student Avatar"
+                      className="h-12 w-12 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="rounded-full w-12 h-12 bg-[#2A7B88] flex items-center justify-center text-white text-lg font-bold">
+                      {student.firstName?.[0]}{student.lastName?.[0]}
+                    </div>
+                  )}
+
+                  <div>
+                    <h2 className="text-xl font-semibold">{student.firstName} {student.lastName}</h2>
+                    <p className="text-sm text-gray-500">{student.email}</p>
+                  </div>
                 </div>
+
+
                 <div>
                   <p className="font-semibold">Agent ID:  {student._id}</p>
                   <p className="text-sm text-gray-500">Status: {student.status}</p>
