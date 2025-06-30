@@ -16,10 +16,6 @@ export default function PaymentRequestsDashboard() {
   const [statusFilter, setStatusFilter] = useState('All');
   const uniqueStatuses = ['All', ...new Set(paymentRequests.map(p => p.status))];
 
-
-
-
-
   useEffect(() => {
     const fetchPaymentRequests = async () => {
       try {

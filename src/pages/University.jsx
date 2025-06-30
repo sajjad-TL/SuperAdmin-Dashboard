@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Eye, Edit, Trash2, ChevronRight, UserPlus, Shield, Clock, AlertCircle, X } from 'lucide-react';
 import Admin from '../layout/Adminnavbar';
 import { toast } from 'react-toastify';
@@ -133,13 +133,13 @@ export default function University() {
   };
 
   // Handle form input changes
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+ const handleInputChange = useCallback((e) => {
+  const { name, value } = e.target;
+  setFormData(prev => ({
+    ...prev,
+    [name]: value
+  }));
+}, []);
 
   // Handle university creation
   const handleCreateUniversity = async (e) => {
@@ -322,28 +322,27 @@ export default function University() {
   ];
 
   // Modal Component
-  const Modal = ({ isOpen, onClose, title, children }) => {
-    if (!isOpen) return null;
+ const Modal = React.memo(({ isOpen, onClose, title, children }) => {
+  if (!isOpen) return null;
 
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-          <div className="p-6">
-            {children}
-          </div>
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
         </div>
+        <div className="p-6">{children}</div>
       </div>
-    );
-  };
+    </div>
+  );
+});
+
 
   if (loading) {
     return (
