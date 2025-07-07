@@ -17,43 +17,67 @@ export default function StudentProfile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchStudent = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`${API_BASE}/${studentId}`);
-        const data = await response.json();
+useEffect(() => {
+  const fetchStudent = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:5000/student/${studentId}`);
+      const data = await response.json();
 
-        if (data.success) {
-          const s = data.student;
+      if (data.success) {
+        const s = data.student;
 
-          const hasUploadedImage = s.profileImage && s.profileImage.filename;
-          const profileImageUrl = hasUploadedImage
-            ? `http://localhost:5000/uploads/${s.profileImage.filename}`
-            : null;
+        // Profile Image Logic
+        const hasUploadedImage = s.profileImage && s.profileImage.filename;
+        const profileImageUrl = hasUploadedImage
+          ? `http://localhost:5000/uploads/${s.profileImage.filename}`
+          : null;
 
-          setStudent({
-            ...s,
-            avatar: profileImageUrl,
-          });
-          setEditedStudent(s);
-          setApplications(s.applications || []);
-        } else {
-          setError(data.message || 'Failed to fetch student data');
-        }
-      } catch (err) {
-        setError('Network error: ' + err.message);
-      } finally {
-        setLoading(false);
+        setStudent({
+          ...s,
+          avatar: profileImageUrl,
+        });
+
+        setEditedStudent(s);
+        setApplications(s.applications || []);
+
+        // ✅ Document logic: map backend documents to frontend state
+        const docs = s.documents || [];
+        const formattedDocs = docs.map((doc) => {
+          const isImage = /\.(jpg|jpeg|png|gif)$/i.test(doc.filename);
+          return {
+            id: doc._id || Date.now() + doc.filename,
+            name: doc.filename,
+            size: doc.size || 0,
+            preview: isImage ? `http://localhost:5000/uploads/${doc.filename}` : "",
+            uploadDate: doc.uploadedAt || new Date(),
+            status: "Uploaded",
+            isImage,
+          };
+        });
+
+        setUploadedFiles(formattedDocs);
+      } else {
+        setError(data.message || 'Failed to fetch student data');
       }
-    };
+    } catch (err) {
+      setError('Network error: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-
-    fetchStudent();
-  }, [studentId]);
+  fetchStudent();
+}, [studentId]);
+const handleFieldChange = (field, value) => {
+  setEditedStudent((prev) => ({
+    ...prev,
+    [field]: value,
+  }));
+};
 
   // Handle new file uploads
-  const handleInputChange = async (e) => {
+  const handleFileUploadChange  = async (e) => {
     const files = Array.from(e.target.files);
 
     for (const file of files) {
@@ -295,14 +319,14 @@ export default function StudentProfile() {
                       <input
                         type="text"
                         value={editedStudent.firstName || ''}
-                        onChange={(e) => handleInputChange('firstName', e.target.value)}
+                        onChange={(e) => handleFieldChange('firstName', e.target.value)}
                         className="border rounded px-2 py-1 text-lg font-bold flex-1"
                         placeholder="First Name"
                       />
                       <input
                         type="text"
                         value={editedStudent.lastName || ''}
-                        onChange={(e) => handleInputChange('lastName', e.target.value)}
+                        onChange={(e) => handleFieldChange('lastName', e.target.value)}
                         className="border rounded px-2 py-1 text-lg font-bold flex-1"
                         placeholder="Last Name"
                       />
@@ -310,7 +334,7 @@ export default function StudentProfile() {
                     <input
                       type="email"
                       value={editedStudent.email || ''}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      onChange={(e) => handleFieldChange('email', e.target.value)}
                       className="border rounded px-2 py-1 text-sm text-gray-500 w-full"
                       placeholder="Email"
                     />
@@ -336,7 +360,7 @@ export default function StudentProfile() {
                     <input
                       type="text"
                       value={editedStudent.phoneNumber || ''}
-                      onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+                      onChange={(e) => handleFieldChange('phoneNumber', e.target.value)}
                       className="border rounded px-2 py-1 font-medium w-full"
                     />
                   ) : (
@@ -352,7 +376,7 @@ export default function StudentProfile() {
                     <input
                       type="date"
                       value={editedStudent.dateOfBirth ? editedStudent.dateOfBirth.split('T')[0] : ''}
-                      onChange={(e) => handleInputChange('dateOfBirth', e.target.value)}
+                      onChange={(e) => handleFieldChange('dateOfBirth', e.target.value)}
                       className="border rounded px-2 py-1 font-medium w-full"
                     />
                   ) : (
@@ -368,7 +392,7 @@ export default function StudentProfile() {
                     <input
                       type="text"
                       value={editedStudent.citizenOf || ''}
-                      onChange={(e) => handleInputChange('citizenOf', e.target.value)}
+                      onChange={(e) => handleFieldChange('citizenOf', e.target.value)}
                       className="border rounded px-2 py-1 font-medium w-full"
                     />
                   ) : (
@@ -381,7 +405,7 @@ export default function StudentProfile() {
                   {editMode ? (
                     <select
                       value={editedStudent.gender || ''}
-                      onChange={(e) => handleInputChange('gender', e.target.value)}
+                      onChange={(e) => handleFieldChange('gender', e.target.value)}
                       className="border rounded px-2 py-1 font-medium w-full"
                     >
                       <option value="">Select Gender</option>
@@ -400,7 +424,7 @@ export default function StudentProfile() {
                     <input
                       type="text"
                       value={editedStudent.passportNumber || ''}
-                      onChange={(e) => handleInputChange('passportNumber', e.target.value)}
+                      onChange={(e) => handleFieldChange('passportNumber', e.target.value)}
                       className="border rounded px-2 py-1 font-medium w-full"
                     />
                   ) : (
@@ -422,7 +446,7 @@ export default function StudentProfile() {
                   type="file"
                   multiple
                   className="hidden"
-                  onChange={handleInputChange}
+                  onChange={handleFileUploadChange}
                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
                 />
               </label>

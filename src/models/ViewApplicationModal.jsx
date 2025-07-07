@@ -29,18 +29,8 @@ const ViewApplication = ({ onClose, existingData }) => {
                                 <p className="font-semibold">Email:</p>
                                 <p>{existingData.email}</p>
                             </div>
-                            <div>
-                                <p className="font-semibold">Phone:</p>
-                                <p>{existingData.phone || '—'}</p>
-                            </div>
-                            <div>
-                                <p className="font-semibold">Nationality:</p>
-                                <p>{existingData.nationality || '—'}</p>
-                            </div>
-                            <div>
-                                <p className="font-semibold">Date of Birth:</p>
-                                <p>{existingData.dob?.slice(0, 10) || '—'}</p>
-                            </div>
+                           
+
                         </div>
                     </div>
 
@@ -71,10 +61,6 @@ const ViewApplication = ({ onClose, existingData }) => {
                             <div>
                                 <p className="font-semibold">Current Stage:</p>
                                 <p>{existingData.currentStage}</p>
-                            </div>
-                            <div>
-                                <p className="font-semibold">Agent:</p>
-                                <p>{existingData.agentName || '—'}</p>
                             </div>
                         </div>
                     </div>
