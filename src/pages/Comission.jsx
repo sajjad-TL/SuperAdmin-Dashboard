@@ -7,12 +7,14 @@ import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 
 export default function CommissionDashboard() {
-  const [activeTab, setActiveTab] = useState('Agent Commissions');
+  // const [activeTab, setActiveTab] = useState('Agent Commissions');
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedAgentId, setSelectedAgentId] = useState(null);
+  const [agentDetails, setAgentDetails] = useState(null);
 
-  // Dashboard stats state
   const [dashboardStats, setDashboardStats] = useState({
     totalCommission: 0,
     pendingPayouts: 0,
@@ -23,28 +25,18 @@ export default function CommissionDashboard() {
     commissionGrowthPercent: 0
   });
 
-  // Agents data state
   const [agents, setAgents] = useState([]);
   const [totalAgents, setTotalAgents] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Filters state
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
   const [itemsPerPage] = useState(10);
-//  const { parsePhoneNumberFromString } = require('libphonenumber-js');
 
-
-  // Navigation handler
   const handleNavigation = (path) => {
   
   };
   const API_BASE_URL = 'http://localhost:5000/api/commission'; 
-  const tabs = [
-    { label: 'Agent Commissions', path: '/commission' },
-    { label: 'Payment Requests', path: '/payment-requests' },
-    { label: 'Payment History', path: '/payment-history' },
-  ];
 
   const fetchDashboardStats = async () => {
     try {
@@ -85,11 +77,26 @@ export default function CommissionDashboard() {
     }
   };
 
+const handleViewDetails = async (agentId) => {
+  setSelectedAgentId(agentId);
+  setShowModal(true);
+  try {
+    const response = await fetch(`${API_BASE_URL}/agent/${agentId}`);
+    if (!response.ok) throw new Error('Failed to fetch agent details');
+    const data = await response.json();
+    console.log('Fetched agent details:', data); // Debug
+    setAgentDetails(data);
+  } catch (error) {
+    console.error('Error fetching agent details:', error);
+  }
+};
+
+
   const handleExport = async () => {
     try {
       const params = new URLSearchParams({
         type: 'commissions',
-        agentId: selectedCountry // You can modify this based on your filter logic
+        agentId: selectedCountry
       });
 
       const response = await fetch(`${API_BASE_URL}/export?${params}`);
@@ -128,7 +135,7 @@ export default function CommissionDashboard() {
   // Handle search
 const handleSearch = (e) => {
   const value = e.target.value;
-  setSearchTerm(value); // no `.trim()` here
+  setSearchTerm(value);
   setCurrentPage(1);
 };
 
@@ -163,28 +170,25 @@ const getCountryFromPhone = (phoneNumber) => {
   if (!phoneNumber) return 'Not Specified';
 
   try {
-    const cleaned = phoneNumber.replace(/\s+/g, ''); // Remove spaces
+    const cleaned = phoneNumber.replace(/\s+/g, '');
     const phone = parsePhoneNumberFromString(cleaned);
 
-    if (phone && phone.country) {
+    if (phone?.country) {
       const countryMap = {
         PK: 'Pakistan',
-        US: 'USA',
         CA: 'Canada',
-        GB: 'UK',
-        AU: 'Australia',
-        IN: 'India'
+        GB: 'United Kingdom',
       };
 
       return countryMap[phone.country] || phone.country;
     }
-
-    return 'Not Specified';
   } catch (error) {
     console.error('Phone parse error:', phoneNumber, error.message);
-    return 'Not Specified';
   }
+
+  return 'Not Specified';
 };
+
 
 
   // Loading state
@@ -365,8 +369,6 @@ const getCountryFromPhone = (phoneNumber) => {
                     </tr>
                   ) : (
                     agents.map(agent => (
-                      
-                      
                       <tr key={agent.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
@@ -380,13 +382,12 @@ const getCountryFromPhone = (phoneNumber) => {
                             </div>
                             <div className="ml-4">
                               <div className="text-sm font-medium text-gray-900">{agent.name}</div>
-                              <div className="text-sm text-gray-500">
-                                  {agent.country && agent.country.toLowerCase() !== 'not specified'
-    ? agent.country
-    : getCountryFromPhone(agent.phone)}
+                             <div className="text-sm text-gray-500">
+                                    {agent.country && agent.country.toLowerCase() !== 'not specified'
+                                      ? agent.country
+                                      : getCountryFromPhone(agent.phone)}
+                                  </div>
 
-                                  
-                              </div>
 
                             </div>
                           </div>
@@ -412,12 +413,13 @@ const getCountryFromPhone = (phoneNumber) => {
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <button
-                            onClick={() => handleNavigation(`/agent/${agent.id}`)}
-                            className="text-blue-500 hover:text-blue-700 transition-colors"
-                          >
-                            <Eye size={20} />
-                          </button>
+                         <button
+  onClick={() => handleViewDetails(agent.id)}
+  className="text-blue-500 hover:text-blue-700 transition-colors"
+>
+  <Eye size={20} />
+</button>
+
                         </td>
                       </tr>
                     ))
@@ -469,6 +471,29 @@ const getCountryFromPhone = (phoneNumber) => {
           </div>
         </div>
       </div>
+
+   {showModal && agentDetails && (
+  <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+    <div className="bg-white w-full max-w-md p-6 rounded-lg shadow-lg relative">
+      <button
+        onClick={() => setShowModal(false)}
+        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+      >
+        ✕
+      </button>
+      <h2 className="text-xl font-semibold mb-4">Agent Details</h2>
+      <div className="space-y-2 text-sm text-gray-700">
+        <p><strong>Name:</strong> {agentDetails.agent?.name || 'N/A'}</p>
+        <p><strong>Email:</strong> {agentDetails.agent?.email || 'N/A'}</p>
+        <p><strong>Country:</strong> {getCountryFromPhone(agentDetails.agent?.phone || '')}</p>
+        <p><strong>Total Commission:</strong> {formatCurrency(agentDetails.agent?.totalEarned)}</p>
+        <p><strong>Pending Amount:</strong> {formatCurrency(agentDetails.agent?.pendingAmount)}</p>
+      </div>
+    </div>
+  </div>
+)}
+
+
     </>
   );
 }

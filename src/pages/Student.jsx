@@ -32,7 +32,8 @@ export default function StudentTable() {
           program: s.applications?.map(app => app.program).join(', ') || "No Program",
           university: s.applications?.map(app => app.institute).join(', ') || "No Institute",
           status: s.status || "N/A",
-          payment: s.paymentStatus || "No Payment",
+          
+          payment: s.applications?.map(app => app.status).join(', ') || "No Payment",
           avatar: profileImageUrl, // use uploaded image if exists
           initials: s.firstName?.charAt(0).toUpperCase() || "U", // fallback
           applications: s.applications || [],
