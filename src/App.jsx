@@ -29,6 +29,7 @@ import Register from "./pages/auth/Register";
 import University from "./pages/University";
 
 import { SocketProvider } from "./context/SocketContext"; // Import the new provider
+import Review from "./pages/Review";
 
 function App() {
   return (
@@ -100,6 +101,7 @@ function App() {
               <Route path="/newpayment" element={<NewPayment />} />
               <Route path="commission" element={<Comission />} />
               <Route path="/create-agent" element={<Register />} />
+              <Route path="/review" element={<Review />} />
             </Route>
           </Routes>
         </Router>
