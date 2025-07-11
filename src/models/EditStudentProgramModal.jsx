@@ -53,46 +53,26 @@ export default function EditStudentProgramModal({ onClose, student, onUpdate }) 
     }
   };
 
-const handleSave = async () => {
-  try {
-    // 1. First update profile image if selected
-    if (profileImage) {
-      const imageFormData = new FormData();
-      imageFormData.append("profileImage", profileImage);
-
-      const imageRes = await fetch(`http://localhost:5000/student/update-profile-image/${student._id}`, {
-        method: "PATCH",
-        body: imageFormData,
-      });
-
-      const imgResult = await imageRes.json();
-      if (!imageRes.ok) {
-        toast.error(imgResult.message || "Image upload failed.");
-        return;
-      }
-    }
-
-    // 2. Then update student data
-    const response = await fetch("http://localhost:5000/student/update-student", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        studentId: student._id,
-        applicationId: selectedApplicationId,
-        applications: {
-          program: formData.program,
-          institute: formData.university,
-        },
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        status: formData.status,
-        payment: formData.payment,
-      }),
-    });
   const handleSave = async () => {
     try {
+      // 1. First update profile image if selected
+      if (profileImage) {
+        const imageFormData = new FormData();
+        imageFormData.append("profileImage", profileImage);
+
+        const imageRes = await fetch(`http://localhost:5000/student/update-profile-image/${student._id}`, {
+          method: "PATCH",
+          body: imageFormData,
+        });
+
+        const imgResult = await imageRes.json();
+        if (!imageRes.ok) {
+          toast.error(imgResult.message || "Image upload failed.");
+          return;
+        }
+      }
+
+      // 2. Then update student data
       const response = await fetch("http://localhost:5000/student/update-student", {
         method: "PATCH",
         headers: {
@@ -101,6 +81,10 @@ const handleSave = async () => {
         body: JSON.stringify({
           studentId: student._id,
           applicationId: selectedApplicationId,
+          applications: {
+            program: formData.program,
+            institute: formData.university,
+          },
           firstName: formData.firstName,
           lastName: formData.lastName,
           status: formData.status,
@@ -108,32 +92,18 @@ const handleSave = async () => {
         }),
       });
 
-      const result = await response.json();
-
       if (response.ok) {
-        toast.success("Student program updated successfully!");
-        onUpdate();
+        toast.success("Student updated successfully!");
+        onUpdate(); // Notify parent
         onClose();
       } else {
-        toast.error(result.message || "Failed to update student program.");
+        toast.error(result.message || "Failed to update student.");
       }
     } catch (error) {
-      console.error("Error updating student:", error);
+      console.error("Update error:", error);
       toast.error("Something went wrong.");
     }
   };
-    if (response.ok) {
-      toast.success("Student updated successfully!");
-      onUpdate(); // Notify parent
-      onClose();
-    } else {
-      toast.error(result.message || "Failed to update student.");
-    }
-  } catch (error) {
-    console.error("Update error:", error);
-    toast.error("Something went wrong.");
-  }
-};
 
 
 
@@ -152,8 +122,8 @@ const handleSave = async () => {
             <button
               key={tab}
               className={`pb-3 mr-6 font-medium transition capitalize ${activeTab === tab
-                  ? "text-blue-600 border-b-2 border-blue-600"
-                  : "text-gray-500 hover:text-gray-800"
+                ? "text-blue-600 border-b-2 border-blue-600"
+                : "text-gray-500 hover:text-gray-800"
                 }`}
               onClick={() => setActiveTab(tab)}
             >
@@ -235,47 +205,41 @@ const handleSave = async () => {
                 </div>
                 <div>
                   <label className="text-sm text-gray-600 mb-1 block">Payment</label>
-                  <select
+                  <input
                     name="payment"
-                    value={formData.payment}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none"
-                  >
-                    <option value="">Select Payment Status</option>
-                    <option value="Paid">Paid</option>
-                    <option value="Unpaid">Unpaid</option>
-                    <option value="Under Verification">Under Verification</option>
-                    <option value="Pending">Pending</option>
-                  </select>
+                    value={formData.payment || "No Payments"}
+                    disabled // ← disables selection and hides dropdown interaction
+                    className="w-full p-2 border rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed"
+                  />
                 </div>
               </div>
             </form>
           )}
 
-        {activeTab === "media" && (
-  <div className="flex flex-col items-center justify-center text-center py-10 px-4 border border-dashed rounded-lg bg-gray-50">
-    <div className="bg-blue-100 p-4 rounded-full mb-4">
-      <Upload className="text-blue-500" size={28} />
-    </div>
-    <p className="text-gray-500 mb-2">
-      Drag & drop or click to upload profile image
-    </p>
-    <label className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-      Choose Image
-      <input
-        type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-        className="hidden"
-      />
-    </label>
-    {profileImage && (
-      <p className="mt-3 text-sm text-green-600">
-        Selected: {profileImage.name}
-      </p>
-    )}
-  </div>
-)}
+          {activeTab === "media" && (
+            <div className="flex flex-col items-center justify-center text-center py-10 px-4 border border-dashed rounded-lg bg-gray-50">
+              <div className="bg-blue-100 p-4 rounded-full mb-4">
+                <Upload className="text-blue-500" size={28} />
+              </div>
+              <p className="text-gray-500 mb-2">
+                Drag & drop or click to upload profile image
+              </p>
+              <label className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+                Choose Image
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </label>
+              {profileImage && (
+                <p className="mt-3 text-sm text-green-600">
+                  Selected: {profileImage.name}
+                </p>
+              )}
+            </div>
+          )}
 
         </div>
 
