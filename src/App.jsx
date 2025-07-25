@@ -27,9 +27,11 @@ import PaymentProfile from "./pages/PaymentProfile";
 import NewPayment from "./pages/NewPayment";
 import Register from "./pages/auth/Register";
 import University from "./pages/University";
-
-import { SocketProvider } from "./context/SocketContext"; // Import the new provider
+import Access from "./pages/ManageAccess";
+import StudyProgramForm from "./pages/StudyProgram";
+import { SocketProvider } from "./context/SocketContext"; 
 import Review from "./pages/Review";
+import TasksWorkflowDashboard from "./pages/TasksWorkflow";
 
 function App() {
   return (
@@ -102,6 +104,9 @@ function App() {
               <Route path="commission" element={<Comission />} />
               <Route path="/create-agent" element={<Register />} />
               <Route path="/review" element={<Review />} />
+              <Route path="/Access" element={<Access />} />
+              <Route path="/StudyProgramm" element={<StudyProgramForm />} />
+              <Route path="/task-Workflow" element={<TasksWorkflowDashboard />} />
             </Route>
           </Routes>
         </Router>

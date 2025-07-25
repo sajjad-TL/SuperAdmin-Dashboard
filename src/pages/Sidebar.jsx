@@ -29,7 +29,7 @@ const navRoutes = {
     "Students Management": "/student",
     "Application Management": "/application",
     "Commission & Payment": "/commission",
-    "Tasks / Workflows": "/tasks",
+    "Tasks / Workflows": "/task-Workflow",
     "Schools & Programs": "/trainhub",
     "Growth Hub": "/growth",
     "Test Solutions": "/tests",

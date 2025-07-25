@@ -8,7 +8,9 @@ export default function ApplicationForm({ onClose, refreshApplications }) {
     const agentId = user?.agentId;
 
     const [students, setStudents] = useState([]);
+    const [universities, setUniversities] = useState([]);
     const [selectedStudentId, setSelectedStudentId] = useState("");
+
     const [formData, setFormData] = useState({
         program: "",
         institute: "",
@@ -26,25 +28,36 @@ export default function ApplicationForm({ onClose, refreshApplications }) {
             try {
                 const res = await fetch("http://localhost:5000/student/getAllStudents");
                 const data = await res.json();
-
                 if (res.ok) {
-                    // Normalize like in StudentTable
                     const normalized = (data?.students || []).map(s => ({
                         _id: s._id,
                         firstName: s.firstName || "N/A",
                         lastName: s.lastName || "N/A",
                         email: s.email,
                     }));
-
                     setStudents(normalized);
                 }
             } catch (err) {
                 toast.error("Error fetching students");
-                console.error("Fetch error:", err);
+            }
+        };
+
+        const fetchUniversities = async () => {
+            try {
+                const res = await fetch("http://localhost:5000/api/universities/all");
+                const data = await res.json();
+                if (res.ok && Array.isArray(data)) {
+                    setUniversities(data);
+                } else {
+                    toast.error("Failed to load universities");
+                }
+            } catch (err) {
+                toast.error("Error fetching universities");
             }
         };
 
         fetchStudents();
+        fetchUniversities();
     }, []);
 
     const handleChange = (e) => {
@@ -67,19 +80,15 @@ export default function ApplicationForm({ onClose, refreshApplications }) {
             const result = await res.json();
             if (res.ok) {
                 toast.success("Application added successfully");
-                if (typeof refreshApplications === "function") {
-                    refreshApplications(); // Only call if it's a valid function
-                }
+                refreshApplications?.();
                 onClose();
             } else {
                 toast.error(result.message || "Failed to add application");
             }
         } catch (err) {
-            toast.error(err);
-
+            toast.error("Server error");
         }
     };
-
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -104,34 +113,81 @@ export default function ApplicationForm({ onClose, refreshApplications }) {
                             </option>
                         ))}
                     </select>
-
                 </div>
 
                 {/* Form Fields */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    {[
-                        { label: "Program", name: "program", placeholder: "e.g., MSc Computer Science" },
-                        { label: "Institute", name: "institute", placeholder: "e.g., University of Toronto" },
-                        { label: "Apply Date", name: "applyDate", type: "date" },
-                        { label: "Start Date", name: "startDate", type: "date" },
-                        { label: "Payment Date", name: "paymentDate", type: "date" },
-                    ].map(({ label, name, type = "text", placeholder }) => (
-                        <div key={name} className="flex flex-col">
-                            <label className="font-semibold mb-1">{label} *</label>
-                            <input
-                                type={type}
-                                name={name}
-                                value={formData[name]}
-                                onChange={handleChange}
-                                placeholder={placeholder}
-                                className="border rounded px-3 py-2"
-                            />
-                        </div>
-                    ))}
+                    <div className="flex flex-col">
+                        <label className="font-semibold mb-1">Program *</label>
+                        <input
+                            type="text"
+                            name="program"
+                            value={formData.program}
+                            onChange={handleChange}
+                            placeholder="e.g., MSc Computer Science"
+                            className="border rounded px-3 py-2"
+                        />
+                    </div>
+
+                    {/* Institute Dropdown (Populated from backend) */}
+                    <div className="flex flex-col">
+                        <label className="font-semibold mb-1">Institute *</label>
+                        <select
+                            name="institute"
+                            value={formData.institute}
+                            onChange={handleChange}
+                            className="border bg-blue-100 rounded px-3 py-2"
+                        >
+                            <option value="">Select a university</option>
+                            {universities.map((uni) => (
+                                <option key={uni._id} value={uni.name}>
+                                    {uni.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="flex flex-col">
+                        <label className="font-semibold mb-1">Apply Date *</label>
+                        <input
+                            type="date"
+                            name="applyDate"
+                            value={formData.applyDate}
+                            onChange={handleChange}
+                            className="border rounded px-3 py-2"
+                        />
+                    </div>
+
+                    <div className="flex flex-col">
+                        <label className="font-semibold mb-1">Start Date *</label>
+                        <input
+                            type="date"
+                            name="startDate"
+                            value={formData.startDate}
+                            onChange={handleChange}
+                            className="border rounded px-3 py-2"
+                        />
+                    </div>
+
+                    <div className="flex flex-col">
+                        <label className="font-semibold mb-1">Payment Date *</label>
+                        <input
+                            type="date"
+                            name="paymentDate"
+                            value={formData.paymentDate}
+                            onChange={handleChange}
+                            className="border rounded px-3 py-2"
+                        />
+                    </div>
 
                     <div className="flex flex-col">
                         <label className="font-semibold mb-1">Status *</label>
-                        <select name="status" value={formData.status} onChange={handleChange} className="border bg-blue-100 rounded px-3 py-2">
+                        <select
+                            name="status"
+                            value={formData.status}
+                            onChange={handleChange}
+                            className="border bg-blue-100 rounded px-3 py-2"
+                        >
                             <option value="Pending">Pending</option>
                             <option value="Accepted">Accepted</option>
                             <option value="Rejected">Rejected</option>

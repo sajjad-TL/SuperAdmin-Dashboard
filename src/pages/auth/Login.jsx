@@ -14,7 +14,7 @@ const Login = () => {
   });
   const navigate = useNavigate();
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false); // Added loading state
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
