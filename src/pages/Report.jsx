@@ -1,6 +1,7 @@
+// -------------------- ReportsDashboard.jsx --------------------
 import { useState, useEffect } from 'react';
 import {
-  BarChart, Bar, XAxis, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, ResponsiveContainer,
   Tooltip, CartesianGrid
 } from 'recharts';
 import {
@@ -22,7 +23,8 @@ export default function ReportsDashboard() {
   const fetchReports = async () => {
     try {
       const res = await axios.get(`http://localhost:5000/api/reports/getReport?range=${timeRange}`);
-      setReportData(res.data || []);
+      const data = Array.isArray(res.data) ? res.data : [];
+      setReportData(data);
     } catch (err) {
       console.error('Error fetching report:', err);
     } finally {
@@ -31,16 +33,15 @@ export default function ReportsDashboard() {
   };
 
   useEffect(() => {
-    setLoading(true);
     fetchReports();
   }, [timeRange]);
 
   const handleCreateReport = async () => {
     try {
       const res = await axios.post('http://localhost:5000/api/reports/createReport');
-      if (res.status === 201) {
+      if (res.status === 201 && res.data) {
         alert('Report created successfully');
-        fetchReports();
+        setReportData(prev => [...prev, res.data]);
       }
     } catch (error) {
       alert('Error creating report: ' + error.message);
@@ -52,7 +53,6 @@ export default function ReportsDashboard() {
       const res = await axios.get(`http://localhost:5000/api/reports/exportExcel?range=${timeRange}`, {
         responseType: 'blob',
       });
-
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -65,14 +65,17 @@ export default function ReportsDashboard() {
     }
   };
 
-  const chartData = Array.isArray(reportData)
-    ? reportData
-        .filter(r => r?.chartValue !== undefined)
-        .map(r => ({
-          name: `${r.month} ${r.year}`,
-          value: Number(r.chartValue) || 0,
-        }))
-    : [];
+  // -------------------- Chart Data --------------------
+const chartData = Array.isArray(reportData)
+  ? reportData.map((r, i) => {
+      const revenueValue = Number(r.monthlyRevenue ?? 0);
+      return {
+        name: r.month && r.year ? `${r.month} ${r.year}` : r.date || `Month ${i + 1}`,
+        value: revenueValue > 0 ? revenueValue : 1,
+      };
+    })
+  : [];
+
 
   const latestReport = reportData?.[reportData.length - 1] || {};
 
@@ -82,18 +85,14 @@ export default function ReportsDashboard() {
   reportData.forEach(report => {
     report.popularPrograms?.forEach(p => {
       const key = `${p.program}-${p.university}`;
-      if (!mergedProgramsMap.has(key)) {
-        mergedProgramsMap.set(key, { ...p });
-      } else {
-        mergedProgramsMap.get(key).applications += p.applications;
-      }
+      if (!mergedProgramsMap.has(key)) mergedProgramsMap.set(key, { ...p });
+      else mergedProgramsMap.get(key).applications += p.applications;
     });
 
     report.topAgents?.forEach(a => {
       const key = a.name;
-      if (!mergedAgentsMap.has(key)) {
-        mergedAgentsMap.set(key, { ...a });
-      } else {
+      if (!mergedAgentsMap.has(key)) mergedAgentsMap.set(key, { ...a });
+      else {
         const existing = mergedAgentsMap.get(key);
         existing.applications += a.applications;
         existing.successRate = Math.round((existing.successRate + a.successRate) / 2);
@@ -152,79 +151,72 @@ export default function ReportsDashboard() {
   );
 }
 
+// -------------------- ReportContent Component --------------------
 function ReportContent({ chartData, reportData, timeRange, setTimeRange, mergedPrograms, mergedAgents }) {
+  // Helper to format currency
+  const formatCurrency = (value) => {
+    if (!value) return '$0';
+    return `$${Number(value).toLocaleString()}`;
+  };
+
   return (
     <>
+      {/* Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <MetricCard title="Monthly Applications" value={reportData.monthlyApplications} change="+12.5%" isPositive={true} icon={<IconWrapper><TrendingUp size={20} className="text-blue-600" /></IconWrapper>} />
-        <MetricCard title="Monthly Revenue" value={`$${reportData.monthlyRevenue}`} change="+6.2%" isPositive={true} icon={<IconWrapper><DollarSign size={20} className="text-green-600" /></IconWrapper>} />
-        <MetricCard title="Active Agents" value={reportData.activeAgents} change="+3%" isPositive={true} icon={<IconWrapper><Users size={20} className="text-purple-600" /></IconWrapper>} />
-        <MetricCard title="Success Rate" value={`${reportData.successRate}%`} change="+5.2%" isPositive={true} icon={<IconWrapper><Award size={20} className="text-orange-600" /></IconWrapper>} />
+        <MetricCard title="Monthly Applications" value={reportData.monthlyApplications ?? 0} change="+12.5%" isPositive={true} icon={<IconWrapper><TrendingUp size={20} className="text-blue-600" /></IconWrapper>} />
+        <MetricCard title="Monthly Revenue" value={formatCurrency(reportData.monthlyRevenue)} change="+6.2%" isPositive={true} icon={<IconWrapper><DollarSign size={20} className="text-green-600" /></IconWrapper>} />
+        <MetricCard title="Active Agents" value={reportData.activeAgents ?? 0} change="+3%" isPositive={true} icon={<IconWrapper><Users size={20} className="text-purple-600" /></IconWrapper>} />
+        <MetricCard title="Success Rate" value={`${reportData.successRate ?? 0}%`} change="+5.2%" isPositive={true} icon={<IconWrapper><Award size={20} className="text-orange-600" /></IconWrapper>} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div className="bg-white rounded-lg shadow p-4 md:p-6">
-          <div className="flex justify-between mb-4">
-            <div>
-              <h2 className="font-medium text-gray-900">Applications Trend</h2>
-              <p className="text-xs text-gray-500">Monthly application statistics</p>
-            </div>
-            <select
-              value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value)}
-              className="text-xs border px-2 py-1 rounded"
+      {/* Chart */}
+      <div className="bg-white rounded-lg shadow p-4 md:p-6 mb-6">
+        <div className="flex justify-between mb-4">
+          <div>
+            <h2 className="font-medium text-gray-900">Applications Trend</h2>
+            <p className="text-xs text-gray-500">Monthly application statistics</p>
+          </div>
+          <select
+            value={timeRange}
+            onChange={(e) => setTimeRange(e.target.value)}
+            className="text-xs border px-2 py-1 rounded"
+          >
+            <option value="1m">Last 1 Month</option>
+            <option value="3m">Last 3 Months</option>
+            <option value="6m">Last 6 Months</option>
+          </select>
+        </div>
+
+        <div className="h-64 mt-4">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={chartData}
+              barSize={50}
+              barCategoryGap="30%"
+              margin={{ top: 20, right: 20, left: 0, bottom: 5 }}
             >
-              <option value="1m">Last 1 Month</option>
-              <option value="3m">Last 3 Months</option>
-              <option value="6m">Last 6 Months</option>
-            </select>
-          </div>
-
-          <div className="h-64 mt-4">
-            <ResponsiveContainer width="100%" height="100%">
-              {chartData.length === 0 ? (
-                <div className="flex items-center justify-center text-gray-500 h-full">No data available</div>
-              ) : chartData.length === 1 && timeRange === '1m' ? (
-                <div className="flex flex-col items-center justify-center text-center text-gray-700 h-full px-4">
-                  <h3 className="text-lg font-semibold mb-2">1-Month Summary</h3>
-                  <p>
-                    This month you had <strong>{reportData.monthlyApplications}</strong> applications, generated <strong>${reportData.monthlyRevenue}</strong> in revenue, and maintained a success rate of <strong>{reportData.successRate}%</strong>.
-                  </p>
-                </div>
-              ) : (
-                <BarChart data={chartData} barSize={40} barCategoryGap="20%">
-                  <defs>
-                    <linearGradient id="blueGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#3B82F6" stopOpacity={1} />
-                      <stop offset="100%" stopColor="#60A5FA" stopOpacity={0.8} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <Tooltip />
-                  <Bar dataKey="value" fill="url(#blueGradient)" radius={[4, 4, 0, 0]} animationDuration={1000} />
-                </BarChart>
-              )}
-            </ResponsiveContainer>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 pt-4 border-t border-gray-100">
-            <Stat title="Total Applications" value={reportData.totalApplications} />
-            <Stat title="Approval Rate" value={`${reportData.approvalRate}%`} />
-            <Stat title="Avg Processing Time" value={`${reportData.processingTimeDays} Days`} />
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-4 md:p-6">
-          <h2 className="font-medium text-gray-900 mb-4">Top Source Countries</h2>
-          <div className="space-y-4">
-            {reportData.sourceCountries?.map((c, i) => (
-              <ProgressBar key={i} label={c.country} percent={c.percentage} />
-            ))}
-          </div>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis allowDecimals={false} />
+              <Tooltip formatter={(value) => formatCurrency(value)} />
+              <defs>
+                <linearGradient id="blueGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3B82F6" stopOpacity={1} />
+                  <stop offset="100%" stopColor="#60A5FA" stopOpacity={0.8} />
+                </linearGradient>
+              </defs>
+              <Bar
+                dataKey="value"
+                fill="url(#blueGradient)"
+                radius={[6, 6, 0, 0]}
+                isAnimationActive={true}
+              />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
+      {/* Programs & Agents */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ProgramList title="Popular Programs" data={mergedPrograms} />
         <AgentList title="Top Performing Agents" data={mergedAgents} />
@@ -233,7 +225,7 @@ function ReportContent({ chartData, reportData, timeRange, setTimeRange, mergedP
   );
 }
 
-// Reusable components
+// -------------------- Reusable Components --------------------
 const MetricCard = ({ title, value, change, isPositive, icon }) => (
   <div className="bg-white rounded-lg shadow p-4">
     <div className="flex justify-between items-start mb-2">
@@ -247,25 +239,6 @@ const MetricCard = ({ title, value, change, isPositive, icon }) => (
 
 const IconWrapper = ({ children }) => (
   <div className="bg-gray-100 p-2 rounded-md">{children}</div>
-);
-
-const Stat = ({ title, value }) => (
-  <div>
-    <p className="text-xs text-gray-500">{title}</p>
-    <p className="text-xl font-semibold">{value}</p>
-  </div>
-);
-
-const ProgressBar = ({ label, percent }) => (
-  <div>
-    <div className="flex justify-between mb-1">
-      <p className="text-sm font-medium">{label}</p>
-      <p className="text-sm font-medium">{percent}%</p>
-    </div>
-    <div className="w-full bg-gray-200 rounded-full h-2">
-      <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${percent}%` }}></div>
-    </div>
-  </div>
 );
 
 const ProgramList = ({ title, data }) => (

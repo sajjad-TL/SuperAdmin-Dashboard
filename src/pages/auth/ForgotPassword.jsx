@@ -9,31 +9,34 @@ const ForgotPassword = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [showOtpInput, setShowOtpInput] = useState(false);
   const navigate = useNavigate();
-
-  const handleSubmit = async (e) => {
-
-    e.preventDefault();
-    try {
-      const res = await axios.post(
-        console.log(res,"sdfj"),
-        'http://localhost:5000/api/password/forgot-password',
-        { email },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      if (res.data.message) {
-        localStorage.setItem('email', email);
-        toast.success('OTP sent to your email');
-        setShowOtpInput(true);
+const handleSubmit = async (e) => {
+  debugger
+  e.preventDefault();
+  try {
+    const res = await axios.post(
+      'http://localhost:5000/api/password/forgot-password',
+      { email },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
       }
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Something went wrong');
+    );
+
+    if (res.data?.message) {
+      localStorage.setItem('email', email);
+      toast.success('OTP sent to your email');
+      setShowOtpInput(true);
+    } else {
+      // if API returns something else, handle it
+      toast.info(res.data?.message || 'Check your email for OTP');
     }
-  };
+  } catch (error) {
+    console.error('forgot-password error', error);
+    toast.error(error.response?.data?.message || 'Something went wrong');
+  }
+};
+
 
   const handleOtpChange = (index, value) => {
     if (value.length <= 1 && /^[0-9]*$/.test(value)) {

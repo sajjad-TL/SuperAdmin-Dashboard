@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { X, Eye, EyeOff, Info, User, Lock, Settings, Shield } from 'lucide-react';
 
 const CreateUniversityAccessModal = ({ onClose, selectedUser, isEdit = false }) => {
     const [showTempPassword, setShowTempPassword] = useState(false);
     const [universities, setUniversities] = useState([]);
+
 
     const [formData, setFormData] = useState({
         universityName: '',
@@ -19,6 +21,7 @@ const CreateUniversityAccessModal = ({ onClose, selectedUser, isEdit = false }) 
         secondaryEmail: '',
         username: '',
         password: '',
+        temporaryPassword: '',
         forcePasswordChange: false,
         selectedRole: 'Super Admin',
         permissions: {
@@ -48,61 +51,104 @@ const CreateUniversityAccessModal = ({ onClose, selectedUser, isEdit = false }) 
         fetchUniversities();
     }, []);
 
-
+    // Fixed useEffect for populating edit data
     useEffect(() => {
-        if (isEdit && selectedUser && universities.length > 0) {
-            console.log("selectedUser:", selectedUser);
-            console.log("selectedUser.universityId:", selectedUser.universityId);
-            console.log("universities[] sample:", universities[0]);
+        console.log("useEffect triggered - isEdit:", isEdit, "selectedUser:", selectedUser);
+        
+        if (isEdit && selectedUser) {
+            console.log("Populating form with selectedUser data:", selectedUser);
+            
+            // Format the date properly for input field
+            const formatDate = (dateString) => {
+                if (!dateString) return '';
+                try {
+                    const date = new Date(dateString);
+                    return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
+                } catch (error) {
+                    console.error('Error formatting date:', error);
+                    return '';
+                }
+            };
 
-            const selectedUniId = selectedUser.universityId?.universityId || selectedUser.universityId?._id;
-
-            const matchedUniversity = universities.find(
-                (u) => u.universityId === selectedUniId || u._id === selectedUniId
-            );
-
-            console.log("Matched University:", matchedUniversity);
-
-            setFormData((prev) => ({
-                ...prev,
+            setFormData({
+                // User personal information
                 fullName: selectedUser.fullName || '',
                 jobTitle: selectedUser.jobTitle || '',
                 emailAddress: selectedUser.emailAddress || '',
                 phoneNumber: selectedUser.phoneNumber || '',
                 department: selectedUser.department || '',
                 secondaryEmail: selectedUser.secondaryEmail || '',
+                
+                // Login credentials
                 username: selectedUser.username || '',
-                selectedRole: selectedUser.role || '',
-                permissions: selectedUser.permissions || {
+                password: selectedUser.password || '',
+                temporaryPassword: selectedUser.password || '',
+                forcePasswordChange: selectedUser.forcePasswordChange || false,
+                
+                // Role and permissions
+                selectedRole: selectedUser.role || 'Super Admin',
+                permissions: {
+                    viewStudentApplications: selectedUser.permissions?.viewStudentApplications || false,
+                    manageApplicationStatus: selectedUser.permissions?.manageApplicationStatus || false,
+                    downloadStudentDocuments: selectedUser.permissions?.downloadStudentDocuments || false,
+                    acceptRejectApplications: selectedUser.permissions?.acceptRejectApplications || false,
+                    requestAdditionalDocuments: selectedUser.permissions?.requestAdditionalDocuments || false,
+                    manageEducationPrograms: selectedUser.permissions?.manageEducationPrograms || false,
+                },
+                
+                // Account settings
+                accountStatus: selectedUser.accountStatus || 'Active',
+                accountExpiryDate: formatDate(selectedUser.accountExpiryDate),
+                emailNotifications: selectedUser.emailNotifications || false,
+                
+                // University information
+                universityName: selectedUser.universityId?.name || '',
+                universityCode: selectedUser.universityId?.code || '',
+                country: selectedUser.universityId?.country || 'Select Country',
+                city: selectedUser.universityId?.city || '',
+                website: selectedUser.universityId?.website || '',
+            });
+        } else if (!isEdit) {
+            // Reset form for create mode
+            setFormData({
+                universityName: '',
+                universityCode: '',
+                country: 'Select Country',
+                city: '',
+                website: '',
+                fullName: '',
+                jobTitle: '',
+                emailAddress: '',
+                phoneNumber: '',
+                department: '',
+                secondaryEmail: '',
+                username: '',
+                password: '',
+                temporaryPassword: '',
+                forcePasswordChange: false,
+                selectedRole: 'Super Admin',
+                permissions: {
                     viewStudentApplications: false,
                     manageApplicationStatus: false,
                     downloadStudentDocuments: false,
                     acceptRejectApplications: false,
                     requestAdditionalDocuments: false,
-                    manageEducationPrograms: false,
+                    manageEducationPrograms: false
                 },
-                accountStatus: selectedUser.accountStatus || 'Active',
-                accountExpiryDate: selectedUser.accountExpiryDate?.substring(0, 10) || '',
-                emailNotifications: selectedUser.emailNotifications || false,
-                forcePasswordChange: selectedUser.forcePasswordChange || false,
-                temporaryPassword: selectedUser.password || '',
-                password: selectedUser.password || '',
-
-                universityName: matchedUniversity?.name || '',
-                universityCode: matchedUniversity?.code || '',
-                country: matchedUniversity?.country || 'Select Country',
-                city: matchedUniversity?.city || '',
-                website: matchedUniversity?.website || '',
-            }));
+                accountStatus: 'Active',
+                accountExpiryDate: '',
+                emailNotifications: false
+            });
         }
-    }, [isEdit, selectedUser, universities]);
-
+    }, [isEdit, selectedUser]);
 
     const handleInputChange = (field, value) => {
+        console.log(`Updating field: ${field} with value:`, value);
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
     const handlePermissionChange = (permission, checked) => {
+        console.log(`Updating permission: ${permission} to:`, checked);
         setFormData(prev => ({
             ...prev,
             permissions: {
@@ -132,6 +178,8 @@ const CreateUniversityAccessModal = ({ onClose, selectedUser, isEdit = false }) 
             };
 
             if (isEdit && selectedUser?._id) {
+                console.log("Updating user with payload:", commonPayload);
+                
                 // 1. First update the user
                 const updateUserPayload = {
                     ...commonPayload,
@@ -184,7 +232,8 @@ const CreateUniversityAccessModal = ({ onClose, selectedUser, isEdit = false }) 
                 onClose();
 
             } else {
-
+                console.log("Creating new user with payload:", commonPayload);
+                
                 const createPayload = {
                     ...commonPayload,
                     university: {
@@ -222,11 +271,6 @@ const CreateUniversityAccessModal = ({ onClose, selectedUser, isEdit = false }) 
         }
     };
 
-
-
-
-
-
     const roles = [
         {
             name: 'Super Admin', icon: '⚡', color: 'text-orange-600',
@@ -256,13 +300,20 @@ const CreateUniversityAccessModal = ({ onClose, selectedUser, isEdit = false }) 
         }));
     };
 
+    
+
     return (
+
+        
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            
             <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
                 {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-200">
                     <div>
-                        <h2 className="text-xl font-semibold text-gray-900">Create University Access</h2>
+                        <h2 className="text-xl font-semibold text-gray-900">
+                        {isEdit ? 'Edit University Access' : 'Create University Access'}
+                    </h2>
                         <p className="text-sm text-gray-600 mt-1">Set up login credentials and permissions for university administrators</p>
                     </div>
                     <button

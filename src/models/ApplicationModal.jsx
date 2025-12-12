@@ -46,10 +46,10 @@ export default function ApplicationForm({ onClose, refreshApplications }) {
             try {
                 const res = await fetch("http://localhost:5000/api/universities/all");
                 const data = await res.json();
-                if (res.ok && Array.isArray(data)) {
-                    setUniversities(data);
+               if (res.ok && Array.isArray(data.universities)) {
+                setUniversities(data.universities);
                 } else {
-                    toast.error("Failed to load universities");
+                toast.error("Failed to load universities");
                 }
             } catch (err) {
                 toast.error("Error fetching universities");

@@ -6,6 +6,8 @@ import Admin from '../layout/Adminnavbar';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import UniversityViewModal from '../models/UniversityViewModal';
+
 
 
 const UniversityManagement = () => {
@@ -24,6 +26,8 @@ const UniversityManagement = () => {
   const [registrationFiles, setRegistrationFiles] = useState([]);
   const [applications, setApplications] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
 
 
 
@@ -77,35 +81,6 @@ const UniversityManagement = () => {
   useEffect(() => {
     fetchUniversities();
   }, []);
-
-
-  // Create university
-  // const createUniversity = async (universityData) => {
-  //   try {
-  //     const response = await fetch(`${API_BASE_URL}/universities/create`, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify(universityData),
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error('Failed to create university');
-  //     }
-
-  //     const result = await response.json();
-  //     if (result.success) {
-  //       await fetchUniversities(); // Refresh the list
-  //       setShowAddModal(false);
-  //       setShowisAddModal(false)
-  //       resetForm();
-  //     }
-  //   } catch (err) {
-  //     setError(err.message);
-  //     console.error('Error creating university:', err);
-  //   }
-  // };
 
   // Update university
   const updateUniversity = async (id, universityData, logoFile, accreditationFile, registrationFiles) => {
@@ -263,8 +238,6 @@ const UniversityManagement = () => {
   };
 
 
-
-  // Handle edit click
   const handleEditClick = (university) => {
     setSelectedUniversity(university);
     setFormData({
@@ -382,24 +355,21 @@ const UniversityManagement = () => {
     navigate("/Access");
   };
 
-const handleViewUser = async (user) => {
-  try {
-    const universityId = user.university._id || user.universityId;
+  const handleViewUser = async (university) => {
+    try {
+      const universityId = university._id || university.universityId;
+      const res = await fetch(`http://localhost:5000/api/universities/single/${universityId}`);
+      if (!res.ok) throw new Error("Failed to fetch university");
 
-    console.log("Fetching university for ID:", universityId);
+      const data = await res.json();
+      setSelectedUser(data.university);
+      setViewModalOpen(true);
+    } catch (error) {
+      console.error("Failed to fetch university data:", error);
+    }
+  };
 
-    const res = await fetch(`http://localhost:5000/api/universities/${universityId}`);
-    if (!res.ok) throw new Error("Failed to fetch university");
 
-    const universityData = await res.json();
-    const fullUser = { ...user, university: universityData };
-
-    setSelectedUser(fullUser);
-    setViewModalOpen(true);
-  } catch (error) {
-    console.error("Failed to fetch university data:", error);
-  }
-};
 
   return (
     <>
@@ -434,8 +404,6 @@ const handleViewUser = async (user) => {
               </button>
             </div>
           )}
-
-
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -523,11 +491,11 @@ const handleViewUser = async (user) => {
                         {university.city || university.address || 'N/A'}
                       </td>
 
-
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {university.programs?.length || 0}
+                        {university.programs?.length > 0
+                          ? university.programs.map(p => p.programName).join(', ')
+                          : 'No programs added'}
                       </td>
-
 
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {(() => {
@@ -537,7 +505,6 @@ const handleViewUser = async (user) => {
                           return getApplicationCount(name) || '—';
                         })()}
                       </td>
-
 
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={getStatusBadge(university.status)}>
@@ -574,6 +541,7 @@ const handleViewUser = async (user) => {
 
             </div>
           </div>
+
           {/* Action Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -584,18 +552,18 @@ const handleViewUser = async (user) => {
                 <h3 className="text-lg font-semibold text-gray-900">Add Programs</h3>
               </div>
               <p className="text-gray-600 mb-4">Add new educational programs for universities</p>
-               <div>
-      <button
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors"
-        onClick={() => navigate('/StudyProgramm')}
-      >
-        Add Program
-      </button>
+              <div>
+                <button
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors"
+                  onClick={() => navigate('/StudyProgramm')}
+                >
+                  Add Program
+                </button>
 
-      {showModal && (
-        <StudyProgramModal onClose={() => setShowModal(false)} />
-      )}
-    </div>
+                {showModal && (
+                  <StudyProgramModal onClose={() => setShowModal(false)} />
+                )}
+              </div>
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -628,6 +596,15 @@ const handleViewUser = async (user) => {
             </div>
           </div>
         </div>
+
+
+        {viewModalOpen && selectedUser && (
+          <UniversityViewModal
+            university={selectedUser}
+            onClose={() => setViewModalOpen(false)}
+          />
+        )}
+
 
         <UniversityModal
           showAddModal={showAddModal}

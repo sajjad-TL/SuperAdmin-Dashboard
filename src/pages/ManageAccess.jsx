@@ -512,7 +512,7 @@ const UniversityAccessManager = () => {
                     <UniversityAccessModal
                         selectedUser={selectedUser}
                         onClose={handleCloseModal}
-                        isEdit={true}
+                        isEdit={!!selectedUser}
                     />
                 )}
 

@@ -19,7 +19,7 @@ export default function CommissionDashboard() {
     totalCommission: 0,
     pendingPayouts: 0,
     pendingRequestsCount: 0,
-    Paid: 0,
+    paid: 0,
     paymentsProcessedCount: 0,
     activeAgents: 0,
     commissionGrowthPercent: 0
@@ -43,8 +43,12 @@ export default function CommissionDashboard() {
       const response = await fetch(`${API_BASE_URL}/dashboard/stats`);
       if (!response.ok) throw new Error('Failed to fetch dashboard stats');
       const data = await response.json();
-      
-      setDashboardStats(data);
+      console.log("Paid mapped value:", data.paidThisMonth);
+      setDashboardStats({
+  ...data,
+  paid: data.paidThisMonth
+});
+
     } catch (err) {
       setError('Failed to load dashboard statistics');
       console.error('Dashboard stats error:', err);
@@ -250,7 +254,7 @@ const getCountryFromPhone = (phoneNumber) => {
                 <p className="text-gray-600 mb-1">Pending Payouts</p>
                 <h2 className="text-2xl font-bold">{formatCurrency(dashboardStats.pendingPayouts)}</h2>
                 <p className="text-amber-500 text-sm flex items-center mt-1">
-                  <Clock size={16} className="mr-1" /> {dashboardStats.pendingRequestsCount} requests pending
+                  <Clock size={16} className="mr-1" /> {dashboardStats.pendingPayoutsCount} requests pending
                 </p>
               </div>
               <div className="bg-amber-100 p-3 rounded-lg">
